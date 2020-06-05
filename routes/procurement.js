@@ -140,7 +140,10 @@ router.post('/nonItProducts', (request,response) => {
             singleRecordValues.push(nonItFormResult.itemSpecification);
             singleRecordValues.push(nonItFormResult.quantity);
             singleRecordValues.push(nonItFormResult.budget);
-            singleRecordValues.push(nonItFormResult.imgpath);
+            singleRecordValues.push(nonItFormResult.imgpath1);
+            singleRecordValues.push(nonItFormResult.imgpath2);
+            singleRecordValues.push(nonItFormResult.imgpath3);
+            singleRecordValues.push(nonItFormResult.justification);
             singleRecordValues.push(nonItFormResult.vendor);
             singleRecordValues.push(nonItFormResult.parentProcurementId);
             lstNonItProcurement.push(singleRecordValues);
@@ -176,7 +179,9 @@ router.post('/nonItProducts', (request,response) => {
                 singleRecordValues.push(nonItFormResult.itemSpecification[i]);
                 singleRecordValues.push(nonItFormResult.quantity[i]);
                 singleRecordValues.push(nonItFormResult.budget[i]);
-                singleRecordValues.push(nonItFormResult.imgpath[i]);
+                singleRecordValues.push(nonItFormResult.imgpath1[i]);
+                singleRecordValues.push(nonItFormResult.imgpath2[i]);
+                singleRecordValues.push(nonItFormResult.imgpath3[i]);
                 singleRecordValues.push(nonItFormResult.vendor[i]);
                 singleRecordValues.push(nonItFormResult.parentProcurementId[i]);
                 lstNonItProcurement.push(singleRecordValues);
@@ -187,7 +192,7 @@ router.post('/nonItProducts', (request,response) => {
        }
    }
 
-   let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Heroku_Image_URL__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
+   let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
 
    pool.query(nonItProductsInsertQuery)
    .then((nonItProductsInsertQueryResult) => {
@@ -257,8 +262,10 @@ router.post('/itProducts', (request,response) => {
             singleItProductRecordValue.push(itFormResult.vendor);
             singleItProductRecordValue.push(itFormResult.itemSpecification);
             singleItProductRecordValue.push(itFormResult.quantity);
-            singleItProductRecordValue.push(itFormResult.Budget);
-            singleItProductRecordValue.push(itFormResult.imgpath);
+            singleItProductRecordValue.push(itFormResult.budget);
+            singleItProductRecordValue.push(itFormResult.imgpath1);
+            singleItProductRecordValue.push(itFormResult.imgpath2);
+            singleItProductRecordValue.push(itFormResult.imgpath3);
             singleItProductRecordValue.push(itFormResult.parentProcurementId);
             lstItProducts.push(singleItProductRecordValue);
         }
@@ -292,7 +299,9 @@ router.post('/itProducts', (request,response) => {
             singleItProductRecordValue.push(itFormResult.itemSpecification[i]);
             singleItProductRecordValue.push(itFormResult.quantity[i]);
             singleItProductRecordValue.push(itFormResult.budget[i]);
-            singleItProductRecordValue.push(itFormResult.imgpath[i]);
+            singleItProductRecordValue.push(itFormResult.imgpath1[i]);
+            singleItProductRecordValue.push(itFormResult.imgpath2[i]);
+            singleItProductRecordValue.push(itFormResult.imgpath3[i]);
             singleItProductRecordValue.push(itFormResult.parentProcurementId[i]);
             lstItProducts.push(singleItProductRecordValue);
             }
@@ -302,7 +311,7 @@ router.post('/itProducts', (request,response) => {
 
     console.log('lstItProducts  '+JSON.stringify(lstItProducts));
 
-    const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Heroku_Image_URL__c, Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
+    const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c, Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
     console.log(itProductsInsertQuery);
     pool.query(itProductsInsertQuery)
     .then((itProductsInsertQueryResult) => {

@@ -65,7 +65,10 @@
            <th>QUANTITY</th>
            <th>BUDGET</th>
            <th>Preview</th>
-           <th>ATTACH QUOTE</th>
+           <th>QUOTE1</th>
+           <th>QUOTE2</th>
+           <th>QUOTE3</th>
+           
            
            
            
@@ -121,7 +124,9 @@
         html += '<td><input type="number" name="quantity" class="form-control" /></td>';
         html += '<td><input type="number" name="budget" class="form-control" /></td>';
         html += '<td><a id="itquote'+cnt+'" target="_blank" href="#" >No Qoutes Available</a></td>';
-        html += '<td><input type="file" onChange="chkFile(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo" name="imgpath" id="file_'+cnt+'"></td>';
+        html += '<td><input type="file" onChange="chkFile1(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo1" name="imgpath1" id="file_1'+cnt+'"></td>';
+        html += '<td><input type="file" onChange="chkFile2(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo2" name="imgpath2" id="file_2'+cnt+'"></td>';
+        html += '<td><input type="file" onChange="chkFile3(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo3" name="imgpath3" id="file_3'+cnt+'"></td>';
 //      html += '<td style="display:none;"><input id="impId'+cnt+'" type="hidden" name="impaneledVendorId" value="" class="form-control" /></td>';
         html += '<td style="display:none;"><input  type="hidden" name="parentProcurementId" value="<%= parentAssetId %>" class="form-control" /></td>';
         html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
@@ -351,26 +356,68 @@
     });
     
     
-    function chkFile(file1,id) {
-        var file = file1.files[0];
-        var formData = new FormData();
-        formData.append('formData', file);
-    
-        $.ajax({
-        type: "POST",
-        url: "/expense/uploadImage",    
-        cache: false,
-        dataType:'json',
-        processData: false,
-        contentType: false,
-        data: formData,
-        success: function (data) {
-          console.log(data);
-        //  var result = JSON.stringify(data)
-         $('#file_'+id).val(data.url);
-         
-         }
-      });
-    }
+    function chkFile1(file1,id) {
+      var file = file1.files[0];
+      var formData = new FormData();
+      formData.append('formData', file);
+  
+      $.ajax({
+      type: "POST",
+      url: "/expense/uploadImage",    
+      cache: false,
+      dataType:'json',
+      processData: false,
+      contentType: false,
+      data: formData,
+      success: function (data) {
+        console.log(data);
+      //  var result = JSON.stringify(data)
+       $('#file_1'+id).val(data.url);
+       
+       }
+    });
+  }
+  function chkFile2(file1,id) {
+    var file = file1.files[0];
+    var formData = new FormData();
+    formData.append('formData', file);
+
+    $.ajax({
+    type: "POST",
+    url: "/expense/uploadImage",    
+    cache: false,
+    dataType:'json',
+    processData: false,
+    contentType: false,
+    data: formData,
+    success: function (data) {
+      console.log(data);
+    //  var result = JSON.stringify(data)
+     $('#file_2'+id).val(data.url);
+     
+     }
+  });
+}
+function chkFile3(file1,id) {
+  var file = file1.files[0];
+  var formData = new FormData();
+  formData.append('formData', file);
+
+  $.ajax({
+  type: "POST",
+  url: "/expense/uploadImage",    
+  cache: false,
+  dataType:'json',
+  processData: false,
+  contentType: false,
+  data: formData,
+  success: function (data) {
+    console.log(data);
+  //  var result = JSON.stringify(data)
+   $('#file_3'+id).val(data.url);
+   
+   }
+});
+}
     
     </script>
