@@ -1,0 +1,409 @@
+<% include ../partials/navbar %>
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+
+<div class="row mt-5">
+    <div class="col-md-9 m-auto">
+        <div class="card card-body">
+              <% include ../partials/messages %>
+              <h5><center> List Of Expenses For Approval</center></h5>
+
+              <div class="row mt-5 mb-3 align-items-center">
+                <div class="col-md-5">
+                    <button class="btn btn-primary btn-md" id="refresh">Refresh</button>
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+                </div>
+                <div class="col-md-2 text-right">
+                  <span class="pr-3">Rows Per Page:</span>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-flex justify-content-end">
+                        <select class="custom-select" name="rowsPerPage" id="changeRows">
+                            <option value="1">1</option>
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                        </select>
+                    </div>
+                </div>
+        </div>
+        <div class="table-responsive" id="expenseApprovalsTableList">
+
+
+
+        </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="popup">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Expense Name </h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+              <!-- Modal body -->
+              <div class="modal-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                        <nav>
+                            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Details</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Related</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                <!-- Particular Expense Details -->
+                                    <table id="expenseTable" class="table table-hover striped">
+                                            <!-- Inside code is handled by Jquery to add dyanamic Content -->
+                                    <div id="expenseDetailsSpinner">
+                                                <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+                                      </div>
+                                        
+                                    </table>
+                                <!-- Particular Expense Details-->
+                            </div>
+                            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                <div class="accordion" id="accordionExample">
+                                    <div class="card">
+                                        <div class="card-header" id="headingOne">
+                                            <h5 class="mb-0">
+                                                <button class="btn btn-link text-left" type="pettyCashButton"
+                                                    data-toggle="collapse" data-target="#collapseOne"
+                                                    aria-expanded="true" aria-controls="collapseOne">
+                                                    <i class="fa fa-angle-double-right mr-3"></i>Petty Cash
+                                                </button>
+                                                  <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+                                                <!-- <a href="#" class="btn btn-primary float-right pettyCashButton" id="" style="color:white;" >New</a> -->
+                                            </h5>
+                                        </div>
+
+                                        <div id="collapseOne" class="collapse show fade"
+                                            aria-labelledby="headingOne" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <table id="pettyCashTable" class="table table-hover striped">
+                                                    
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-header" id="headingTwo">
+                                            <h5 class="mb-0">
+                                                <button class="btn btn-link collapsed text-left" type="button"
+                                                    data-toggle="collapse" data-target="#collapseTwo"
+                                                    aria-expanded="false" aria-controls="collapseTwo">
+                                                    <i class="fa fa-angle-double-right mr-3"></i>Conveyance Voucher
+                                                </button>
+                                                <!-- <button class="btn btn-primary float-right">New</button> -->
+                                               <!-- <a href="#" class="btn btn-primary float-right conveyanceVoucherButton" style="color:white;">New</a> -->
+                                            </h5>
+                                        </div>
+                                        <div id="collapseTwo" class="collapse fade" aria-labelledby="headingTwo"
+                                            data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                    <table id="conveyanceVoucherTable" class="table table-hover striped">
+                                                          
+                                                    </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-header" id="headingThree">
+                                            <h5 class="mb-0">
+                                                <button class="btn btn-link collapsed text-left" type="button"
+                                                    data-toggle="collapse" data-target="#collapseThree"
+                                                    aria-expanded="false" aria-controls="collapseThree">
+                                                    <i class="fa fa-angle-double-right mr-3"></i>Tour Bill Claim
+                                                </button>
+                                                <!-- <button class="btn btn-primary float-right">New</button> -->
+                                              <!--  <a href="#" class="btn btn-primary float-right tourBillClaim" style="color:white;" id="tourBillClaimNewButton">New</a> -->
+                                            </h5>
+                                        </div>
+                                        <div id="collapseThree" class="collapse fade"
+                                            aria-labelledby="headingThree" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                    <table id="tourBillClaimTable" class="table  table-hover striped">
+                                                            
+                                                    </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>                          
+              </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+<script>
+    $(document).ready(function(){
+        $('#expenseDetailsSpinner').hide();
+
+        let columns = {
+            sequence: 'Sr No.',
+            recordName: 'Expense Name',
+            totalAmount : 'Total Amount',
+            currentStatus: 'Current Status',
+            createdDate: 'Created Date',
+            approveBtn : 'Approve', 
+            rejectBtn : 'Reject',
+            
+        };
+
+        var table = $('#expenseApprovalsTableList').tableSortable({
+            data :[],
+            columns,
+            searchField: '#searchField',
+            sorting: true,
+            rowsPerPage: 5,
+            pagination:true,
+            tableWillMount: () => {
+                console.log('table will mount')
+                
+            },
+            tableDidMount: () => {
+                console.log('table did mount');
+  
+              //  $('#spinner').hide();
+            },
+            tableWillUpdate: () => {
+                console.log('table will update')
+              //  table.refresh();
+              // onLoadTask();
+            },
+            tableDidUpdate: () => {
+              console.log('table did update');
+              anchorClickFunctionalities();
+              //onLoadTask();
+            },
+            tableWillUnmount: () => console.log('table will unmount'),
+            tableDidUnmount: () => console.log('table did unmount'),
+            onPaginationChange: function(nextPage, setPage) {
+                setPage(nextPage);
+            }, 
+        });
+  
+        $.get("/approvals/expenseApprovalsList",
+        function(returnedData){
+            console.log('returnedData  : '+JSON.stringify(returnedData));
+            if(returnedData.length > 0)
+            {
+                table.setData(returnedData, columns);
+                anchorClickFunctionalities();
+            }
+        }).fail(function(error){
+            console.log("error "+error.stack);
+        });  
+
+       
+
+        function anchorClickFunctionalities()
+        {
+            $("a.expnseRecordName").click(function(event){
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                alert(this.id);
+                let expenseId = this.id.substring(4,23);
+                alert('expenseId'+expenseId);
+
+                $.ajax({
+                    type : 'GET',
+                    url  : '/expense/details',
+                    data : {
+                        'expenseId' : expenseId
+                    },
+                    dataType : 'json',
+                    beforeSend: function()
+                    {
+                      $('#popup').modal('show');
+                      $('#expenseDetailsSpinner').show();
+                    }
+                })
+                .done((expenseRelatedData) => {
+                  
+                    let expenseRecord = expenseRelatedData.Expense[0];
+                    console.log('expenseList  '+JSON.stringify(expenseRecord));
+      
+                    let expenseTableRows = '';
+                    expenseTableRows += '<tr>';
+                    expenseTableRows += '<td><strong>Expense Name<strong></td>';
+                    expenseTableRows += '<td>'+expenseRecord.name+'</td>';
+                    expenseTableRows += '<td><strong>Project Name<strong></td>';
+                    expenseTableRows += '<td>Project 6</td>';
+                    expenseTableRows += '</tr>';   
+                    
+                    expenseTableRows += '<tr>';
+                    expenseTableRows += '<td><strong>Department<strong></td>';
+                    if(expenseRecord.department__c != null)
+                      expenseTableRows += '<td>'+expenseRecord.department__c+'</td>';
+                    else
+                      expenseTableRows += '<td> </td>';
+                    expenseTableRows += '<td><strong>Designation<strong></td>';
+                    expenseTableRows += '<td>'+expenseRecord.designation__c+'</td>';
+                    expenseTableRows += '</tr>';   
+      
+                    expenseTableRows += '<tr>';
+                    expenseTableRows += '<td><strong>Employee ID<strong></td>';
+                    expenseTableRows += '<td>'+expenseRecord.employee_id__c+'</td>';
+                    expenseTableRows += '<td><strong>Employee Category / Band<strong></td>';
+                    if(expenseRecord.conveyance_employee_category_band__c != null)
+                      expenseTableRows += '<td>'+expenseRecord.conveyance_employee_category_band__c+'</td>';
+                    else
+                    expenseTableRows += '<td> </td>';
+                    expenseTableRows += '</tr>';   
+      
+                    expenseTableRows += '<tr>';
+                    expenseTableRows += '<td><strong>Approval Status<strong></td>';
+                    if(expenseRecord.approval_status__c != null)
+                      expenseTableRows += '<td>'+expenseRecord.approval_status__c+'</td>';
+                    else 
+                      expenseTableRows += '<td> </td>';
+                    expenseTableRows += '<td><strong><strong></td>';
+                    expenseTableRows += '<td>'+' '+'</td>';
+                    expenseTableRows += '</tr>';   
+      
+                    expenseTableRows += '<tr>';
+                    expenseTableRows += '<td colspan="4" style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Amount Information</h5></td>';    
+                    expenseTableRows += '</tr>';
+      
+                    expenseTableRows += '<tr>';
+                    expenseTableRows += '<td><strong>Amount Claimed<strong></td>';
+                    expenseTableRows += '<td>'+expenseRecord.amount_claimed__c+'</td>';
+                    expenseTableRows += '<td><strong>Petty Cash Amount<strong></td>';
+                    expenseTableRows += '<td>'+expenseRecord.petty_cash_amount__c+'</td>';
+                    expenseTableRows += '</tr>'; 
+      
+                    expenseTableRows += '<tr>';
+                    expenseTableRows += '<td><strong>Conveyance Amount<strong></td>';
+                    expenseTableRows += '<td>'+expenseRecord.conveyance_amount__c+'</td>';
+                    expenseTableRows += '<td><strong>Tour Bill Claim Amount<strong></td>';
+                    expenseTableRows += '<td>'+expenseRecord.tour_bill_claim__c+'</td>';
+                    expenseTableRows += '</tr>';   
+      
+                    //$('#expenseTable').append(expenseTableRows);
+                    $('#expenseDetailsSpinner').hide();
+                    $('#expenseTable').empty();
+                    $('#expenseTable').html(expenseTableRows);
+      
+      
+                    
+                    let pettyCashList = expenseRelatedData.PettyCash;
+                    console.log('pettyCashList  '+JSON.stringify(pettyCashList));
+                    let lengthOfPettyCashList = pettyCashList.length < 3 ? pettyCashList.length : 3;
+                    console.log('lengthOfPettyCashList : '+lengthOfPettyCashList);
+                    let pettyCashTableRows = '<thead><tr>';
+                    pettyCashTableRows += '<th>Name</th>';
+                    pettyCashTableRows += '<th>Total Amount</th>';
+                    pettyCashTableRows += '<th>Nature Of Expense</th>';
+                    pettyCashTableRows += '<th>Created Date</th>';
+                    pettyCashTableRows += '</tr></thead>';
+      
+                    for(let i= 0 ; i < lengthOfPettyCashList ; i++)
+                    {
+                      var strDate = pettyCashList[i].bill_date__c.toString().split('T')[0];
+                      pettyCashTableRows += '<tr>';
+                      pettyCashTableRows += '<td>'+pettyCashList[i].name+'</td>';
+                      pettyCashTableRows += '<td>'+pettyCashList[i].amount__c+'</td>';
+                    //  pettyCashTableRows += '<td>'+pettyCashList[i].activity_code__c+'</td>';
+                      pettyCashTableRows += '<td>'+pettyCashList[i].nature_of_exp__c+'</td>';
+                      pettyCashTableRows += '<td>'+strDate+'</td>';
+                      pettyCashTableRows += '</tr>';
+                    }
+                  //  pettyCashTableRows += '<tr><td colspan="4"><center><a target="_blank" href="/expense/pettycashlistview?expenseId='+expenseId+'" >View All</a></center></td></tr>';
+                    $('#pettyCashTable').empty();
+                    $('#pettyCashTable').html(pettyCashTableRows);
+                  
+      
+                    let conveyanceVoucherList =  expenseRelatedData.Conveyance;
+                    console.log('conveyanceVoucherList  '+JSON.stringify(conveyanceVoucherList));
+                    let conveyanceVoucherListLength = conveyanceVoucherList.length < 3 ? conveyanceVoucherList.length : 3;
+      
+                    let conveyanceVoucherTableRows = '';
+      
+                    for(let i=0 ;i < conveyanceVoucherListLength ; i++)
+                    {
+                      var strDate = conveyanceVoucherList[i].from__c.toString().split('T')[0];
+                      if(i== 0)
+                      {
+                        conveyanceVoucherTableRows += '<thead><tr>';
+                        conveyanceVoucherTableRows += '<th>Conveyance Voucher ID</th>';
+                        conveyanceVoucherTableRows += '<th>Amount</th>';
+                        conveyanceVoucherTableRows += '<th>Mode Of Conveyance</th>';
+                        conveyanceVoucherTableRows += '<th>From</th>';
+                        conveyanceVoucherTableRows += '</tr></thead><tbody>';
+                      }
+                      conveyanceVoucherTableRows += '<tr>';
+                      conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].name+'</td>';
+                      conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].amount__c+'</td>';
+                      conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].mode_of_conveyance__c+'</td>';
+                      conveyanceVoucherTableRows += '<td>'+strDate+'</td>';
+                      conveyanceVoucherTableRows += '</tr>';
+                    }
+                 //   conveyanceVoucherTableRows += '<tr><td colspan="4"><center><a target="_blank" href="/expense/ConveyanceListView?expenseId='+expenseId+'" >View All</a></center></td></tr></tbody>';
+                    $('#conveyanceVoucherTable').empty();
+                    $('#conveyanceVoucherTable').html(conveyanceVoucherTableRows);
+                    
+                    
+                    let tourBillClaimList = expenseRelatedData.TourBillClaim;
+                    let tourBillClaimListLength = tourBillClaimList.length < 3 ? tourBillClaimList.length : 3;
+                    console.log('tourBillClaimList  '+JSON.stringify(tourBillClaimList));
+      
+                    let tourBillClaimTableRows = '';
+                
+                    for(let i=0 ; i < tourBillClaimListLength ; i++)
+                    {
+                      if(i == 0 )
+                      {
+                          tourBillClaimTableRows += '<thead><tr>';
+                          tourBillClaimTableRows += '<th>Tour Bill Claim Name</th>';
+                          tourBillClaimTableRows += '<th>Grand Total</th>';
+                          tourBillClaimTableRows += '</tr></thead><tbody>';
+                      }
+                      tourBillClaimTableRows += '<tr>';
+                      tourBillClaimTableRows += '<td>'+tourBillClaimList[i].name+'</td>';
+                      tourBillClaimTableRows += '<td>'+tourBillClaimList[i].grand__c+'</td>';
+                      tourBillClaimTableRows += '</tr>';
+                    }
+                 //   tourBillClaimTableRows += '<tr><td colspan="4"><center><a target="_blank" href="/expense/tourBillClaim/tourBillClaimListview?expenseId='+expenseId+'" >View All</a></center></td></tr></tbody>';
+                    $('#tourBillClaimTable').empty();
+                    $('#tourBillClaimTable').html(tourBillClaimTableRows);
+                    
+                })
+                .fail((jqXHR, textStatus, err) => {
+                    console.log('AJAX error response :',textStatus);
+                })
+      
+            });
+                
+        }
+
+
+    })
+</script>
+      

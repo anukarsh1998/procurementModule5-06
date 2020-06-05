@@ -1,0 +1,376 @@
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" /> 
+       -->  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <% include ./partials/messages %>
+       <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <a class="navbar-brand" href="#">LLF</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    
+      <div class="collapse navbar-collapse" id="navbarColor01">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/expense/">Expense</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="/procurement/">Procurement</a>
+            </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" href="/users/timesheet">Timesheet</a>
+          </li> -->
+          <li class="nav-item">
+            <a class="nav-link" href="/users/timesheet">Timesheet</a>
+          </li>
+          
+          <li class="nav-item dropdown" style="margin-left: 800px;">
+            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-4" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
+              <i class="fas fa-user "></i>&nbsp; <%= name%> </a>
+            <div class="dropdown-menu dropdown-menu-right dropdown-info" aria-labelledby="navbarDropdownMenuLink-4">
+              <a class="dropdown-item" href="/users/logout">Log out</a>
+            </div>
+          </li>
+        </ul>
+        
+      </div>
+     </nav>
+    
+      <div class="container-fluid">
+       <br />
+       <h4 align="center">Procuremnet IT</h4>
+       <br />
+       <div class="">
+      <div id="errorMessages"></div>
+       <form method="post" action="/insertprecash" id="formdata"  enctype="multipart/form-data">
+        <div class="table-repsonsive">
+         <span id="error"></span>
+         <table class="table table-bordered" id="item_table">
+          <tr>
+           <th>SR. NO</th>
+           <th>State</th>
+           <th>DISTRICT</th>
+           <th>ITEM CATEGORY</th>
+           <th>ITEMS</th>
+           <th>OTHER ITEMS</th>
+           <th>VENDOR PICKLIST</th>
+           <th>COST PER UNIT ITEM</th>
+           <th>VENDOR GST NUMBER</th>
+           <th>ITEMS SPECIFICATION</th>
+           <th>QUANTITY</th>
+           <th>BUDGET</th>
+           <th>Preview</th>
+           <th>ATTACH QUOTE</th>
+           
+           
+           
+           <th><button type="button" style="background-color:#2C3E50;" name="add" class="btn btn-success btn-sm add"><span class="glyphicon glyphicon-plus"></span></button></th>
+           <th style="display:none;"></th>
+           <th style="display:none;"></th>
+          </tr>
+         </table>
+         <div align="center">
+        
+          <input type="submit" style="background-color:#2C3E50;" name="submit" class="btn btn-info" value="Submit" />
+         </div>
+        </div>
+       </form>
+       </div>
+      </div>
+     
+    
+    
+    <script>
+
+      let st=["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh",
+             "Jharkhand", "Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha",
+             "Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura", "Uttar Pradesh","Uttarakhand","West Bengal"];
+      let dstrUP=["Noida","Ghaziabad","Kanpur Nagar","Kanpur Dehat","Unnao"];
+      let dstrUK=["Almora","Bageshwar","Chamoli","Champawat","Dehradun","Haridwar","Nainital","Pauri Garhwal","Pithoragarh"];
+
+     let  items =["External Hard disk", "Pen drive", "Desktop Mouse","Keyboard",
+     "Ram", "Monitor", "CPU", "UPS" ,"Battery", "Software", "Laptop", "Desktop", "Laptop Chargers", "Base", "Screen",
+     "Printer", "LCD projector", "Toner", "Cartridge", "Plasma",
+     "Servers", "Telephones", "Camera", "Tablets","OtherItems"];
+      let Base = ["Agra"];
+      var subListValue="";
+      var sts='';
+      var dstr='';
+    $(document).ready(function(){
+     // alert('Hello pettyCash');
+     var count = 1
+     $(document).on('click', '.add', function(){
+        var cnt = count++;
+        var html = '';
+        html += '<tr>';
+        html += '<td>'+cnt+'</td>';
+        html += '<td><select id="state'+cnt+'" name="state" class="form-control item_unit"><option value="">Select</option></select></td>';
+        html += '<td><select id="district'+cnt+'" name="district" class="form-control item_unit" ><option value="">Select</option></select></td>';
+        html += '<td><select id="itemCategory'+cnt+'" name="itemCategory" class="form-control item_unit"><option value="">Select</option><option value="IT">IT</option></select></td>';
+        html += '<td><select id="items'+cnt+'" name="items" class="form-control item_unit"><option value="">Select</option></select></td>';
+        html +='<td><input id="otherItems'+cnt+'" type="text" name="otherItems" class="form-control" disabled="true" /></td>';
+        html += '<td><select id="vendor'+cnt+'" name="vendor" class="form-control item_unit"><option value="">Select</option></select></td>';      
+        html +='<td><input id="unitCost'+cnt+'" type="text" name="unitCost" class="form-control" readonly="true"  /></td>';
+        html +='<td><input id="gst'+cnt+'" type="text" name="gst" class="form-control" readonly="true"  /></td>';
+        html += '<td><input type="text" name="itemSpecification" class="form-control" /></td>';
+        html += '<td><input type="number" name="quantity" class="form-control" /></td>';
+        html += '<td><input type="number" name="budget" class="form-control" /></td>';
+        html += '<td><a id="itquote'+cnt+'" target="_blank" href="#" >No Qoutes Available</a></td>';
+        html += '<td><input type="file" onChange="chkFile(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo" name="imgpath" id="file_'+cnt+'"></td>';
+//      html += '<td style="display:none;"><input id="impId'+cnt+'" type="hidden" name="impaneledVendorId" value="" class="form-control" /></td>';
+        html += '<td style="display:none;"><input  type="hidden" name="parentProcurementId" value="<%= parentAssetId %>" class="form-control" /></td>';
+        html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
+        
+        $('#item_table').append(html);
+        
+
+        if(st.length > 0)
+        {
+          for(let i=0; i < st.length; i++)
+          {
+            $('#state'+cnt)
+            .append($("<option></option>")
+            .attr("value",st[i])
+            .text(st[i]))
+          }
+        }
+        $('#state'+cnt).on('change',function(){
+           let state =this.value;
+           sts=state;
+           alert("selcted"+sts);
+           let select = document.getElementById("district"+cnt);
+           let length = select.options.length;
+           for (i = length-1; i > 0; i--) {
+             select.options[i] = null;
+            }
+         //  alert('You Choose'+state);
+           if(state=='Uttar Pradesh')
+           {
+            $('#district'+cnt).attr("disabled",false);
+            alert('You Choose=> '+state);
+            $('#district'+cnt)
+              .append($("<option></option>")
+              .attr("value","")
+              .text("select District"))
+             for(let i=0; i <dstrUP.length; i++)
+             {
+              $('#district'+cnt)
+              .append($("<option></option>")
+              .attr("value",dstrUP[i])
+              .text(dstrUP[i]))
+             }
+           }
+            else if(state=='Uttarakhand')
+           {
+            alert('You Choose=> '+state);
+            $('#district'+cnt).attr("disabled",false);
+            $('#district'+cnt).clearQueue();
+             for(let i=0; i <dstrUK.length; i++)
+             {
+              $('#district'+cnt)
+              .append($("<option></option>")
+              .attr("value",dstrUK[i])
+              .text(dstrUK[i]))
+             }
+           }
+           else{
+            $('#district'+cnt).attr("disabled",true);
+           }
+           $('#district'+cnt).on('change',function(){
+            dstr=this.value;
+            alert('District choose =>'+dstr);
+          })           
+        })
+        
+
+
+
+        var lstVendorDetail=[]; let sid='';
+        $('#vendor'+cnt).on('change',function(){
+          let sif =this.value;
+          console.log('sfidSelected = '+sif);
+          let gstNo=document.getElementById('gst'+cnt);
+          lstVendorDetail.forEach((each)=>{
+           if(each.sfid==sif){
+            gstNo.value=each.gst_no__c;
+            sid=each.sfid;
+            $('#itquote'+cnt)
+            .attr("href",each.quote_public_url__c)
+            .text('Available Quote');
+           }
+          })
+         alert('Vendor Id=>'+sid);
+         $.ajax({
+          url : '/procurement/getCostPerUnit',
+          type : 'get',
+          data: {sid:sid},
+          dataType : 'json'
+        })
+        .done((response)=>{
+          console.log('response '+JSON.stringify(response));
+            if(response.length>0){
+            let unCost=document.getElementById('unitCost'+cnt);
+            unCost.value=response[0].per_unit_cost__c;
+            alert('per_unit_cost__c'+response[0].per_unit_cost__c);
+            }
+        })
+        .fail((jqXHR,text,err) => {
+          console.log('jqXHR  '+JSON.stringify(jqXHR));
+          console.log('err  '+err + 'text  : '+text);
+      })
+
+
+        })
+
+
+
+
+        let itemsValue='',locationValue='',impaneledVendorId='';
+        if(items.length > 0)
+        {
+          for(let i=0; i < items.length; i++)
+          {
+            $('#items'+cnt)
+            .append($("<option></option>")
+            .attr("value",items[i])
+            .text(items[i]))
+          }
+        }
+        $('#items'+cnt).on('change',function(){
+         alert('Selected States=> '+sts+' & District =>'+dstr);
+        // $('#'+cnt).empty();
+            itemsValue = this.value;
+            alert( itemsValue);
+            console.log('itemsValue others '+itemsValue);
+// subListValue = eval(this.value);
+            if(itemsValue=='OtherItems')
+            {
+              console.log('Other Items got got got');
+              $('#otherItems'+cnt).attr("disabled",false); 
+            }
+            else
+            $('#otherItems'+cnt).attr("disabled",true); 
+            let select = document.getElementById("vendor"+cnt);
+                     let length = select.options.length;
+                     for (i = length-1; i > 0; i--) {
+                     select.options[i] = null;
+                       }
+                     
+            var data =[];
+            let filtervalues={};
+            filtervalues.state=sts;
+            filtervalues.district=dstr;
+            filtervalues.item=itemsValue;
+            data.push(filtervalues);
+            console.log(JSON.stringify(data));
+            
+                //alert('DSDHSHD');
+                $.ajax({
+                  url : '/procurement/getCostandGSt',
+                  type : 'get',
+                  data: {data:data},
+                  dataType : 'json'
+                })
+                .done((response) => {
+                    console.log('Vendor ResultData '+JSON.stringify(response));
+                    console.log('length '+response.length);
+                    console.log('dgsdh '+response[0].vendor_name__c);
+                       
+                      for(let i=0;i<response.length;i++)
+                      {
+                        $('#vendor'+cnt)
+                        .append($("<option></option>")
+                        .attr("value",response[i].sfid)
+                        .text(response[i].vendor_name__c))
+                        lstVendorDetail.push(response[i]);
+                      }
+                      console.log('lstVendorDetail=> '+JSON.stringify(lstVendorDetail));
+                //    .attr("href",response.quote_public_url__c)
+                //    .text('Available Quote');
+
+                //    $('#imp'+cnt).attr("disabled",false);
+                  //  $('#impId'+cnt).attr("value",response.sfid);
+                  //  impaneledVendorId = response.sfid;
+                })
+                .fail((jqXHR,text,err) => {
+                    console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    console.log('err  '+err + 'text  : '+text);
+                })
+        })
+
+
+        $('#imp'+cnt).on('click',function(){
+
+          console.log('this.value  : '+this.checked);
+          if(this.checked == true)
+          {
+              $('#impId'+cnt).attr("value",impaneledVendorId);
+          }
+          else
+          {
+              $('#impId'+cnt).attr("value","");
+          }
+        });
+
+     }); //Add function Ends
+     
+     $(document).on('click', '.remove', function(){
+        $(this).closest('tr').remove();
+     });
+    
+    });
+    
+    
+    $(function () {
+      $('form#formdata').bind('submit', function () {
+        $.ajax({
+          type: 'post',
+          url: '/procurement/itProducts',   // Need to make changes in post method url
+          data: $('form#formdata').serialize(),
+          success: function (data) {
+            console.log(data);
+        //    alert(data);
+            
+              let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+ data+
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+                  '<span aria-hidden="true">&times;</span>'+
+                '</button>'+
+              '</div>';
+              $('#errorMessages').empty();
+              $('#errorMessages').append(errorHtml); 
+              
+          }
+        });
+        return false;
+      });
+    });
+    
+    
+    function chkFile(file1,id) {
+        var file = file1.files[0];
+        var formData = new FormData();
+        formData.append('formData', file);
+    
+        $.ajax({
+        type: "POST",
+        url: "/expense/uploadImage",    
+        cache: false,
+        dataType:'json',
+        processData: false,
+        contentType: false,
+        data: formData,
+        success: function (data) {
+          console.log(data);
+        //  var result = JSON.stringify(data)
+         $('#file_'+id).val(data.url);
+         
+         }
+      });
+    }
+    
+    </script>

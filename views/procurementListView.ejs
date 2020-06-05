@@ -1,0 +1,349 @@
+<% include ./partials/navbar %>
+<% include ./partials/footer %>
+<% include ./partials/messages %>
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+<h1 style="text-align: center;">PROCUREMENT IT LIST VIEW</h1>
+<h1><%=objUser.name %></h1>
+
+<div class="container">
+    <div class="row mt-5 mb-3 align-items-center">
+        <div class="col-md-5">
+            <a class="btn btn-primary btn-md bg-gray" href="#" id="createNewPettyCashButton">Create New It Procurement</a>
+            <a class="btn btn-primary btn-md bg-gray" href="/expense" >Refresh</a>
+        </div>
+        <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+        </div>
+        <div class="col-md-2 text-right">
+        <span class="pr-3">Rows Per Page:</span>
+        </div>
+        <div class="col-md-2">
+            <div class="d-flex justify-content-end">
+                <select class="custom-select" name="rowsPerPage" id="changeRows">
+                    <option value="1">1</option>
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+        </div>
+ </div>
+
+ <div id="procurementItListView" class="responsive ">
+
+ </div>
+
+</div>
+<!--        Procurement IT Detail Modal-->
+
+<div id="procurementItModal" class="modal fade">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Petty Cash View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+  
+          <div id="detailLoadingSpinner">
+            <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+        </div>
+        <table id="procItTable" class="table">
+
+        </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--  Procurement It edit MOdal-->
+  
+  <div id="procurementItEditModal" class="modal fade ">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Procurement IT   Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body" id="editModalBody" >
+            <form name="editProcurementIt" id="editProcurementIt" >
+             <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                      <label for="procItName">Name</label>
+                      <input type="text" disabled class="form-control" id="procItName" value=""   name="procItName" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <label for="vendorName">Vendor Name</label>
+                      <input type="text" id="vendorName" disabled class="form-control" value="" name="vendorName" required>
+                    </div>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6"
+                    <label for="specification">Item Specification </label>
+                    <input type="text" class="form-control" id="specification" value=""   name="specification" >
+                    </div>
+
+                  <div class="col-md-6">
+                    <label for="item">Item </label>
+                    <input type="text" disabled class="form-control" id="item" value=""   name="item" >
+                  </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                  
+                  
+                  <div class="col-md-6">
+                  <label for="quantity">Quantity </label>
+                    <input type="number" class="form-control" id="quantity" value=""   name="quantity" >
+                  </div>
+                  <div class="col-md-6">
+                    <label for="budget">Budget </label>
+                    <input type="number" class="form-control" id="budget" value=""   name="budget" >
+                    </div>
+                </div>
+            </div>
+
+
+              <div class="form-group">
+                  <div class="row">
+                   
+                      <div class="col-md-6">
+                        <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                        </div>
+                  </div>     
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary" id="editProcurementItButton" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+  </div>
+</div>
+
+    
+
+<script>
+    $(document).ready(function(){
+    
+    /**************Table Sortable Start ***********/
+
+        let columns ={
+            sequence : 'Sequence',
+            name: 'Procurement IT',
+            item : 'Item',
+            item_spec: 'Item Specification',
+            quantity: 'Quantity',
+            budget:'Budget',
+            vendor:'Impanel Vendor',
+            editAction:'Action',
+        }
+      
+      var table = $('#procurementItListView').tableSortable({
+            data :[],
+            columns,
+            searchField: '#searchField',
+            sorting: true,
+            rowsPerPage: 5,
+            pagination:true,
+            tableWillMount: () => {
+                console.log('table will mount')
+                
+            },
+            tableDidMount: () => {
+                console.log('table did mount');
+
+                $('#spinner').hide();
+            },
+            tableWillUpdate: () => {
+                console.log('table will update')
+            //  table.refresh();
+            // onLoadTask();
+            },
+            tableDidUpdate: () => {
+            console.log('table did update');
+            anchorClickFunctionalities();
+            additionalEditFunctionality();
+            
+            },
+            tableWillUnmount: () => console.log('table will unmount'),
+            tableDidUnmount: () => console.log('table did unmount'),
+            onPaginationChange: function(nextPage, setPage) {
+                setPage(nextPage);
+            },
+        
+        });
+
+        /**************Table Sortable End ***********/
+
+        $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+        })
+
+    /    $('#refresh').click(function() {
+            table.refresh(true);
+            onLoadTask();
+        })
+
+       $.ajax({
+            url : '/procurement/itProcurementList',
+            type:'get',
+            dataType: 'json'
+       })
+       .done((response) => {
+           console.log('response it : '+JSON.stringify(response));
+           table.setData(response, columns);
+           anchorClickFunctionalities();
+          
+          
+        })
+      .fail((jqXHR, status, error) =>{
+          console.log('jqXHR  : '+JSON.stringify(jqXHR));
+          console.log('error  : '+error);
+        })
+    })
+    function anchorClickFunctionalities(){
+        $('a.procureItTag').on('click',function(event){
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            let procurementId = this.id;
+            alert('It Procurement ID=>'+procurementId);
+            $('#procurementItModal').modal('show');
+            $.ajax({
+                url : '/procurement/getProcurementITDetail',
+                type:'get',
+                data : {
+                    procurementId : procurementId
+                },
+                dataType: 'json',
+                beforeSend : function(){
+                  $('#detailLoadingSpinner').show();
+                }
+            })
+            .done((response)=>{
+                $('#detailLoadingSpinner').hide();
+                console.log('respsnse = '+JSON.stringify(response));
+                         if(response.length > 0)
+                            {
+                              let record = response[0];
+                              let htmlTable = '';
+                              htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Name</strong></td>';
+                                htmlTable += '<td>'+record.procitname+'</td>';
+                                htmlTable += '<td><strong>Vendor</strong></td>';
+                                htmlTable += '<td>'+record.vendername+'</td>';
+                            htmlTable += '</tr>';
+                            htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Item</strong></td>';
+                                htmlTable += '<td>'+record.items__c+'</td>';
+                                htmlTable += '<td><strong>Item Specification</strong></td>';
+                                htmlTable += '<td>'+record.product_service_specification__c+'</td>';
+                            htmlTable += '</tr>';
+                            htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Quantity</strong></td>';
+                                htmlTable += '<td>'+record.quantity__c+'</td>';
+                                htmlTable += '<td><strong>Budget</strong></td>';
+                                htmlTable += '<td>'+record.budget__c+'</td>';
+                            htmlTable += '</tr>';
+                            $('#procItTable').empty();
+                            $('#procItTable').html(htmlTable);
+                            }
+
+            })
+            .fail((jqXHR, status, error) =>{
+                $('#detailLoadingSpinner').show();
+                console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                console.log('error  : '+error);
+              })
+      
+          })
+        }
+        function additionalEditFunctionality(){
+          $('.editProcIt').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let procurementId = this.id;
+            alert('procurementEditModal ID=>'+procurementId);
+            $('#procurementItEditModal').modal('show'); 
+            $.ajax({
+              url : '/procurement/getProcurementITDetail',
+              type:'get',
+              data : {
+                  procurementId : procurementId
+              },
+              dataType: 'json',
+              beforeSend : function(){
+                $('#detailLoadingSpinner').show();
+              }
+          })
+          .then((response)=>{
+            console.log('response fron It procurement +='+JSON.stringify(response));
+            let procDetail=response[0];
+            console.log('procurementDetail'+procDetail);
+            document.forms["editProcurementIt"]["procItName"].value = procDetail.procitname;
+            document.forms["editProcurementIt"]["vendorName"].value = procDetail.vendername;
+            document.forms["editProcurementIt"]["item"].value = procDetail.items__c;
+            document.forms["editProcurementIt"]["specification"].value = procDetail.product_service_specification__c;
+            document.forms["editProcurementIt"]["quantity"].value = procDetail.quantity__c;
+            document.forms["editProcurementIt"]["budget"].value = procDetail.budget__c;
+            document.forms["editProcurementIt"]["hide"].value = procDetail.sfid;
+          })
+          .fail((jqXHR, status, error) =>{
+            $('#detailLoadingSpinner').show();
+            console.log('jqXHR  : '+JSON.stringify(jqXHR));
+            console.log('error  : '+error);
+          })
+          })
+          $('#editProcurementItButton').on('click',function(event){
+
+            event.preventDefault();
+                      event.stopPropagation();
+                      event.stopImmediatePropagation();
+                      alert('Save Button Clicked !');
+                      var $inputs = $('#editProcurementIt :input');
+  
+                      // not sure if you wanted this, but I thought I'd add it.
+                      // get an associative array of just the values.
+                      var values = {};
+                      $inputs.each(function() {
+                          values[this.name] = $(this).val();
+                          console.log('fomvalues=> '+JSON.stringify(values));
+                      });
+                      console.log('fomvalues=> '+JSON.stringify(values));
+                      alert('formValues : '+JSON.stringify(values));
+                      $.ajax({
+                        url : '/procurement/updateProcurementIt',
+                        type:'post',
+                        data: values,
+                        dataType : 'json'
+                    })
+                    .done((response) => {
+                          console.log('resonse   :'+response);
+                          alert("Procuremet It succesfullly Updated!");
+                    })
+                    .fail((jqXHR, status, error) => {
+                          console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    }) 
+                    })
+        }
+
+    </script>
+
+
+

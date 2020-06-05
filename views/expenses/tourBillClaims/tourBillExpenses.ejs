@@ -1,0 +1,772 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="#">LLF</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarColor01">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/expense/">Expense</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" href="/procurement/">Procurement</a>
+        </li>
+      <!-- <li class="nav-item">
+        <a class="nav-link" href="/users/timesheet">Timesheet</a>
+      </li> -->
+      <li class="nav-item">
+        <a class="nav-link" href="/users/timesheet">Timesheet</a>
+      </li>
+      
+      <!-- <li class="nav-item">
+          <a class="nav-link" href="/users/timesheet">Image Upload</a>
+      </li> -->
+      <li class="nav-item dropdown" style="margin-left: 800px;">
+        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-4" data-toggle="dropdown" aria-haspopup="true"
+          aria-expanded="false">
+          <i class="fas fa-user "></i>&nbsp; <%= name%> </a>
+        <div class="dropdown-menu dropdown-menu-right dropdown-info" aria-labelledby="navbarDropdownMenuLink-4">
+          <a class="dropdown-item" href="/users/logout">Log out</a>
+        </div>
+      </li>
+    </ul>
+    
+  </div>
+ </nav>
+
+ <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+ <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+ 
+  
+
+
+  
+  <style>
+    .project-tab {
+      padding: 10%;
+      margin-top: -8%;
+  }
+  .project-tab #tabs{
+      background: #007b5e;
+      color: #eee;
+  }
+  .project-tab #tabs h6.section-title{
+      color: #eee;
+  }
+  .project-tab #tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+      color: #0062cc;
+      background-color: transparent;
+      border-color: transparent transparent #f3f3f3;
+      border-bottom: 3px solid !important;
+      font-size: 16px;
+      font-weight: bold;
+  }
+  .project-tab .nav-link {
+      border: 1px solid transparent;
+      border-top-left-radius: .25rem;
+      border-top-right-radius: .25rem;
+      color: #0062cc;
+      font-size: 16px;
+      font-weight: 600;
+  }
+  .project-tab .nav-link:hover {
+      border: none;
+  }
+  .project-tab thead{
+      background: #f3f3f3;
+      color: #333;
+  }
+  .project-tab a{
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+  }
+          .accordion {
+              max-height: 500px;
+              overflow-y: auto;
+          }
+  
+          section {
+              padding: 60px 0;
+          }
+  
+          #accordion-style-1 h1,
+          #accordion-style-1 a {
+              color: #007b5e;
+          }
+  
+          #accordion-style-1 .btn-link {
+              font-weight: 400;
+              color: #007b5e;
+              background-color: transparent;
+              text-decoration: none !important;
+              font-size: 16px;
+              font-weight: bold;
+              padding-left: 25px;
+          }
+  
+          #accordion-style-1 .card-body {
+              border-top: 2px solid #007b5e;
+          }
+  
+          #accordion-style-1 .card-header .btn.collapsed .fa.main {
+              display: none;
+          }
+  
+          #accordion-style-1 .card-header .btn .fa.main {
+              background: #007b5e;
+              padding: 13px 11px;
+              color: #ffffff;
+              width: 35px;
+              height: 41px;
+              position: absolute;
+              left: -1px;
+              top: 10px;
+              border-top-right-radius: 7px;
+              border-bottom-right-radius: 7px;
+              display: block;
+          }
+  
+          .rotate {
+              -webkit-transform: rotate(90deg);
+              /* Chrome, Safari, Opera */
+              -moz-transform: rotate(90deg);
+              /* Firefox */
+              -ms-transform: rotate(90deg);
+              /* IE 9 */
+              transform: rotate(90deg);
+              /* Standard syntax */
+          }
+  
+          ul.liststyle {
+              padding: 0;
+              list-style: none;
+          }
+  
+          ul.liststyle li {
+              padding: 5px;
+          }
+        
+          
+          #nav-tabContent .btn.collapsed .fa.fa-angle-double-right.mr-3{
+            -webkit-transform: rotate(0deg);
+              /* Chrome, Safari, Opera */
+              -moz-transform: rotate(0deg);
+              /* Firefox */
+              -ms-transform: rotate(0deg);
+              /* IE 9 */
+              transform: rotate(0deg);
+              /* Standard syntax */
+          }
+          #nav-tabContent .btn .fa.fa-angle-double-right.mr-3{
+            -webkit-transform: rotate(90deg);
+              /* Chrome, Safari, Opera */
+              -moz-transform: rotate(90deg);
+              /* Firefox */
+              -ms-transform: rotate(90deg);
+              /* IE 9 */
+              transform: rotate(90deg);
+              /* Standard syntax */
+          }
+      </style>
+
+
+  <script>
+   $(document).ready(function(){
+  
+        $('#parentExpenseId').hide();
+        $('#tourBillId').hide();
+
+
+        $("a.tourBillId").click(function(){
+          var tourBillClaimId = $(this).attr('href');
+          console.log('Hello Jose');
+          console.log('tourBillClaimId   '+tourBillClaimId);
+          document.getElementById('tourBillId').innerHTML = tourBillClaimId;
+
+            $.ajax({
+              type: 'get',
+              url : '/expense/tourBillClaim/getRelatedTourBillClaimDetails/'+tourBillClaimId,
+              dataType : 'json',
+            
+          })
+          .done((responseData) => {
+              console.log('response getRelatedTourBillClaimDetails data '+JSON.stringify(responseData));
+              let tourBillClaim = responseData.tourBillClaim;
+              console.log('tourBillClaim  '+JSON.stringify(tourBillClaim));
+              let tourBillClaimTableHtml = '';
+              tourBillClaimTableHtml += '<tr>';
+              tourBillClaimTableHtml += '<td>Name</td>';
+              tourBillClaimTableHtml += '<td>'+tourBillClaim.name+'</td>';
+              tourBillClaimTableHtml += '<td>Expense </td>';
+              tourBillClaimTableHtml += '<td>'+tourBillClaim.expense__c+'</td>';
+              tourBillClaimTableHtml += '</tr>'; 
+              tourBillClaimTableHtml += '<tr>'; 
+              tourBillClaimTableHtml += '<td>Grand Total</td>';
+              tourBillClaimTableHtml += '<td>'+tourBillClaim.grand_total__c+'</td>';
+              tourBillClaimTableHtml += '<td></td>';
+              tourBillClaimTableHtml += '<td></td>';
+              tourBillClaimTableHtml += '</tr>';
+              $('#tourBillClaimTable').html(tourBillClaimTableHtml);
+
+
+              let airBusRailFare = responseData.airBusRailFare;
+              console.log('airBusRailFare  '+JSON.stringify(airBusRailFare));
+              let airBusRailFareHtml = '';
+              if(airBusRailFare.length > 0)
+              {
+                airBusRailFareHtml = '<thead>';
+                airBusRailFareHtml += '<th>Air Rail Bus Fares</th>';
+                airBusRailFareHtml += '<th>Arrival Date</th>';
+                airBusRailFareHtml += '<th>Departure Date</th>';
+                airBusRailFareHtml += '<th>Amount</th>';
+                airBusRailFareHtml += '</thead>';
+
+                airBusRailFare.forEach((eachAirRailBus) => {
+                  let strArrivalDate = eachAirRailBus.arrival_date__c.toString().split('T')[0];
+                  let strDepartureDate = eachAirRailBus.departure_date__c.toString().split('T')[0];
+                  airBusRailFareHtml += '<tbody>';
+                  airBusRailFareHtml += '<td>'+eachAirRailBus.name+'</td>';
+                  airBusRailFareHtml += '<td>'+strArrivalDate+'</td>';
+                  airBusRailFareHtml += '<td>'+strDepartureDate+'</td>';
+                  airBusRailFareHtml += '<td>'+eachAirRailBus.amount__c+'</td>';
+                  airBusRailFareHtml += '</tbody>';
+                });
+                $('#airRailBusTable').html(airBusRailFareHtml);
+              }
+
+
+              let conveyanceCharges = responseData.conveyanceCharges;
+              console.log('conveyanceCharges  '+JSON.stringify(conveyanceCharges));
+              if(conveyanceCharges.length > 0)
+              {
+                let conveyanceChargesHtml = '<thead>';
+                conveyanceChargesHtml += '<th>ConveyanceCharges</th>';
+                conveyanceChargesHtml += '<th>Amount</th>';
+                conveyanceChargesHtml += '<th>Date</th>';
+                conveyanceChargesHtml += '</thead>';
+                conveyanceCharges.forEach((eachConveyanceCharge) => {
+                  let strDate = eachConveyanceCharge.date__c.toString().split('T')[0];
+                  conveyanceChargesHtml += '<tbody>';
+                  conveyanceChargesHtml += '<td>'+eachConveyanceCharge.name+'</td>';
+                  conveyanceChargesHtml += '<td>'+strDate+'</td>';
+                  conveyanceChargesHtml += '<td>'+eachConveyanceCharge.amount__c+'</td>';  
+                  conveyanceChargesHtml += '</tbody>';
+                });
+                $('#conveyanceChargesTable').html(conveyanceChargesHtml);
+              }
+
+              let boardingLodgingCharges = responseData.boardingLodgingCharges;
+              console.log('boardingLodgingCharges  '+JSON.stringify(boardingLodgingCharges));
+              if(boardingLodgingCharges.length > 0)
+              {
+                let boardingLodgingChargesHtml = '<thead>';
+                    boardingLodgingChargesHtml += '<th>Boarding Lodging  Number</th>';
+                    boardingLodgingChargesHtml += '<th>Amount for Boarding & Lodging</th>';
+                    boardingLodgingChargesHtml += '<th>Place Journey</th>';
+                    boardingLodgingChargesHtml += '</thead>';
+                  boardingLodgingCharges.forEach((eachBoardingLodging) => {
+                    boardingLodgingChargesHtml += '<tbody>';
+                    boardingLodgingChargesHtml += '<td>'+eachBoardingLodging.name+'</td>';
+                    boardingLodgingChargesHtml += '<td>'+eachBoardingLodging.total_amount__c+'</td>';
+                    boardingLodgingChargesHtml += '<td>'+eachBoardingLodging.place_journey__c+'</td>';  
+                    boardingLodgingChargesHtml += '</tbody>';
+                });
+                $('#boardingLodgingChargesTable').html(boardingLodgingChargesHtml);
+              }
+
+              let telephoneFoodCharges = responseData.telephoneFoodCharges;
+              console.log('telephoneFoodCharges  '+JSON.stringify(telephoneFoodCharges));
+              if(telephoneFoodCharges.length > 0)
+              {
+                  let telephoneFoodChargesHtml = '<thead>';
+                      telephoneFoodChargesHtml += '<th>Telephone Food & Laundry Expense Number</th>';
+                      telephoneFoodChargesHtml += '<th>Fooding Expense</th>';
+                      telephoneFoodChargesHtml += '<th>Laundry Expense</th>';
+                      telephoneFoodChargesHtml += '<th>Reamrks</th>';
+                      telephoneFoodChargesHtml += '</thead>';
+                telephoneFoodCharges.forEach((eachTelephoneFoodCharge) => {
+                      telephoneFoodChargesHtml += '<tbody>';
+                      telephoneFoodChargesHtml += '<td>'+eachTelephoneFoodCharge.name+'</td>';
+                      telephoneFoodChargesHtml += '<td>'+eachTelephoneFoodCharge.laundry_expense__c+'</td>';
+                      telephoneFoodChargesHtml += '<td>'+eachTelephoneFoodCharge.fooding_expense__c+'</td>';  
+                      telephoneFoodChargesHtml += '<td>'+eachTelephoneFoodCharge.remarks__c+'</td>';  
+                      telephoneFoodChargesHtml += '</tbody>';
+                });
+                $('#telephoneFoodChargesTable').html(telephoneFoodChargesHtml);
+              }
+
+              let miscellenousCharges = responseData.miscellenousCharges;
+              console.log('miscellenousCharges   '+JSON.stringify(miscellenousCharges));
+              if(miscellenousCharges.length > 0)
+              {
+                let miscellenousChargesHtml = '<thead>';
+                    miscellenousChargesHtml += '<th>Miscellaneous Name</th>';
+                    miscellenousChargesHtml += '<th>Date</th>';
+                    miscellenousChargesHtml += '<th>Amount</th>';
+                    miscellenousChargesHtml += '<th>Remarks</th>';
+                    miscellenousChargesHtml += '</thead>';
+                miscellenousCharges.forEach((eachMiscellenousCharge) => {
+                    let strDate = eachMiscellenousCharge.date__c.toString().split('T')[0];
+                    miscellenousChargesHtml += '<tbody>';
+                    miscellenousChargesHtml += '<td>'+eachMiscellenousCharge.name+'</td>';
+                    miscellenousChargesHtml += '<td>'+strDate+'</td>';
+                    miscellenousChargesHtml += '<td>'+eachMiscellenousCharge.amount__c+'</td>';  
+                    miscellenousChargesHtml += '<td>'+eachMiscellenousCharge.remarks__c+'</td>';  
+                    miscellenousChargesHtml += '</tbody>';
+                });
+                $('#miscellaneousChargesTable').html(miscellenousChargesHtml);
+              } 
+          })
+          .fail((jqXHR, textStatus, err) => {
+              console.log('textStatus  '+textStatus);
+              
+          })
+
+        });
+
+        $('a.airRailBusCharges').click(() => {
+          console.log('airRailBusCharges   anchor tag');
+          var tourBillId = document.getElementById('tourBillId').innerHTML;
+          console.log('tourBillId   '+tourBillId);
+          location.assign('/expense/tourBillClaim/airRailBusCharges/'+tourBillId);
+        });
+
+        $('a.conveyanceCharges').click(() => {
+          console.log('conveyanceCharges   anchor tag');
+          var tourBillId = document.getElementById('tourBillId').innerHTML;
+          console.log('tourBillId   '+tourBillId);
+          location.assign('/expense/tourBillClaim/conveyanceCharges/'+tourBillId);
+        });
+
+        $('a.boardingLodgingCharges').click(() => {
+          console.log('boardingLodgingCharges   anchor tag');
+          var tourBillId = document.getElementById('tourBillId').innerHTML;
+          console.log('tourBillId   : '+tourBillId);
+          location.assign('/expense/tourBillClaim/boardingLodgingCharges/'+tourBillId);
+        });
+
+        $('a.telephoneFood').click(() => {
+          console.log('telephoneFood anchor tag');
+          var tourBillId = document.getElementById('tourBillId').innerHTML;
+          console.log('tourBillId   '+tourBillId);
+          location.assign('/expense/tourBillClaim/telephoneFood/'+tourBillId);
+        });
+
+        $('a.miscellaneousCharges').click(() => {
+          console.log('miscellaneousCharges   anchor tag');
+          var tourBillId = document.getElementById('tourBillId').innerHTML;
+          console.log('tourBillId   '+tourBillId);
+          location.assign('/expense/tourBillClaim/miscellenousCharges/'+tourBillId);
+        });
+
+
+
+        $('#createTourBillClaim').click(()=>{
+           
+           $('#createTourBillClaimModal').modal('show');
+        })
+
+        $('#tourBillClaimSubmitbutton').click(() => {
+              //alert('Hello');
+
+              $('#tourBillClaimForm').submit(function(e){
+                e.preventDefault();
+                var values = $(this).serialize();
+                console.log('tour Bill Claim values  '+values);
+                let parentExpenseId = document.getElementById('parentExpenseId').innerHTML;
+                console.log('parentExpenseId  '+parentExpenseId);
+
+                $.ajax({
+                  url: '/expense/tourBillClaim/saveTourBillClaim',
+                  type: 'post',
+                  data:  values,
+                  dataType : 'json'
+                })
+                .done((response) => {
+                    console.log('response  '+response);
+                })
+                .fail((jqXHR,text,err) => {
+                      console.log('jqXHR   '+JSON.stringify(jqXHR));
+                      if(jqXHR.responseText == 'Success')
+                      {
+                        alert('Saved Successfully !');
+                        $('#createTourBillClaimModal').modal('hide');
+                      }
+                      else
+                      {
+                        alert('There occured error while saving !');
+                      }
+                      console.log('text  '+text+' err :'+err);
+                })
+              })
+        });
+
+    
+  });
+  </script>
+
+
+
+  <div id="createTourBillClaimModal" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createTaskModal">Create New Tour Bill Claim</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form  id="tourBillClaimForm" class="needs-validation" novalidate >
+  
+            <div class="form-group">  
+                <div class="row">
+                  <div class="col-md-6">
+                    <label for="validationTooltip01">Tour Bill Claim Name</label>
+                    <input type="text" class="form-control" id="validationTooltip01" value="" placeholder="Tour Bill Claim Name"  name="tourBillClaimName" required>
+                  </div>
+              </div>
+            </div> 
+            <div class="form-group">  
+                <div class="row">
+                  <div class="col-md-6">
+                    <input type="hidden" class="form-control"  value="<%= parentExpenseId %>"  name="parentExpenseId" required>
+                  </div>
+              </div>
+            </div>   
+  
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" id="tourBillClaimSubmitbutton"  class="btn btn-primary">Save</button>
+              </div>
+  
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!--     **********************************************************************          -->
+
+<br/>
+
+<br/>
+
+<form class="container-fluid bg-gray">
+    <div class="form-row mb-4 col-10 mx-auto">
+            <div class="col form-inline" >
+                
+            </div>
+            <div class="col form-inline" >
+                
+              </div>
+              <div class="col form-inline" >
+                
+                </div>
+            <div class="col">
+                <button class="btn btn-primary btn-block bg-gray" type="button" id="createTourBillClaim">Create Tour Bill Claim</button>
+            </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+  <p id="parentExpenseId"><%= parentExpenseId %></p>
+  <p id="tourBillId"></p>
+
+   
+  <table class="col-10 text-center mx-auto table  table-striped">
+    <thead>
+      <tr>
+          <th>Tour Bill Claim Name</th>
+          <th>Related Expense </th>
+          <th>Grand Total</th>
+      </tr>
+  </thead>
+  <tbody>
+      <% if(tourBillClaimRows.length > 0) { %>
+      <% tourBillClaimRows.forEach(function(eachTourBill) { %>
+          <tr>
+                  <td><a href="<%= eachTourBill.sfid %>" data-toggle="modal" data-target="#popup" class="tourBillId" id="" ><%= eachTourBill.name %></a></td>
+                  <td><%= eachTourBill.expense__c %></td>
+                  <td><%= eachTourBill.grand_total__c %></td>
+                 
+          </tr>
+      <% }) %>
+      <% }%>
+     
+  </tbody>
+
+  </table>
+</div>
+
+
+<!--     **********************************************************************          -->
+
+
+<!-- <div id="createExpenseModal" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+    <div class="modal- modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createTaskModal">Create New Expense</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form  id="taskForm" class="needs-validation" novalidate >
+
+            <div class="form-group">  
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip01">Expense Name</label>
+                  <input type="text" class="form-control" id="validationTooltip01" value="" placeholder="Task Name"  name="taskname" required>
+                </div>
+               
+                <div class="col-md-6">
+                 <label for="validationTooltipUsername">Project Name</label>
+                 <select class="custom-select custom-select-sm form-control" name="status" id="validationTooltipUsername">
+                      <option selected>None</option>
+                      <option value="Started">Started</option>
+                      <option value="On Hold">On Hold</option>
+                      <option value="Completed">Completed</option>
+                 </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group"> 
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip03">Department</label>
+                  <input type="text" class="form-control" id="validationTooltip03" placeholder="Deaprtment"  name="department" >
+                </div>
+                <div class="col-md-6">
+                  <label for="validationTooltip04">Designation</label>
+                  <input type="text" class="form-control" id="validationTooltip04" placeholder="Designation"  name="designation" >
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip05">Employee ID</label>
+                  <input type="text" class="form-control" id="validationTooltip05" placeholder="Designation"  name="employeeId" >
+                </div>
+
+                <div class="col-md-6">
+                  <label for="validationTooltip06">Employee Category / Band</label>
+                  <input type="text" class="form-control" id="validationTooltip06" placeholder="Designation"  name="employeeId" >
+                </div>
+              </div>  
+            </div>
+            
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip07">Approval Status</label>
+                  <select class="custom-select custom-select-sm form-control" name="status" id="validationTooltip07">
+                        <option value="None" selected>None</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                   </select>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="validationTooltip08">Incurred By</label>
+                  <input type="time" class="form-control" id="validationTooltip08" name="plannedendtime" >
+                </div>
+              </div>  
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" id="submitbutton" class="btn btn-primary">Save</button>
+            </div>
+
+          </form>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+ -->
+
+  
+
+
+
+
+
+  <div class="modal fade" id="popup">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Tour Bill  Claim Name </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <nav>
+                            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Details</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Related</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                <!-- Particular Expense Details -->
+                                <table id="tourBillClaimTable" class="table table-hover striped">
+                                    <!-- Inside code is handled by Jquery to add dyanamic Content -->
+                                </table>
+                                <!-- Particular Expense Details-->
+                            </div>
+                            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                <div class="accordion" id="accordionExample">
+
+                                    <div class="card">
+                                        <div class="card-header" id="headingOne">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link text-left collapsed" type="pettyCashButton"
+                                                data-toggle="collapse" data-target="#collapseOne"
+                                                aria-expanded="true" aria-controls="collapseOne">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Air/Rail/Bus  Fare
+                                            </button>
+                                             <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+                                            <a href="#" class="btn btn-primary float-right airRailBusCharges" id="pettyCashButton" style="color:white;" >New</a>
+                                        </h5>
+                                        </div>
+
+                                        <div id="collapseOne" class="collapse  fade" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <!-- Need to show Table -->
+                                                <table id="airRailBusTable" class="table table-striped">
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header" id="headingTwo">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link text-left collapsed" type="pettyCashButton"
+                                                data-toggle="collapse" data-target="#collapseTwo"
+                                                aria-expanded="true" aria-controls="collapseTwo">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Conveyance Charges
+                                            </button>
+                                             <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+                                            <a href="#" class="btn btn-primary float-right conveyanceCharges" id="pettyCashButton" style="color:white;" >New</a>
+                                        </h5>
+                                        </div>
+
+                                        <div id="collapseTwo" class="collapse fade" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <!-- Need to show Table -->
+                                                <table id="conveyanceChargesTable" class="table table-striped">
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header" id="headingThree">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link text-left collapsed" type="pettyCashButton"
+                                                data-toggle="collapse" data-target="#collapseThree"
+                                                aria-expanded="true" aria-controls="collapseThree">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Boarding & Lodging Charges
+                                            </button>
+                                             <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+                                            <a href="#" class="btn btn-primary float-right boardingLodgingCharges" id="boardingLodgingCharges" style="color:white;" >New</a>
+                                        </h5>
+                                        </div>
+
+                                        <div id="collapseThree" class="collapse  fade" aria-labelledby="headingThree" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <!-- Need to show Table -->
+                                                <table id="boardingLodgingChargesTable" class="table table-striped">
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header" id="headingFour">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link collapsed text-left" type="button"
+                                                data-toggle="collapse" data-target="#collapseFour"
+                                                aria-expanded="false" aria-controls="collapseFour">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Telephone & Food Charges
+                                            </button>
+                                            <!-- <button class="btn btn-primary float-right">New</button> -->
+                                            <a href="#" class="btn btn-primary float-right telephoneFood" style="color:white;">New</a>
+                                        </h5>
+                                        </div>
+                                        <div id="collapseFour" class="collapse fade" aria-labelledby="headingFour" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <!-- Need to create table here -->
+                                                <table id="telephoneFoodChargesTable" class="table table-striped">
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header" id="headingFive">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link collapsed text-left" type="button"
+                                                data-toggle="collapse" data-target="#collapseFive"
+                                                aria-expanded="false" aria-controls="collapseFive">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Miscellaneous Charges
+                                            </button>
+                                            <!-- <button class="btn btn-primary float-right">New</button> -->
+                                            <a href="#" class="btn btn-primary float-right miscellaneousCharges" style="color:white;"  id="tourBillClaim">New</a>
+                                        </h5>
+                                        </div>
+                                        <div id="collapseFive" class="collapse fade" aria-labelledby="headingFive" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <!-- Need to create table here -->
+                                                <table id="miscellaneousChargesTable" class="table table-striped">
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+  
+  

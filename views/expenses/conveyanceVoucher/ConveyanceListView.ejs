@@ -1,0 +1,215 @@
+<% include ../../partials/navbar %>
+<% include ../../partials/messages %>
+<% include ../../partials/footer %>
+
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+
+
+<center><h3>Conveyance Vocher ListView</h3></center>
+
+<p id="expenseId"><%= expenseId %></p>
+<div class="container">
+<div class="row mt-5 mb-3 align-items-center">
+    <div class="col-md-5">
+        <a class="btn btn-primary btn-md bg-gray" href="/expense/conveyanceVoucher/<%= expenseId %>" id="createNewConveyanceVoucherButton">Create New </a>
+        <a class="btn btn-primary btn-md bg-gray" href="/expense" >Go To Expense Page</a>
+        <button class="btn btn-primary btn-md" id="refresh">Refresh</button>
+    </div>
+    <div class="col-md-3">
+    <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+    </div>
+    <div class="col-md-2 text-right">
+    <span class="pr-3">Rows Per Page:</span>
+    </div>
+    <div class="col-md-2">
+        <div class="d-flex justify-content-end">
+            <select class="custom-select" name="rowsPerPage" id="changeRows">
+                <option value="1">1</option>
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="ConveyanceVoucherTable" class="responsive " class="row mt-5 mb-3 align-items-center">
+
+</div>
+
+</div>
+<!-- Conveyance Voucher Details Modal -->
+
+<div id="conveyanceModal" class="modal fade">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Conveyance Voucher View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+  
+          <div id="detailLoadingSpinner">
+            <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+        </div>
+        <table id="conveyanceVouchertable" class="table">
+
+        </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<script>
+    $(document).ready(function() { 
+        $('#expenseId').hide();
+        let expenseId =document.getElementById('expenseId').innerHTML;
+
+       // alert(expenseId);
+       
+        let columns ={
+            sequence : 'Sequence',
+            name: 'Conveyance Voucher ',
+            TravellingPurpose : 'Purpose of Travelling',
+            modeOfTravel : 'Nature Of Travel',
+            createDdate : 'Created Date',
+
+        }
+        
+      var table = $('#ConveyanceVoucherTable').tableSortable({
+        data :[],
+        columns,
+        searchField: '#searchField',
+        sorting: true,
+        rowsPerPage: 5,
+        pagination:true,
+        tableWillMount: () => {
+            console.log('table will mount')
+            
+        },
+        tableDidMount: () => {
+            console.log('table did mount');
+
+            $('#spinner').hide();
+        },
+        tableWillUpdate: () => {
+            console.log('table will update')
+        //  table.refresh();
+        // onLoadTask();
+        },
+        tableDidUpdate: () => {
+        console.log('table did update');
+         anchorClickFunctionalities();
+        
+        },
+        tableWillUnmount: () => console.log('table will unmount'),
+        tableDidUnmount: () => console.log('table did unmount'),
+        onPaginationChange: function(nextPage, setPage) {
+            setPage(nextPage);
+        },
+         
+    });
+
+    
+    $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+        })
+
+        $('#refresh').click(function() {
+            table.refresh(true);
+            onLoadTask();
+        })
+
+
+        $.ajax({
+            url:'/expense/getconveyancelist',
+            type:"get",
+            data:
+            {
+                expenseId:expenseId
+            },
+            datatype:'json'
+        })
+        .done((response)=>{
+            console.log('response '+JSON.stringify(response));
+            table.setData(response, columns);
+            anchorClickFunctionalities();
+
+         })
+         .fail((jqXHR,status,error)=>{
+             console.log('jqXHR: '+jqXHR);
+             console.log('error: '+JSON.stringify(jqXHR));
+
+         })
+         function anchorClickFunctionalities(){
+            $('a.conveyanceTag').on('click',function(event){
+                event.stopImmediatePropagation();
+                event.stopPropagation();
+                let conveyanceId = this.id;
+                alert('conveyanceId  '+conveyanceId);
+                $('#conveyanceModal').modal('show');
+
+                $.ajax({
+                    url : '/expense/getConveyanceVoucherDetail',
+                    type:'get',
+                    data : {
+                        conveyanceId : conveyanceId
+                    },
+                    dataType: 'json',
+                    beforeSend : function(){
+                      $('#detailLoadingSpinner').show();
+                    }
+                })
+                    .done((response)=>{
+                        console.log('ConveyanceVoucherDetail '+JSON.stringify(response));
+                      $('#detailLoadingSpinner').hide();
+                      if(response.length > 0)
+                            {
+                              let conveyanceRecord = response[0];
+                              let htmlTable = '';
+                              let strCreatedDate = new Date(conveyanceRecord.createddate).toLocaleString();
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Name</strong></td>';
+                                  htmlTable += '<td>'+conveyanceRecord.conveyancename+'</td>';
+                                  htmlTable += '<td><strong>Expense Name</strong></td>';
+                                  htmlTable += '<td>'+conveyanceRecord.expname+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Amount</strong></td>';
+                                htmlTable += '<td>'+conveyanceRecord.amount__c+'</td>';
+                                htmlTable += '<td><strong>Mode of Conveyance</strong></td>';
+                                htmlTable += '<td>'+conveyanceRecord.mode_of_conveyance__c+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Purpose of Travel</strong></td>';
+                                htmlTable += '<td>'+conveyanceRecord.purpose_of_travel__c+'</td>';
+                                htmlTable += '<td><strong>Create Date</strong></td>';
+                                htmlTable += '<td>'+strCreatedDate+'</td>';
+                              htmlTable += '</tr>';
+                              $('#conveyanceVouchertable').empty();
+                              $('#conveyanceVouchertable').html(htmlTable);
+        
+
+                            }
+
+
+                    })
+                    .fail((jqXHR, status, error) =>{
+                        $('#detailLoadingSpinner').show();
+                        console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                        console.log('error  : '+error);
+                      })
+                })
+        }
+    })
+</script>

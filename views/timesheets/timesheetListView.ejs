@@ -1,0 +1,289 @@
+<% include ../partials/navbar %>
+<% include ../partials/footer %>
+<% include ../partials/messages %>
+
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+<h1>Timesheet Task ListView</h1>
+<div class="container">
+<div class="row mt-5 mb-3 align-items-center">
+    <div class="col-md-5">
+        <button class="btn btn-primary btn-md" id="refresh">Refresh</button>
+    </div>
+    <div class="col-md-3">
+    <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+    </div>
+    <div class="col-md-2 text-right">
+    <span class="pr-3">Rows Per Page:</span>
+    </div>
+    <div class="col-md-2">
+        <div class="d-flex justify-content-end">
+            <select class="custom-select" name="rowsPerPage" id="changeRows">
+                <option value="1">1</option>
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="timesheetTable" class="responsive " class="row mt-5 mb-3 align-items-center">
+
+</div>
+
+</div>
+
+<div id="timesheetEditModal" class="modal fade ">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Timesheet Edit Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body" id="editModalBody" >
+            <form name="editTimesheetForm" id="editTaskForm" >
+             <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                      <label for="timesheetName">Name</label>
+                      <input type="text" disabled class="form-control" id="timesheetName" value=""   name="timesheetName" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <label for="representative">Representative</label>
+                    <input type="text" disabled class="form-control" id="representative" value=""   name="representative" required>
+                   </option>
+                      </select>
+                    </div>
+                </div>
+              </div>
+              
+
+              <div class="form-group">
+                  <div class="row">            
+                    <div class="col-md-6">
+                      <label for="start">Start Time</label>
+                        <input type="text" class="form-control" id="start" value=""   name="start" >
+                      </div>
+
+                    <div class="col-md-6">
+                        <label for="endTime">EndTime</label>
+                        <input type="text" class="form-control" id="endTime" value=""   name="endTime" >
+                        </div>
+                  </div>
+              </div>
+              <div class="form-group">  
+                 <div class="col-md-6">
+                     <label for="dt">Date</label>
+                     <input type="text" class="form-control" id="dt" value=""   name="dt" >
+                     </div>      
+                     <div class="col-md-6">
+                        <label for="hr">Hours</label>
+                        <input type="number" class="form-control" id="hr" value=""   name="hr" >
+                        </div>      
+                    <div class="col-md-6">
+                       <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                      </div>
+            </div>
+            
+              
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary" id="editTimesheetButton" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+       
+  </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function() { 
+        let columns ={
+            sequence : 'Sequence',
+             name : 'Timesheet Name ',
+             startTime:'Start Time',
+             endtime:'End Time',
+             hours:' Hours',
+             date:'Date',
+            createDdate : 'Created Date',
+            editAction:'Action',
+        }
+        
+      var table = $('#timesheetTable').tableSortable({
+        data :[],
+        columns,
+        searchField: '#searchField',
+        sorting: true,
+        rowsPerPage: 5,
+        pagination:true,
+        tableWillMount: () => {
+            console.log('table will mount')
+            
+        },
+        tableDidMount: () => {
+            console.log('table did mount');
+
+            $('#spinner').hide();
+        },
+        tableWillUpdate: () => {
+            console.log('table will update')
+        //  table.refresh();
+        // onLoadTask();
+        },
+        tableDidUpdate: () => {
+        console.log('table did update');
+   //      anchorClickFunctionalities();
+        
+        },
+        tableWillUnmount: () => console.log('table will unmount'),
+        tableDidUnmount: () => console.log('table did unmount'),
+        onPaginationChange: function(nextPage, setPage) {
+            setPage(nextPage);
+        },
+         
+    });
+
+    
+    $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+        })
+
+        $('#refresh').click(function() {
+            table.refresh(true);
+            onLoadTask();
+        })
+
+
+        $.ajax({
+            url:'/timesheets/getTimesheetlist',
+            type:"get",
+            datatype:'json'
+        })
+        .done((response)=>{
+            console.log('response listViewTimesheet'+JSON.stringify(response));
+            table.setData(response, columns);
+            namemodal();
+            anotherEditFunctionality();
+            
+
+         })
+         .fail((jqXHR,status,error)=>{
+             console.log('jqXHR: '+jqXHR);
+             console.log('error: '+JSON.stringify(jqXHR));
+
+         })
+    })
+    
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+    
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+    
+        return [year, month ,day].join('-');
+    }
+
+    function namemodal(){
+        $('a.taskreferenceTag').on('click',function(event){
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            let idss =this.id;
+            alert('idddddddddddddddddddd'+idss);
+
+        })
+
+    }
+    function anotherEditFunctionality()
+    {
+        $('.editTimesheet').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let timesheetId = this.id;
+            alert('timesheetId ' +timesheetId);
+            $('#timesheetEditModal').modal('show'); 
+            $('#timesheetEditModal').modal('show');
+                        $.ajax({
+                            url : '/timesheets/fetchtimesheetkDetail',
+                            type:'get',
+                            data : {
+                                timesheetId : timesheetId
+                            },
+                            dataType: 'json',
+                         //   beforeSend : function(){
+                          //    $('#detailLoadingSpinner').show();
+                       //     }
+                        })  
+                        .done((response)=>{
+                        // console.log('timesheetDetail edit Modal: '+JSON.stringify(response));
+                          let taskDetail = response[0];
+                          alert(taskDetail);
+                             let strdate = formatDate(new Date(taskDetail.date__c));
+                           document.forms["editTimesheetForm"]["timesheetName"].value = taskDetail.name;
+                            document.forms["editTimesheetForm"]["representative"].value = taskDetail.representative__c;
+                            document.forms["editTimesheetForm"]["start"].value = taskDetail.start_time__c;
+                           document.forms["editTimesheetForm"]["endTime"].value = taskDetail.end_time__c;
+                           document.forms["editTimesheetForm"]["dt"].value = strdate;
+                           document.forms["editTimesheetForm"]["hr"].value = taskDetail.hours__c;
+                          
+                           document.forms["editTimesheetForm"]["hide"].value = taskDetail.sfid;
+                           })
+                        .fail((jqXHR, status, error) => {
+                          console.log('jqXHR   '+JSON.stringify(jqXHR));
+                          console.log('error  '+error);
+                      })
+    
+        })
+        $('#editTimesheetButton').on('click',function(event){
+
+          event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    alert('Save Button Clicked !');
+                 //   var formEl = document.forms.editTimesheetForm;
+                 //   var formData = new FormData(formEl);
+                //    alert(JSON.stringify(formData.get('name')));
+
+                   var $inputs = $('#editTimesheetForm :input');
+
+                    // not sure if you wanted this, but I thought I'd add it.
+                    // get an associative array of just the values.
+                     var values = {};
+                    $inputs.each(function() {
+                       values[this.name] = $(this).val();
+                    });
+                    let dta = $(editTimesheetForm).serialize();
+
+                    
+                    alert('formValues : '+JSON.stringify(dta));
+
+                    $.ajax({
+                        url : '/timesheets/updateTimesheet',
+                        type:'post',
+                        data: dta,
+                        dataType : 'json'
+                    })
+                    .done((response) => {
+                          console.log('response   :'+response);
+                    })
+                    .fail((jqXHR, status, error) => {
+                          console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    })
+
+        })
+    }
+</script>

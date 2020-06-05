@@ -1,0 +1,330 @@
+<% include ../../partials/navbar %>
+<% include ../../partials/footer %>
+
+  <style>
+      #formdata .form-control {
+        width: auto;
+        }
+
+  </style>
+
+  <div class="container-fluid">
+   <br />
+   
+      <div class="col-md-5">
+          <a class="btn btn-primary btn-md bg-gray" href="/expense/tourBillClaim/boardingLodgingListView?tourBillClaimId=<%= parentTourBillId %>" >Go To Boarding &amp; Lodging ListView</a>
+      </div>
+   
+   <h4 align="center">Boarding & Lodging</h4>
+   <br />
+  
+      <% include ../../partials/messages %>
+    <div id="errorMessages"></div>
+    
+   <form method="post" action="/insertprecash" id="formdata"  enctype="multipart/form-data">
+    <div class="table-responsive" >
+     <table class="table table-bordered " id="item_table">
+      <tr>
+       <th>NO</th>
+       <th>STAY OPTION</th>
+       <th>ACTIVITY CODE</th>
+       <th>PLACE JOURNEY</th>
+       <th>TIER3CITY</th>
+       <th>FROM</th>
+       <th></th>
+       <th>TO</th>
+       <th></th>
+       <th>TOTAL ALLOWANCES</th>
+       <th>DAILY ALLOWANCES</th>
+       <th>  AMT FOR B & L </th>
+       <th>ACTUAL AMT FOR B & L</th>
+       <th>OWN STAY AMOUNT</th>
+       <th>UPLOAD FILE</th>
+       <th><button type="button" id="addButton" style="background-color:#2C3E50;" name="add" class="btn btn-success btn-sm add"><span class="glyphicon glyphicon-plus"></span></button></th>
+       <th style="display:none;"></th>
+
+      </tr>
+     </table>
+  </div>
+
+     <div align="center">
+    
+      <input type="submit" style="background-color:#2C3E50;" name="submit" class="btn btn-info" value="Submit" />
+     </div>
+    
+   </form>
+   </div>
+  </div>
+</div>
+
+<p id ='tourbillId' ><%= parentTourBillId %></p>
+<script>
+  var lstPlaces = ["Mumbai","Delhi/NCR","Bengaluru","Hyderabad","Itanagar","Dispur", 
+  "Patna", "Raipur", "Panaji", "Gandhinagar", "Shimla", "Srinagar", "Chandigarh", 
+  "Ranchi", "Thiruvananthapuram","Bhopal", "Imphal", "Shillong", "Aizawl", "Kohima",
+  "Bhubaneswar", "Jaipur", "Gangtok", "Chennai","Agartala", "Lucknow", "Dehradun", 
+  "Kolkata", "Port Blair", "Silvassa", "Daman", "Kavaratti", "Pondicherry", "Agra", "Pune", "Kochi", 
+  "Ajmer", "Allahabad", "Amritsar","Coimbatore", "Indore", "Gwalior", "Jalandhar", "Mussorie","Ooty", "Others"];
+
+$(document).ready(function(){
+   $('#tourbillId').hide();
+   $('#addButton').hide();
+   let tourbillId = document.getElementById('tourbillId').innerHTML;
+  var count = 1;
+ 
+ let activityCodes = [];
+ var count = 1;
+ $.get('/expense/tourBillClaim/fetchActivityCodes',{tourbillId : tourbillId}, function(response){
+      console.log('response  : '+JSON.stringify(response));
+      activityCodes = response;
+      $('#addButton').show();
+
+      var cnt = count++;
+      var html = '';
+      html += '<tr>';
+      html += '<td>'+cnt+'</td>';
+      html += '<td><select  id="stay'+cnt+'" name="stayOption" class="form-control"><option value="">None</option><option value="Own Stay">Own Stay</option><option value="Stay">Stay</option></select>';
+        html += '<td><select id="activity_code'+cnt+'"  name="projectTask" disabled="true" class="form-control item_unit"></select></td>';
+      html += '<td><select  id="place'+cnt+'" name="placeJourney" class="form-control" ></select></td>';
+      html += '<td><input type="text" id="tier3City'+cnt+'" disabled="true" name="tier3City" class="form-control" /></td>';
+      html += '<td><input type="date" name="fromDate" class="form-control" /></td>';
+      html += '<td><input type="time" name="fromTime" class="form-control" /></td>';
+      html += '<td><input type="date" name="toDate" class="form-control" /></td>';
+      html += '<td><input type="time" name="toTime" class="form-control" /></td>';
+      html += '<td><input type="number" id="totalAllowances'+cnt+'" name="totalAllowances" disabled  class="form-control" /></td>';
+      html += '<td><input type="number" id="dailyAllowances'+cnt+'"  name="dailyAllowances" disabled  class="form-control" /></td>';
+      html += '<td><input type="number" id ="amtForBL'+cnt+'" name="amtForBL"  class="form-control" /></td>';
+      html += '<td><input type="number" id="actualAMTForBL'+cnt+'" name="actualAMTForBL" class="form-control" /></td>';
+      html += '<td><input type="number" id="ownStayAmount'+cnt+'" name="ownStayAmount" class="form-control" /></td>';
+      html += '<td><input type="file" onChange="chkFile(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo" name="imgpath" id="file_'+cnt+'"></td>';
+      html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
+      html += '<td style="display:none;"><input  type="hidden" id="projectTask'+cnt+'" name="activity_code"   class="form-control" /></td>';
+      html += '<td style="display:none;"><input  type="hidden" name="parentTourBillId" value="<%= parentTourBillId %>" class="form-control" /></td>';
+      $('#item_table').append(html);
+      $('#stay'+cnt).on("change" ,function(){
+        if(this.value != 'Stay')
+        {
+        $('#activity_code'+cnt).attr("disabled",true);  
+        $('#amtForBL'+cnt).attr("disabled",true);  
+        $('#actualAMTForBL'+cnt).attr("disabled",true);
+        $('#ownStayAmount'+cnt).attr("disabled",true);  
+        }       
+        else
+        {
+          $('#activity_code'+cnt).attr("disabled",false);  
+          $('#amtForBL'+cnt).attr("disabled",false);  
+          $('#actualAMTForBL'+cnt).attr("disabled",false);
+          $('#ownStayAmount'+cnt).attr("disabled",false); 
+        }
+      })
+      $('#activity_code'+cnt)
+      .append($("<option></option>")
+      .attr("value",'')
+      .text('Select'));	
+    for(let i=0; i< activityCodes.length ;i++)
+    {
+      $('#activity_code'+cnt)
+      .append($("<option></option>")
+      .attr("value",activityCodes[i].sfid)
+      .text(activityCodes[i].activity_code__c));	
+    }
+    $('#activity_code'+cnt).on('change',function(){
+      let taskId = this.value;
+            let selectedCode = activityCodes.filter((eachCode)=> {
+              if(eachCode.sfid == taskId)
+                return eachCode;
+            })
+            let label = selectedCode[0].activity_code__c;
+            document.getElementById('projectTask'+cnt).value = label;
+          //  $('#projectTask'+cnt).value = label;
+            console.log('label  :'+label+' value : '+taskId);
+    })
+    $('#place'+cnt).empty();
+   $('#place'+cnt)
+    .append($("<option></option>")
+    .attr("value",'')
+    .text('Select'));
+    for(let i=0;i<lstPlaces.length;i++)
+    {
+      $('#place'+cnt)
+    .append($("<option></option>")
+    .attr("value",lstPlaces[i])
+    .text(lstPlaces[i]));
+    }
+    $('#place'+cnt).on("change",function(){
+        if(this.value == 'Others')
+          $('#tier3City'+cnt).attr("disabled",false);
+        else
+        {
+          $('#tier3City'+cnt).attr("disabled",true);
+            cityAllowance(this.value,cnt);                                  // to auto fill the allowanne fields
+        } 
+    });
+  }).fail(function(jqXHR, error) {
+      console.log('error  : '+JSON.stringify(jqXHR));
+  })
+  
+ $(document).on('click', '.add', function(){
+    var cnt = count++;
+    var html = '';
+    html += '<tr>';
+    html += '<td>'+cnt+'</td>';
+    html += '<td><select name="stayOption" class="form-control"><option value="">None</option><option value="Own Stay">Own Stay</option><option value="Stay">Stay</option></select>';
+      html += '<td><select id="activity_code'+cnt+'"  name="projectTask" class="form-control item_unit"></select></td>';
+    html += '<td><select  id="place'+cnt+'" name="placeJourney" class="form-control" ></select></td>';
+    html += '<td><input type="text" id="tier3City'+cnt+'" disabled="true" name="tier3City" class="form-control" /></td>';
+    html += '<td><input type="date" name="fromDate" class="form-control" /></td>';
+    html += '<td><input type="time" name="fromTime" class="form-control" /></td>';
+    html += '<td><input type="date" name="toDate" class="form-control" /></td>';
+    html += '<td><input type="time" name="toTime" class="form-control" /></td>';
+    html += '<td><input type="number" id="totalAllowances'+cnt+'" name="totalAllowances"  disabled class="form-control" /></td>';
+    html += '<td><input type="number" id="dailyAllowances'+cnt+'" name="dailyAllowances"  disabled  class="form-control" /></td>';
+    html += '<td><input type="number" id="amtForBL'+cnt+'" name="amtForBL"  class="form-control" /></td>';
+    html += '<td><input type="number" name="actualAMTForBL" class="form-control" /></td>';
+    html += '<td><input type="number" id="ownStayAmount'+cnt+'" name="ownStayAmount" class="form-control" /></td>';
+    html += '<td><input type="file" onChange="chkFile(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo" name="imgpath" id="file_'+cnt+'"></td>';
+    html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
+    html += '<td style="display:none;"><input  type="hidden" id="projectTask'+cnt+'" name="activity_code"   class="form-control" /></td>';
+    html += '<td style="display:none;"><input  type="hidden" name="parentTourBillId" value="<%= parentTourBillId %>" class="form-control" /></td>';
+    $('#item_table').append(html);
+    $('#activity_code'+cnt)
+    .append($("<option></option>")
+    .attr("value",'')
+    .text('Select'));	
+  for(let i=0; i< activityCodes.length ;i++)
+  {
+    $('#activity_code'+cnt)
+    .append($("<option></option>")
+    .attr("value",activityCodes[i].sfid)
+    .text(activityCodes[i].activity_code__c));	
+  }
+  $('#activity_code'+cnt).on('change',function(){
+    let taskId = this.value;
+          let selectedCode = activityCodes.filter((eachCode)=> {
+            if(eachCode.sfid == taskId)
+              return eachCode;
+          })
+          let label = selectedCode[0].activity_code__c;
+          document.getElementById('projectTask'+cnt).value = label;
+        //  $('#projectTask'+cnt).value = label;
+          console.log('label  :'+label+' value : '+taskId);
+  })
+  $('#place'+cnt).empty();
+   $('#place'+cnt)
+    .append($("<option></option>")
+    .attr("value",'')
+    .text('Select'));
+    for(let i=0;i<lstPlaces.length;i++)
+    {
+      $('#place'+cnt)
+    .append($("<option></option>")
+    .attr("value",lstPlaces[i])
+    .text(lstPlaces[i]));
+    }
+    $('#place'+cnt).on("change",function(){
+        if(this.value == 'Others')
+          $('#tier3City'+cnt).attr("disabled",false);
+        else
+        cityAllowance(this.value,cnt);    
+          
+    });
+  });
+ 
+ $(document).on('click', '.remove', function(){
+    $(this).closest('tr').remove();
+ });
+
+
+ $.get('/expense/tourBillClaim/fetchActivityCodes',{tourbillId : tourbillId}, function(response){
+    console.log('response  : '+JSON.stringify(response));
+ }).fail(function(jqXHR, error) {
+    console.log('error  : '+JSON.stringify(jqXHR));
+ })
+});
+
+
+$(function () {
+  $('form#formdata').bind('submit', function () {
+    console.log('formdata +'+$('form#formdata').serialize())
+    $.ajax({
+      type: 'post',
+      url: '/expense/tourBillClaim/boardingLodgingCharges',  // to save the Boarding Chargess
+      data: $('form#formdata').serialize(),
+      success: function (data) {
+        console.log(data);
+       if(data == 'BoardingLodging Form Saved Successfully !')
+       {
+        document.getElementById("formdata").reset();
+        let errorHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">'+ data+
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+              '<span aria-hidden="true">&times;</span>'+
+            '</button>'+
+          '</div>';
+          $('#errorMessages').empty();
+          $('#errorMessages').append(errorHtml);
+       }
+       else
+       {
+        let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+ data+
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+              '<span aria-hidden="true">&times;</span>'+
+            '</button>'+
+          '</div>';
+          $('#errorMessages').empty();
+          $('#errorMessages').append(errorHtml);
+
+       }
+        
+        
+    
+        
+      }
+    });
+    return false;
+  });
+});
+
+
+function chkFile(file1,id) {
+    var file = file1.files[0];
+    var formData = new FormData();
+    formData.append('formData', file);
+
+   
+    $.ajax({
+    type: "POST",
+    url: "/expense/uploadImage",    
+    cache: false,
+    dataType:'json',
+    processData: false,
+    contentType: false,
+    data: formData,
+    success: function (data) {
+      alert('File Uploaded Successfully !');
+      console.log(data);
+    //  var result = JSON.stringify(data)
+     $('#file_'+id).val(data.url);
+     
+     }
+  });
+}
+
+function cityAllowance(name,cnt)
+{
+  $.get('/expense/tourBillClaim/fetchAllowence',{name : name}, function(response){
+    console.log('response  : '+JSON.stringify(response));
+    let val=response[0];
+    alert(JSON.stringify(val.boarding_lodging__c));
+    // $('#amtForBL'+cnt).attr("disabled",true);
+    $('amtForBL'+cnt).attr("disabled",true);
+    $('amtForBL'+cnt).attr("ownStayAmount",true);
+    document.getElementById('amtForBL'+cnt). value = val.boarding_lodging__c;
+    document.getElementById('dailyAllowances'+cnt).value = val.daily_allowance_amount__c;
+    document.getElementById('ownStayAmount'+cnt). value = 0;
+
+ }).fail(function(jqXHR, error) {
+    console.log('error  : '+JSON.stringify(jqXHR));
+ })
+}
+
+</script>

@@ -1,0 +1,86 @@
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+<h1 style="margin-left: 775px; margin-top:25px;">Task Activity Code</h1>
+<div class="container">
+    <div class="row mt-5 mb-3 align-items-center">
+        <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+        </div>
+        <div class="col-md-2 text-right">
+        <span class="pr-3">Rows Per Page:</span>
+        </div>
+        <div class="col-md-2">
+            <div class="d-flex justify-content-end">
+                <select class="custom-select" name="rowsPerPage" id="changeRows">
+                    <option value="1">1</option>
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div id="tableTask" class="responsive " class="row mt-5 mb-3 align-items-center">
+    
+    </div>
+    
+    </div>
+    <script>
+      $(document).ready(function(){
+          
+        let columns ={
+        sequence : 'Sequence',
+            taskId: 'Task IDs',
+            activityCode:'Activity Code',
+       }
+      
+      var table = $('#tableTask').tableSortable({
+        data :[],
+        columns,
+        searchField: '#searchField',
+        sorting: true,
+        rowsPerPage: 5,
+        pagination:true,
+        tableWillMount: () => {
+            console.log('table will mount')
+            
+        },
+        tableDidMount: () => {
+            console.log('table did mount');
+
+            $('#spinner').hide();
+        },
+        tableWillUpdate: () => {
+            console.log('table will update')
+        //  table.refresh();
+        // onLoadTask();
+        },
+        tableDidUpdate: () => {
+        console.log('table did update');
+        
+        },
+        tableWillUnmount: () => console.log('table will unmount'),
+        tableDidUnmount: () => console.log('table did unmount'),
+        onPaginationChange: function(nextPage, setPage) {
+            setPage(nextPage);
+        },
+      })
+      $.ajax({
+        url:'/users/fetchTASKCODE',
+        type:'get',
+        dataType:'json',
+    })
+    .done((response)=>{
+        console.log('response : '+JSON.stringify(response));
+        table.setData(response, columns);
+
+    })
+    .fail((jqXHR,status,error)=>{
+        console.log('jqXHR: '+jqXHR);
+        console.log('error: '+JSON.stringify(jqXHR));
+
+    })
+
+    })
+    </script>

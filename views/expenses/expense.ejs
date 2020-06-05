@@ -1,0 +1,1172 @@
+
+<% include ../partials/navbar %>
+<% include ../partials/messages %>
+<% include ../partials/footer %>
+
+
+
+<style>
+
+   
+
+
+      .project-tab {
+          padding: 10%;
+          margin-top: -8%;
+      }
+      .project-tab #tabs{
+          background: #007b5e;
+          color: #eee;
+      }
+      .project-tab #tabs h6.section-title{
+          color: #eee;
+      }
+      .project-tab #tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+          color: #0062cc;
+          background-color: transparent;
+          border-color: transparent transparent #f3f3f3;
+          border-bottom: 3px solid !important;
+          font-size: 16px;
+          font-weight: bold;
+      }
+      .project-tab .nav-link {
+          border: 1px solid transparent;
+          border-top-left-radius: .25rem;
+          border-top-right-radius: .25rem;
+          color: #0062cc;
+          font-size: 16px;
+          font-weight: 600;
+      }
+      .project-tab .nav-link:hover {
+          border: none;
+      }
+      .project-tab thead{
+          background: #f3f3f3;
+          color: #333;
+      }
+      .project-tab a{
+          text-decoration: none;
+          color: #333;
+          font-weight: 600;
+      }
+      .accordion {
+          max-height: 500px;
+          overflow-y: auto;
+      }
+
+      section {
+          padding: 60px 0;
+      }
+
+      #accordion-style-1 h1,
+      #accordion-style-1 a {
+          color: #007b5e;
+      }
+
+      #accordion-style-1 .btn-link {
+          font-weight: 400;
+          color: #007b5e;
+          background-color: transparent;
+          text-decoration: none !important;
+          font-size: 16px;
+          font-weight: bold;
+          padding-left: 25px;
+      }
+
+      #accordion-style-1 .card-body {
+          border-top: 2px solid #007b5e;
+      }
+
+      #accordion-style-1 .card-header .btn.collapsed .fa.main {
+          display: none;
+      }
+
+      #accordion-style-1 .card-header .btn .fa.main {
+          background: #007b5e;
+          padding: 13px 11px;
+          color: #ffffff;
+          width: 35px;
+          height: 41px;
+          position: absolute;
+          left: -1px;
+          top: 10px;
+          border-top-right-radius: 7px;
+          border-bottom-right-radius: 7px;
+          display: block;
+      }
+
+      .rotate {
+          -webkit-transform: rotate(90deg);
+          /* Chrome, Safari, Opera */
+          -moz-transform: rotate(90deg);
+          /* Firefox */
+          -ms-transform: rotate(90deg);
+          /* IE 9 */
+          transform: rotate(90deg);
+          /* Standard syntax */
+      }
+
+    
+  </style>
+
+<div class="container-fluid bg-gray" id="accordion-style-1">
+      <p id="expenseIdpTag"> </p>
+  <div class="container">
+      <div id="success" class="alert alert-success alert-dismissible fade show" role="alert">
+ 
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      <section>
+            <div class="row mt-6 mb-3 align-items-center">
+                      <div class="col-md-5">
+                          <button class="btn btn-primary btn-md bg-gray"  id="createNewExpenseButton">Create New Expense</button>
+                          <button class="btn btn-primary btn-md" id="refresh">Refresh</button>
+                      </div>
+                      <div class="col-md-3">
+                        <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+                      </div>
+                      <div class="col-md-2 text-right">
+                        <span class="pr-3">Rows Per Page:</span>
+                      </div>
+                      <div class="col-md-2">
+                          <div class="d-flex justify-content-end">
+                              <select class="custom-select" name="rowsPerPage" id="changeRows">
+                                  <option value="1">1</option>
+                                  <option value="5" selected>5</option>
+                                  <option value="10">10</option>
+                                  <option value="15">15</option>
+                              </select>
+                          </div>
+                      </div>
+              </div>
+              <div class=" table-responsive md-10 table-wrap" id="rootExpenseTable">
+                  <div id="spinner">
+                      <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+                    </div>
+                    
+                  <!--  <table class="table" id="allExpenseRecordsTableId">
+                      <thead>
+                          <tr>
+                              <th>Expense Name</th>
+                              <th>Project </th>
+                              <th>Approval Status</th>
+                              <th>Amount Claimed</th>
+                              <th>Petty Cash Amount</th>
+                              <th>Conveyance Amount</th>
+                              <th>Tour Bill Claim Amount</th>
+                              <th>Action</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                        
+                          
+                      </tbody>
+                    </table> -->
+                </div>
+                <div class="modal fade" id="popup">
+                      <div class="modal-dialog modal-lg">
+                          <div class="modal-content">
+
+                              <!-- Modal Header -->
+                              <div class="modal-header">
+                                  <h4 class="modal-title">Expense Name </h4>
+                                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                              </div>
+
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                                <div class="row">
+                                  <div class="col-md-12">
+                                      <nav>
+                                          <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                              <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Details</a>
+                                              <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Related</a>
+                                          </div>
+                                      </nav>
+                                      <div class="tab-content" id="nav-tabContent">
+                                          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                              <!-- Particular Expense Details -->
+                                                  <table id="expenseTable" class="table table-hover striped">
+                                                          <!-- Inside code is handled by Jquery to add dyanamic Content -->
+                                                  <div id="expenseDetailsSpinner">
+                                                              <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+                                                    </div>
+                                                      
+                                                  </table>
+                                              <!-- Particular Expense Details-->
+                                          </div>
+                                          <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                              <div class="accordion" id="accordionExample">
+                                                  <div class="card">
+                                                      <div class="card-header" id="headingOne">
+                                                          <h5 class="mb-0">
+                                                              <button class="btn btn-link text-left" type="pettyCashButton"
+                                                                  data-toggle="collapse" data-target="#collapseOne"
+                                                                  aria-expanded="true" aria-controls="collapseOne">
+                                                                  <i class="fa fa-angle-double-right mr-3"></i>Petty Cash
+                                                              </button>
+                                                                <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+                                                              <a href="#" class="btn btn-primary float-right pettyCashButton" id="" style="color:white;" >New</a>
+                                                          </h5>
+                                                      </div>
+
+                                                      <div id="collapseOne" class="collapse show fade"
+                                                          aria-labelledby="headingOne" data-parent="#accordionExample">
+                                                          <div class="card-body">
+                                                              <table id="pettyCashTable" class="table table-hover striped">
+                                                                  
+                                                              </table>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  <div class="card">
+                                                      <div class="card-header" id="headingTwo">
+                                                          <h5 class="mb-0">
+                                                              <button class="btn btn-link collapsed text-left" type="button"
+                                                                  data-toggle="collapse" data-target="#collapseTwo"
+                                                                  aria-expanded="false" aria-controls="collapseTwo">
+                                                                  <i class="fa fa-angle-double-right mr-3"></i>Conveyance Voucher
+                                                              </button>
+                                                              <!-- <button class="btn btn-primary float-right">New</button> -->
+                                                              <a href="#" class="btn btn-primary float-right conveyanceVoucherButton" style="color:white;">New</a>
+                                                          </h5>
+                                                      </div>
+                                                      <div id="collapseTwo" class="collapse fade" aria-labelledby="headingTwo"
+                                                          data-parent="#accordionExample">
+                                                          <div class="card-body">
+                                                                  <table id="conveyanceVoucherTable" class="table table-hover striped">
+                                                                        
+                                                                  </table>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  <div class="card">
+                                                      <div class="card-header" id="headingThree">
+                                                          <h5 class="mb-0">
+                                                              <button class="btn btn-link collapsed text-left" type="button"
+                                                                  data-toggle="collapse" data-target="#collapseThree"
+                                                                  aria-expanded="false" aria-controls="collapseThree">
+                                                                  <i class="fa fa-angle-double-right mr-3"></i>Tour Bill Claim
+                                                              </button>
+                                                              <!-- <button class="btn btn-primary float-right">New</button> -->
+                                                              <a href="#" class="btn btn-primary float-right tourBillClaim" style="color:white;" id="tourBillClaimNewButton">New</a>
+                                                          </h5>
+                                                      </div>
+                                                      <div id="collapseThree" class="collapse fade"
+                                                          aria-labelledby="headingThree" data-parent="#accordionExample">
+                                                          <div class="card-body">
+                                                                  <table id="tourBillClaimTable" class="table  table-hover striped">
+                                                                          
+                                                                  </table>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                                </div>                          
+                            </div>
+
+                              <!-- Modal footer -->
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary"
+                                      data-dismiss="modal">Close</button>
+                              </div>
+
+                          </div>
+                      </div>
+                  </div>
+      </section>
+  </div>
+</div>
+
+
+
+<!-- Create Expense Modal  Start -->
+<div id="createExpenseModal" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createTaskModal">Create New Expense</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form  id="taskForm" class="needs-validation" novalidate >
+  
+              <div class="form-group">  
+                <div class="row">
+                  <div class="col-md-6">
+                    <label for="validationTooltip01">Expense Name</label>
+                    <input type="text" class="form-control" id="validationTooltip01" value="" placeholder="Expense Name"  name="taskname" required>
+                  </div>
+                  
+                  <div class="col-md-6">
+                    <label for="projectNameDropDown">Project Name</label>
+                    <select class="custom-select custom-select-sm form-control" id="projectNameDropDown" name="projectname">
+                        <option selected value="a030p0000018ScOAAU" >Project 6</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="form-group"> 
+                <div class="row">
+                  <div class="col-md-6">
+                    <label for="validationTooltip03">Department</label>
+                    <input type="text" class="form-control" id="validationTooltip03" placeholder="Deaprtment"  name="department" >
+                  </div>
+                  <div class="col-md-6">
+                    <label for="validationTooltip06">Employee Category / Band</label>
+                    <input type="text" class="form-control" id="validationTooltip06" placeholder="Employee Category / Band"  name="empCategory" >
+                  </div>
+                </div>
+              </div>
+              
+             
+              
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-md-6">
+                    <label for="validationTooltip08">Incurred By</label>
+                    <select class="custom-select custom-select-sm form-control" name="incurredBy">
+                        <option selected value="<%= objUser.sfid %>" ><%= objUser.name %></option>
+                    </select>
+                  </div>
+                  
+                  <div class="col-md-6">
+                   
+                  </div>
+                </div>  
+              </div>
+  
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" id="expenseSubmitbutton"  class="btn btn-primary">Save</button>
+              </div>
+  
+            </form>
+          </div>
+        </div>
+      </div>
+</div>
+
+    <!-- Create Expense Modal  End -->
+
+
+
+<!--  Edit Expense Modal Start -->      
+
+<div class="modal fade" id="popupEdit">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header">
+              <h5 class="modal-title" id="createTaskModal">Edit Expense</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body" id="expenseEditModalBody">
+                <div id="editExpenseSpinner">
+                    <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            
+      </div>
+  </div>
+</div>
+<!--  Edit Expense Modal End -->      
+
+
+<div id="createTourBillClaim" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createTaskModal">Create New Tour Bill Claim</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form  id="taskForm" class="needs-validation" novalidate >
+
+        <div class="form-group">  
+            <div class="row">
+              <div class="col-md-6">
+                <label for="validationTooltip01">Tour Bill Claim Name</label>
+                <input type="text" class="form-control" id="validationTooltip01" value="" placeholder="Task Name"  name="taskname" required>
+              </div>
+          </div>
+        </div>   
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" id="expenseSubmitbutton"  class="btn btn-primary">Save</button>
+          </div>
+
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Approval Comment Modal Start -->
+
+<div id="approvalCommentModal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Approval Comment</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label for="commentTextarea">Comment</label>
+          <textarea class="form-control" id="commentTextarea" rows="3" autocomplete="off"></textarea>
+        </div>
+        <div class="form-group">  
+          <div class="row">
+            <div class="col-md-6">
+              <input type="hidden" class="form-control"  value=""  id="expenseId" name="expenseId" required>
+            </div>
+        </div>
+
+      </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="submitForApproval" >Submit</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Tour Bill Claim Modal Start -->
+<div id="createTourBillClaimModal" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createTaskModal">Create New Tour Bill Claim</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form  id="tourBillClaimForm" class="needs-validation" novalidate >
+
+        <div class="form-group">  
+            <div class="row">
+              <div class="col-md-6">
+                <label for="validationTooltip01">Tour Bill Claim Name</label>
+                <input type="text" class="form-control" id="validationTooltip01" value="" placeholder="Tour Bill Claim Name"  name="tourBillClaimName" required>
+              </div>
+          </div>
+        </div> 
+        <div class="form-group">  
+            <div class="row">
+              <div class="col-md-6">
+                <input type="hidden" class="form-control" id="hiddenExpenseId"   name="parentExpenseId" required>
+              </div>
+          </div>
+        </div>   
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" id="tourBillClaimSubmitbutton"  class="btn btn-primary">Save</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Create Tour Bill Claim Modal End -->
+
+
+
+<!-- Approval Comment Modal End -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" >
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" ></script>
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+<script>
+      $(".collapse").on('show.bs.collapse', function () {
+          $(this).parent().find(".fa-angle-double-right").addClass("rotate");
+      }).on('hide.bs.collapse', function () {
+          $(this).parent().find(".fa-angle-double-right").removeClass("rotate");
+      });
+
+      
+      $(document).ready(function(){
+        $('#success').hide();
+        $('#spinner').hide();
+        $('#editExpenseSpinner').hide();
+        $('#expenseDetailsSpinner').hide();
+     //   $('#loaderSpin').hide();
+
+
+        let columns = {
+          sequence: 'Sr No.',
+          name: 'Expense Name',
+          projectName: 'Project Name',
+          approvalStatus: 'Reporting Manager Status',
+          totalAmount: 'Total Amount',
+          /* pettyCashAmount: 'Petty Cash Amount',
+          conveyanceVoucherAmount: 'Conveyance Voucher Amount' ,
+          tourBillAmount: 'Tour Bill Amount', */
+          createdDate : 'Created Date', 
+          editButton : 'Action',
+          approvalButton : 'Approval'
+        }
+
+
+        
+
+        var table = $('#rootExpenseTable').tableSortable({
+          data :[],
+          columns,
+          searchField: '#searchField',
+          sorting: true,
+          rowsPerPage: 5,
+          pagination:true,
+          tableWillMount: () => {
+              console.log('table will mount');
+            //  $('#loaderSpin').show();
+              let x = document.getElementsByClassName("gs-table-head");
+              console.log('x : '+x);
+              var elm = '<tr><td colspan="8"><center><div class="loaderSpin" ' +
+                        'style=""></div></center></td></tr>'+
+              $(elm).appendTo(x);
+              
+          },
+          tableDidMount: () => {
+              console.log('table did mount');
+            //  $('#loader').hide();
+             
+          },
+          tableWillUpdate: () => {
+        //    $('#loaderSpin').hide();
+            let x = document.getElementsByClassName("gs-table-head");
+              console.log('x : '+x);
+              var elm = '<tr><td colspan="8"><center><div class="loaderSpin" ' +
+                'style=""></div></center></td></tr>'+
+              $(elm).appendTo(x);
+              console.log('table will update')
+            //  table.refresh();
+            // onLoadTask();
+          },
+          tableDidUpdate: () => {
+            
+            console.log('table did update');
+            anchorClickFunctionalities();
+            //onLoadTask();
+          },
+          tableWillUnmount: () => console.log('table will unmount'),
+          tableDidUnmount: () => console.log('table did unmount'),
+          onPaginationChange: function(nextPage, setPage) {
+              setPage(nextPage);
+          },
+          
+      });
+
+      $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+      })
+
+      $('#refresh').click(function() {
+          table.refresh(true);
+          onLoadTask();
+      })
+        
+      onLoadTask();
+
+      function onLoadTask(){
+          // alert('Hello On Load Task');
+          $.ajax({
+              url : '/expense/expenseAllRecords',
+              type : 'get',
+              dataType: 'json',
+              beforeSend : function(){
+                  $('#spinner').show();
+              }
+          })
+          .done((allexpenserecords) => {
+              console.log('allexpenserecords :  '+JSON.stringify(allexpenserecords));
+              
+              document.getElementById('success').innerHTML = allexpenserecords.successs_msg;
+            //  $('#success').show();
+              let expenseTableHtml = '';
+              let expenseList = allexpenserecords.expenseList;
+              let data =expenseList;
+              
+              
+              table.setData(data, columns);
+              anchorClickFunctionalities();
+
+              /********** Edit Option ********/
+   
+          })
+          .fail((jqXHR, status, error) => {
+              console.log('jqXHR  '+JSON.stringify(jqXHR));
+              console.log('error '+error);
+          })
+
+        }// End of OnLoadTask Function     
+
+
+
+        $('#expenseIdpTag').hide();
+
+        $("a.pettyCashButton").click(() => {
+          console.log('Petty Cash Anchor Tag');
+          var expenseId = document.getElementById('expenseIdpTag').innerHTML;
+          console.log('Inside PettyCash Anchor Tag expenseId  '+expenseId);
+          location.assign('/expense/pettyCash/'+expenseId);
+        });
+
+
+        $("a.conveyanceVoucherButton").click(() => {
+          console.log('conveyanceVoucherButton Anchor Tag');
+          var expenseId = document.getElementById('expenseIdpTag').innerHTML;
+          console.log('Inside conveyanceVoucherButton Anchor Tag expenseId  '+expenseId);
+          location.assign('/expense/conveyanceVoucher/'+expenseId);
+        });
+
+       /*  $("a.tourBillClaim").click(() => {
+          console.log('tourBillClaimButton Anchor Tag');
+          var expenseId = document.getElementById('expenseIdpTag').innerHTML;
+          console.log('Inside conveyanceVoucherButton Anchor Tag expenseId  '+expenseId);
+          location.assign('/expense/tourBillClaim/'+expenseId);
+        });  */
+
+        $('#createNewExpenseButton').click(() =>{
+              $('#createExpenseModal').modal('show');
+        })
+
+
+
+      function anchorClickFunctionalities()
+      {    
+        $("a.expId").click(function(event){
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          
+          $('#expenseTable').empty();
+       //   alert('Hello PopUp');
+          var expenseId = $(this).attr('href');
+          console.log('expenseId   : '+expenseId);
+          $('#hiddenExpenseId').val(expenseId);   //Setting Hidden Field ExpenseId
+          document.getElementById('expenseIdpTag').innerHTML = expenseId;
+
+          $.ajax({
+              type : 'GET',
+              url  : '/expense/details',
+              data : {
+                  'expenseId' : expenseId
+              },
+              dataType : 'json',
+              beforeSend: function()
+              {
+                $('#expenseDetailsSpinner').show();
+              }
+          })
+          .done((expenseRelatedData) => {
+            
+              let expenseRecord = expenseRelatedData.Expense[0];
+              console.log('expenseList  '+JSON.stringify(expenseRecord));
+
+              let expenseTableRows = '';
+              expenseTableRows += '<tr>';
+              expenseTableRows += '<td><strong>Expense Name<strong></td>';
+              expenseTableRows += '<td>'+expenseRecord.name+'</td>';
+              expenseTableRows += '<td><strong>Project Name<strong></td>';
+              expenseTableRows += '<td>Project 6</td>';
+              expenseTableRows += '</tr>';   
+              
+              expenseTableRows += '<tr>';
+              expenseTableRows += '<td><strong>Department<strong></td>';
+              if(expenseRecord.department__c != null)
+                expenseTableRows += '<td>'+expenseRecord.department__c+'</td>';
+              else
+                expenseTableRows += '<td> </td>';
+              expenseTableRows += '<td><strong>Designation<strong></td>';
+              expenseTableRows += '<td>'+expenseRecord.designation__c+'</td>';
+              expenseTableRows += '</tr>';   
+
+              expenseTableRows += '<tr>';
+              expenseTableRows += '<td><strong>Employee ID<strong></td>';
+              expenseTableRows += '<td>'+expenseRecord.employee_id__c+'</td>';
+              expenseTableRows += '<td><strong>Employee Category / Band<strong></td>';
+              if(expenseRecord.conveyance_employee_category_band__c != null)
+                expenseTableRows += '<td>'+expenseRecord.conveyance_employee_category_band__c+'</td>';
+              else
+              expenseTableRows += '<td> </td>';
+              expenseTableRows += '</tr>';   
+
+              expenseTableRows += '<tr>';
+              expenseTableRows += '<td><strong>Reporting Manager Status<strong></td>';
+              if(expenseRecord.approval_status__c != null)
+                expenseTableRows += '<td>'+expenseRecord.approval_status__c+'</td>';
+              else 
+                expenseTableRows += '<td> </td>';
+              expenseTableRows += '<td><strong>Project Manager Status<strong></td>';
+              if(expenseRecord.project_manager_status__c != null)
+                expenseTableRows += '<td>'+expenseRecord.project_manager_status__c+'</td>';
+              else 
+                expenseTableRows += '<td> </td>';
+              expenseTableRows += '</tr>'; 
+
+
+              expenseTableRows += '<tr>';
+                expenseTableRows += '<td><strong>Accounts Status<strong></td>';
+                if(expenseRecord.accounts_status__c != null)
+                  expenseTableRows += '<td>'+expenseRecord.accounts_status__c+'</td>';
+                else 
+                  expenseTableRows += '<td> </td>';
+                expenseTableRows += '<td><strong><strong></td>';
+                expenseTableRows += '<td> </td>';
+                expenseTableRows += '</tr>'; 
+              
+            
+              expenseTableRows += '<tr>';
+              expenseTableRows += '<td colspan="4" style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Amount Information</h5></td>';    
+              expenseTableRows += '</tr>';
+
+              expenseTableRows += '<tr>';
+              expenseTableRows += '<td><strong>Amount Claimed<strong></td>';
+              expenseTableRows += '<td>'+expenseRecord.amount_claimed__c+'</td>';
+              expenseTableRows += '<td><strong>Petty Cash Amount<strong></td>';
+              expenseTableRows += '<td>'+expenseRecord.petty_cash_amount__c+'</td>';
+              expenseTableRows += '</tr>'; 
+
+              expenseTableRows += '<tr>';
+              expenseTableRows += '<td><strong>Conveyance Amount<strong></td>';
+              expenseTableRows += '<td>'+expenseRecord.conveyance_amount__c+'</td>';
+              expenseTableRows += '<td><strong>Tour Bill Claim Amount<strong></td>';
+              expenseTableRows += '<td>'+expenseRecord.tour_bill_claim__c+'</td>';
+              expenseTableRows += '</tr>';   
+
+              //$('#expenseTable').append(expenseTableRows);
+              $('#expenseDetailsSpinner').hide();
+              $('#expenseTable').empty();
+              $('#expenseTable').html(expenseTableRows);
+
+
+              
+              let pettyCashList = expenseRelatedData.PettyCash;
+              console.log('pettyCashList  '+JSON.stringify(pettyCashList));
+              let lengthOfPettyCashList = pettyCashList.length < 3 ? pettyCashList.length : 3;
+              console.log('lengthOfPettyCashList : '+lengthOfPettyCashList);
+              let pettyCashTableRows = '<thead><tr>';
+              pettyCashTableRows += '<th>Name</th>';
+              pettyCashTableRows += '<th>Total Amount</th>';
+              pettyCashTableRows += '<th>Nature Of Expense</th>';
+              pettyCashTableRows += '<th>Created Date</th>';
+              pettyCashTableRows += '</tr></thead>';
+
+              for(let i= 0 ; i < lengthOfPettyCashList ; i++)
+              {
+                var strDate = pettyCashList[i].bill_date__c.toString().split('T')[0];
+                pettyCashTableRows += '<tr>';
+                pettyCashTableRows += '<td>'+pettyCashList[i].name+'</td>';
+                pettyCashTableRows += '<td>'+pettyCashList[i].amount__c+'</td>';
+              //  pettyCashTableRows += '<td>'+pettyCashList[i].activity_code__c+'</td>';
+                pettyCashTableRows += '<td>'+pettyCashList[i].nature_of_exp__c+'</td>';
+                pettyCashTableRows += '<td>'+strDate+'</td>';
+                pettyCashTableRows += '</tr>';
+              }
+              pettyCashTableRows += '<tr><td colspan="4"><center><a target="_blank" href="/expense/pettycashlistview?expenseId='+expenseId+'" >View All</a></center></td></tr>';
+              $('#pettyCashTable').empty();
+              $('#pettyCashTable').html(pettyCashTableRows);
+            
+
+              let conveyanceVoucherList =  expenseRelatedData.Conveyance;
+              console.log('conveyanceVoucherList  '+JSON.stringify(conveyanceVoucherList));
+              let conveyanceVoucherListLength = conveyanceVoucherList.length < 3 ? conveyanceVoucherList.length : 3;
+
+              let conveyanceVoucherTableRows = '';
+
+              for(let i=0 ;i < conveyanceVoucherListLength ; i++)
+              {
+                var strDate = conveyanceVoucherList[i].from__c.toString().split('T')[0];
+                if(i== 0)
+                {
+                  conveyanceVoucherTableRows += '<thead><tr>';
+                  conveyanceVoucherTableRows += '<th>Conveyance Voucher ID</th>';
+                  conveyanceVoucherTableRows += '<th>Amount</th>';
+                  conveyanceVoucherTableRows += '<th>Mode Of Conveyance</th>';
+                  conveyanceVoucherTableRows += '<th>From</th>';
+                  conveyanceVoucherTableRows += '</tr></thead><tbody>';
+                }
+                conveyanceVoucherTableRows += '<tr>';
+                conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].name+'</td>';
+                conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].amount__c+'</td>';
+                conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].mode_of_conveyance__c+'</td>';
+                conveyanceVoucherTableRows += '<td>'+strDate+'</td>';
+                conveyanceVoucherTableRows += '</tr>';
+              }
+              conveyanceVoucherTableRows += '<tr><td colspan="4"><center><a target="_blank" href="/expense/ConveyanceListView?expenseId='+expenseId+'" >View All</a></center></td></tr></tbody>';
+              $('#conveyanceVoucherTable').empty();
+              $('#conveyanceVoucherTable').html(conveyanceVoucherTableRows);
+              
+              
+              let tourBillClaimList = expenseRelatedData.TourBillClaim;
+              let tourBillClaimListLength = tourBillClaimList.length < 3 ? tourBillClaimList.length : 3;
+              console.log('tourBillClaimList  '+JSON.stringify(tourBillClaimList));
+
+              let tourBillClaimTableRows = '';
+          
+              for(let i=0 ; i < tourBillClaimListLength ; i++)
+              {
+                if(i == 0 )
+                {
+                    tourBillClaimTableRows += '<thead><tr>';
+                    tourBillClaimTableRows += '<th>Tour Bill Claim Name</th>';
+                    tourBillClaimTableRows += '<th>Grand Total</th>';
+                    tourBillClaimTableRows += '</tr></thead><tbody>';
+                }
+                tourBillClaimTableRows += '<tr>';
+                tourBillClaimTableRows += '<td>'+tourBillClaimList[i].name+'</td>';
+                tourBillClaimTableRows += '<td>'+tourBillClaimList[i].grand__c+'</td>';
+                tourBillClaimTableRows += '</tr>';
+              }
+              tourBillClaimTableRows += '<tr><td colspan="4"><center><a target="_blank" href="/expense/tourBillClaim/tourBillClaimListview?expenseId='+expenseId+'" >View All</a></center></td></tr></tbody>';
+              $('#tourBillClaimTable').empty();
+              $('#tourBillClaimTable').html(tourBillClaimTableRows);
+              
+          })
+          .fail((jqXHR, textStatus, err) => {
+              console.log('AJAX error response :',textStatus);
+          })
+
+
+          $("#popup").modal("show");
+              return false;
+        });
+
+
+        $(".expIdApproval").on('click', function(event){
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          let selectedExpenseId = this.id;
+          document.getElementById('expenseId').setAttribute('value',selectedExpenseId);
+          $("#approvalCommentModal").modal('show');
+        });
+
+
+        $('#submitForApproval').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let comment  = document.getElementById('commentTextarea').value;
+            let expenseID = document.getElementById('expenseId').value;
+          //  alert('comment' +comment+' expenseID : '+expenseID);
+
+            document.getElementById('edit'+expenseID).disabled=true;
+            let expenseName = document.getElementById('name'+expenseID).text;
+            let totalAmount = document.getElementById('amount'+expenseID).innerHTML;
+            console.log('expenseName  : '+expenseName+' totalAmount : '+totalAmount);
+  
+  
+            $.post("/expense/sendForApproval", {selectedExpenseId : expenseID, expenseName: expenseName, totalAmount :totalAmount, comment: comment}, 
+                function(returnedData){
+                    console.log(returnedData);
+                    onLoadTask();
+                    $("#approvalCommentModal").modal('hide');
+            }).fail(function(){
+                  console.log("error");
+                  $("#approvalCommentModal").modal('hide');
+            });
+
+            
+        });
+        
+        /***********************************  Edit Functionality *********************/
+        $(".expIdEditMode").on('click', function(event){
+            
+          event.stopImmediatePropagation();
+          event.stopPropagation();
+            let strExpenseId = $(this).attr('id');
+           // alert('strExpenseId  '+strExpenseId);
+            let expenseId = strExpenseId.substring(4,23);
+           // alert('expenseId '+expenseId);
+            
+            $.ajax({
+                url : '/expense/saved-expense-details',
+                data: {
+                  expenseId : expenseId
+                },
+                dataType : 'json',
+                beforeSend : function()
+                {
+                  $('#editExpenseSpinner').show();
+                }
+            })
+            .done((response) => {
+                  console.log('response  : '+JSON.stringify(response));
+                  let expenseDetails = response.expenseDetails;
+                  let objUser = response.objUser;
+                  let projectList = response.projectList;
+                  let projectOptionsHtml = '';
+                  if(projectList.length > 0)
+                  {
+                    projectList.forEach((eachProject) =>
+                    {
+                      if(eachProject.sfid == expenseDetails.project_name__c)
+                          projectOptionsHtml += '<option selected value="'+eachProject.sfid+'">'+eachProject.name+'</option>';
+                      else
+                          projectOptionsHtml += '<option value="'+eachProject.sfid+'">'+eachProject.name+'</option>'; 
+                    })
+                  }
+
+                  $('#popupEdit').modal('show');
+                let expenseEdithtml = '<form  id="taskFormEdit" class="needs-validation" novalidate >'+
+                    '<div class="form-group">'+  
+                      '<div class="row">'+
+                        '<div class="col-md-6">'+
+                          '<label for="validationTooltip01">Expense Name</label>'+
+                          '<input type="text" class="form-control" id="validationTooltip01" value="'+expenseDetails.name+'" placeholder="Task Name"  name="taskname" required>'+
+                        '</div>'+
+                        
+                        '<div class="col-md-6">'+
+                        '<label for="validationTooltip03">Project Name</label>'+
+                          '<select class="custom-select custom-select-sm form-control" name="projectname">'+
+                            projectOptionsHtml+
+                          '</select>'+
+                        '</div>'+
+                      '</div>'+
+                    '</div>'+            
+                  
+                  '<div class="form-group">'+
+                      '<div class="row">'+
+                        '<div class="col-md-6">'+
+                          '<label for="validationTooltip03">Department</label>'+
+                          '<input type="text" class="form-control" id="validationTooltip03" value="'+expenseDetails.department__c+'" placeholder="Deaprtment"  name="department" >'+
+                        '</div>'+
+                        '<div class="col-md-6">'+
+                          '<label for="validationTooltip04">Designation</label>'+
+                          '<input type="text" class="form-control" id="validationTooltip04" value="'+expenseDetails.designation__c+'" placeholder="Designation"  name="designation" >'+
+                        '</div>'+
+                      '</div>'+
+                    '</div>'+
+                    
+                    '<div class="form-group">'+
+                      '<div class="row">'+
+                        '<div class="col-md-6">'+
+                            '<label for="validationTooltip08">Incurred By</label>'+
+                            '<select class="custom-select custom-select-sm form-control" name="incurredBy">'+
+                                '<option selected value="'+objUser.sfid+'" >'+objUser.name+'</option>'+
+                            '</select>'+
+                          
+                        '</div>'+
+        
+                        '<div class="col-md-6">'+
+                          '<label for="validationTooltip06">Employee Category / Band</label>'+
+                          '<input type="text" class="form-control" id="validationTooltip06" value="'+expenseDetails.conveyance_employee_category_band__c+'" placeholder="Employee Category / Band"  name="empCategory" >'+
+                        '</div>'+
+                      '</div>'+
+                    '</div>'+
+                    
+                    '<div class="form-group">'+
+                      '<div class="row">'+
+                        '<div class="col-md-6">'+
+                          '<label for="validationTooltip07">Approval Status</label>'+
+                          '<select disabled="true" class="custom-select custom-select-sm form-control" name="approvalStatus" id="validationTooltip07">'+
+                                '<option value="'+expenseDetails.approval_status__c+'" selected>'+expenseDetails.approval_status__c+'</option>'+
+                            '</select>'+
+                        '</div>'+
+                        
+                        '<div class="col-md-6">'+
+                          
+                        '</div>'+
+                      '</div>'+  
+                  '</div>'+
+                  '<input type="hidden"  value="'+expenseDetails.sfid+'"  name="expenseId">' +
+                  '<div class="modal-footer">'+
+                      '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'+
+                      '<button type="submit" id="expenseEditSubmitbutton"  class="btn btn-primary">Save</button>'+
+                  '</div>'+
+                  '</form>';
+                    
+
+                  $('#editExpenseSpinner').hide();
+                  $('#expenseEditModalBody').empty();
+                  $('#expenseEditModalBody').append(expenseEdithtml); 
+  
+              })
+              .fail((jqXHR, status, error) => {
+                    console.log('Error  : '+JSON.stringify(jqXHR));
+                    $('#editExpenseSpinner').hide();
+              })
+
+          });
+
+
+          $('#expenseEditSubmitbutton').click(function(){
+
+              $('#taskFormEdit').submit(function(e){
+               // alert('Form Going to Submit');
+                e.preventDefault();
+                var values = $(this).serialize();
+                console.log('Expense Updated Form Values : '+values);
+                $.ajax({
+                  url :'/expense/update-expense',
+                  type: 'post',
+                  data : values,
+                  dataType: 'json',
+                  
+                })
+                .done((response) => {
+                    console.log('Expense Creation Response : '+JSON.stringify(response));    
+                })
+                .fail((xhr, status, error)=> {
+                    console.log('xhr.responseText : '+xhr.responseText);
+                    if(xhr.responseText == 'Success')
+                    {
+
+                        alert('Updated Successfully !');
+                        onLoadTask();
+                    }
+                    else if(xhr.responseText == 'Error')
+                    {
+                        alert('There occurred an error while creating expense !');
+                    }
+                    })
+                })
+            });
+
+            /***** Creating Tour Bill Claim ****/
+
+            $("a.tourBillClaim").click(function(){
+
+              $('#createTourBillClaimModal').modal('show');
+
+              $('#tourBillClaimSubmitbutton').on('click',function(event){
+                event.stopImmediatePropagation();
+                event.stopPropagation();
+
+                  $('#tourBillClaimForm').submit(function(e){
+                      e.preventDefault();
+                      e.stopImmediatePropagation();
+                      e.stopPropagation();
+                      var values = $(this).serialize();
+                      console.log('tour Bill Claim values  '+values);
+                      
+      
+                      $.ajax({
+                        url: '/expense/tourBillClaim/saveTourBillClaim',
+                        type: 'post',
+                        data:  values,
+                        dataType : 'json'
+                      })
+                      .done((response) => {
+                          console.log('response  '+response);
+                      })
+                      .fail((jqXHR,text,err) => {
+                            console.log('jqXHR   '+JSON.stringify(jqXHR));
+                            if(jqXHR.responseText == 'Success')
+                            {
+                              alert('Saved Successfully !');
+                              $('#createTourBillClaimModal').modal('hide');
+                            }
+                            else
+                            {
+                              alert('There occured error while saving !');
+                            }
+                            console.log('text  '+text+' err :'+err);
+                      })
+                    })
+              })
+
+          })  
+
+
+
+      }
+
+
+  });
+</script>
+
+
+
+<script>
+      $(document).ready(function(){
+
+
+          $('#taskForm').submit(function(e){
+              e.preventDefault();
+            //  alert('Going to create expnse');
+              var values = $(this).serialize();
+              console.log('Expense Form Values : '+values);
+              $.ajax({
+                url :'/expense/createExpense',
+                type: 'post',
+                data : values,
+                dataType:'json'
+              })
+              .done((response) => {
+                  console.log('Expense Creation Response : '+JSON.stringify(response));
+                  
+                  
+              })
+              .fail((xhr, status, error)=> {
+                  // alert('There occurred an error while creating expense !');
+                  console.log('xhr.responseText : '+xhr.responseText);
+                  if(xhr.responseText == 'Success')
+                  {
+                      alert('Expense Created Successfully !');
+                      $('#createExpenseModal').modal('hide');
+                  }
+                  else if(xhr.responseText == 'Error')
+                  {
+                      alert('There occurred an error while creating expense !');
+                  }
+              })
+          })
+
+
+      /* Clearing the fields when a modal is closed */
+        $('[data-dismiss=modal]').on('click', function (e) {
+            var $t = $(this),
+                target = $t[0].href || $t.data("target") || $t.parents('.modal') || [];
+                $(target)
+                  .find("input,textarea,select")
+                    .val('')
+                    .end()
+                  .find("input[type=checkbox], input[type=radio]")
+                    .prop("checked", "")
+                    .end();
+        })
+
+        $('.modal').on('hidden.bs.modal', function (e) {
+          $(this)
+            .find("input,textarea,select")
+               .val('')
+               .end()
+            .find("input[type=checkbox], input[type=radio]")
+               .prop("checked", "")
+               .end();
+        })
+
+      });
+</script>
+
+

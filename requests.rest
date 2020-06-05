@@ -1,0 +1,17 @@
+GET http://localhost:9000/users/getuser
+
+###
+
+GET http://localhost:9000/users/getuser
+
+
+
+###
+GET http://localhost:9000/calendar/timesheet
+
+
+###
+GET http://localhost:9000/calendar/getevents
+
+###
+GET http://localhost:9000/calendar/getdata

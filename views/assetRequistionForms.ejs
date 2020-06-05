@@ -1,0 +1,568 @@
+<% include ./partials/navbar %>
+
+  <style>
+    .project-tab {
+        padding: 10%;
+        margin-top: -8%;
+    }
+    .project-tab #tabs{
+        background: #007b5e;
+        color: #eee;
+    }
+    .project-tab #tabs h6.section-title{
+        color: #eee;
+    }
+    .project-tab #tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        color: #0062cc;
+        background-color: transparent;
+        border-color: transparent transparent #f3f3f3;
+        border-bottom: 3px solid !important;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .project-tab .nav-link {
+        border: 1px solid transparent;
+        border-top-left-radius: .25rem;
+        border-top-right-radius: .25rem;
+        color: #0062cc;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .project-tab .nav-link:hover {
+        border: none;
+    }
+    .project-tab thead{
+        background: #f3f3f3;
+        color: #333;
+    }
+    .project-tab a{
+        text-decoration: none;
+        color: #333;
+        font-weight: 600;
+    }
+            .accordion {
+                max-height: 500px;
+                overflow-y: auto;
+            }
+    
+            section {
+                padding: 60px 0;
+            }
+    
+            #accordion-style-1 h1,
+            #accordion-style-1 a {
+                color: #007b5e;
+            }
+    
+            #accordion-style-1 .btn-link {
+                font-weight: 400;
+                color: #007b5e;
+                background-color: transparent;
+                text-decoration: none !important;
+                font-size: 16px;
+                font-weight: bold;
+                padding-left: 25px;
+            }
+    
+            #accordion-style-1 .card-body {
+                border-top: 2px solid #007b5e;
+            }
+    
+            #accordion-style-1 .card-header .btn.collapsed .fa.main {
+                display: none;
+            }
+    
+            #accordion-style-1 .card-header .btn .fa.main {
+                background: #007b5e;
+                padding: 13px 11px;
+                color: #ffffff;
+                width: 35px;
+                height: 41px;
+                position: absolute;
+                left: -1px;
+                top: 10px;
+                border-top-right-radius: 7px;
+                border-bottom-right-radius: 7px;
+                display: block;
+            }
+    
+            .rotate {
+                -webkit-transform: rotate(90deg);
+                /* Chrome, Safari, Opera */
+                -moz-transform: rotate(90deg);
+                /* Firefox */
+                -ms-transform: rotate(90deg);
+                /* IE 9 */
+                transform: rotate(90deg);
+                /* Standard syntax */
+            }
+    
+            ul.liststyle {
+                padding: 0;
+                list-style: none;
+            }
+    
+            ul.liststyle li {
+                padding: 5px;
+            }
+            #pettyCashModal{right: 0; margin: auto;}
+            /*@media (min-width: 850px) {
+                .modal-xl {
+                    width: 90%;
+                    max-width:950px;
+                }
+            }*/
+    
+
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+  <script>
+    $(document).ready(function(){
+        $('assetId').hide();
+
+        $("a.assetId").click(function(){
+            $('assetId').hide();
+            var assetId = $(this).attr('href');
+            console.log('assetId   : '+assetId);
+            document.getElementById('assetId').innerHTML = assetId;
+
+            $("#popup").modal("show");
+
+            $.ajax({
+                type : 'GET',
+                url  : '/procurement/details',
+                data : {
+                    'assetId' : assetId
+                },
+                dataType : 'json'
+            })
+            .done((assetDetails) =>{
+                    console.log('assetDetails   : '+JSON.stringify(assetDetails));
+
+                    if(assetDetails.assetFormDetails.length > 0)
+                    {
+                        console.log('Inside Asset Details'); 
+                        let assetDetailsTableRows = '';      
+                        assetDetails.assetFormDetails.forEach((assetDetailsRecord) => {
+                                    console.log('Inside Loop');
+                                    
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Item Metrics</h5></td>';    
+                                    assetDetailsTableRows += '</tr>';
+    
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td><strong>Number Of IT Product<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.number_of_it_product__c+'</td>';
+                                    assetDetailsTableRows += '<td><strong>Number of Non IT Product<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.number_of_non_it_product__c+'</td>';
+                                    assetDetailsTableRows += '</tr>';   
+                                    
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Amount Information</h5></td>';    
+                                    assetDetailsTableRows += '</tr>';
+                
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td><strong>Procurement-IT total amount<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_it_total_amount__c+'</td>';
+                                    assetDetailsTableRows += '<td><strong>Procurement-Non IT total amount<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_non_it_total_amount__c+'</td>';
+                                    assetDetailsTableRows += '</tr>';   
+                    
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td><strong>Total Amount<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.total_amount__c+'</td>';
+                                    assetDetailsTableRows += '<td><strong><strong></td>';
+                                    assetDetailsTableRows += '<td></td>';
+                                    assetDetailsTableRows += '</tr>';   
+                        })
+                        $('#assetDetails').html(assetDetailsTableRows);
+                    }
+
+
+                    if(assetDetails.nonItProducts.length > 0)
+                    {
+                        let nonItProductTable = '';
+                        assetDetails.nonItProducts.forEach((eachNonIt) => {
+                            nonItProductTable += '<td>'+eachNonIt.name +'</td>';
+                            nonItProductTable += '<td>'+eachNonIt.items__c +'</td>';
+                            nonItProductTable += '<td>'+eachNonIt.quantity__c +'</td>';
+                            nonItProductTable += '<td>'+eachNonIt.budget__c +'</td>';  
+
+                        })
+                        $('#procuremnetNonItTable').append(nonItProductTable);
+                    }
+
+
+                    if(assetDetails.itProducts.length > 0)
+                    {
+                        let itProductTable = '';
+                        assetDetails.itProducts.forEach((eachIt)=> {
+                            itProductTable += '<td>'+eachIt.name +'</td>';
+                            itProductTable += '<td>'+eachIt.items__c +'</td>';
+                            itProductTable += '<td>'+eachIt.quantity__c +'</td>';
+                            itProductTable += '<td>'+eachIt.budget__c +'</td>';      
+
+                        })
+                        $('#procuremnetItTable').append(itProductTable);   
+                    }
+            })
+            .fail((jqXHR, textStatus, err) =>{
+                console.log('textStatus  : '+textStatus);
+            })
+            
+        });
+
+        $.ajax({
+            url: '/procurement/getProjectList',
+            type:'get',
+            dataType : 'json'
+        })
+        .done((response) => {
+            console.log('response  '+JSON.stringify(response));
+            if(response.length > 0)
+            {
+                response.forEach((eachRpoject) => {
+                    console.log('eachRpoject.name  '+eachRpoject.name);
+                    $('#projectName')
+                    .append($("<option></option>")
+                    .attr("value",eachRpoject.sfid)
+                    .text(eachRpoject.name))
+                });   
+            }
+            
+        })
+        .fail((jqXHR, status, err)=> {
+                console.log('jqXHR  '+JSON.stringify(jqXHR));
+                console.log('error  '+err);
+        })
+
+
+
+        $('#createAssetRequisitionFormButton').click(function() {
+            $('#createAssetRequisitionForm').modal('show');
+        })
+
+        
+
+    });
+  </script>
+
+
+  <br/>
+
+  <p id="assetId"></p>
+
+  <form class="container-fluid bg-gray">
+    <div class="form-row mb-4 col-10 mx-auto">
+            <div class="col form-inline" >
+                
+            </div>
+            <div class="col form-inline" >
+                
+              </div>
+              <div class="col form-inline" >
+                
+                </div>
+            <div class="col">
+                <button class="btn btn-primary btn-block bg-gray" type="button" id="createAssetRequisitionFormButton">Create New</button>
+            </div>
+    </div>
+   </form>
+
+   <div id="createAssetRequisitionForm" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createTaskModal">Create New Asset Requisition Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form  id="tourBillClaimForm" class="needs-validation" novalidate >
+
+          <div class="form-group">  
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="assetRequisitionName">Asset Requisition Name</label>
+                  <input type="text" class="form-control" id="assetRequisitionName" placeholder="Asset Requisition Name"  name="assetRequisitionName" required>
+                </div>
+
+                <div class="col-md-6">
+                        <label for="validationTooltip01">Project/Department</label>
+                        <select id="projectName" class="form-control projectName" name="projectName">
+        
+                       </select>
+                  </div>
+            </div>
+          </div> 
+
+          <div class="form-group">  
+            <div class="row">
+              <div class="col-md-6">
+                    <label for="actualDate">Requested Closure Actual Date</label>
+                    <input type="date" class="form-control" id="actualDate"  name="actualDate" >
+              </div>
+
+              <div class="col-md-6">
+                    <label for="planDate">Requested Closure Plan Date</label>
+                    <input type="date" class="form-control" id="planDate" >
+                </div>
+          </div>
+        </div> 
+
+        <div class="form-group">  
+            <div class="row">
+              <div class="col-md-6">
+                    <label for="submittedBy">Submitted By</label>
+                    <select id="submittedBy" name="submittedBy" class="form-control">
+  
+                    </select>
+              </div>
+
+              <div class="col-md-6">
+                    <label for="gst">GST</label>
+                    <input type="text" class="form-control" id="gst"   name="gst" required>
+                </div>
+          </div>
+        </div> 
+
+
+        <div class="form-group">  
+              <div class="row">
+                <div class="col-md-6">
+                        <label for="validationTooltip01">Approval Status</label>
+                        <select class="form-control" name="approvalStatus" id="approvalStatus" readonly="true" >
+
+
+                        </select>
+                </div>
+
+                
+            </div>
+          </div> 
+
+
+          <div class="form-group">  
+            <div class="row">
+                    <div class="col-md-6" style="margin-left:22px;">
+                        <input type="checkbox"  class="form-check-input" id="spocApproval"  name="spocApproval" required>
+                        <label for="spocApproval">Is SPOC Approved</label>
+                    </div>
+              
+              <div class="col-md-6" style="margin:22px;">
+                    <input type="checkbox" class="form-check-input" id="availableInStock" name="availableInStock"  required>
+                    <label for="availableInStock">Available In Stock</label>
+              </div>
+
+              
+          </div>
+        </div> 
+            
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" id="tourBillClaimSubmitbutton"  class="btn btn-primary">Save</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Table Containing rows -->
+  <div class="col-10 mx-auto table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Asset Requisition Name</th>
+                <th>Project Name </th>
+                <th>Approval Status</th>
+                <th>Number of IT Product</th>
+                <th>Number of Non IT Product</th>
+                <th>IT Amount</th>
+                <th>Non IT Amount</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if(assetList.length > 0) { %>
+            <% assetList.forEach(function(eachAsset) { %>
+                <tr>
+                        <td><a href="<%= eachAsset.sfid %>" data-toggle="modal" data-target="#popup" class="assetId" id="" ><%= eachAsset.name %></a></td>
+                       <td>Project 6</td>
+                        <td><%= eachAsset.approval_status__c %></td>
+                        <td><%= eachAsset.number_of_it_product__c %></td>
+                        <td><%= eachAsset.number_of_non_it_product__c %></td>
+                        <td><%= eachAsset.procurement_it_total_amount__c %></td>
+                        <td><%= eachAsset.procurement_non_it_total_amount__c %></td>
+                        <td><%= eachAsset.total_amount__c %></td>
+                       
+                </tr>
+            <% }) %>
+            <% }%>
+           
+        </tbody>
+    </table>
+
+
+    <div id="assetRequisitionForm" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createTaskModal">Crate Asset  Requisition</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form  id="assetForm" class="needs-validation" novalidate >
+    
+              <!-- Need to create asset form  -->
+    
+              </form>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      
+
+
+
+<div class="modal fade" id="popup">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Asset Requistion Form </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <nav>
+                            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Details</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Related</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                <!-- Particular Asset Details -->
+                                <table id="assetDetails" class="table table-hover striped">
+                                    <!-- Inside code is handled by Jquery to add dyanamic Content -->
+                                </table>
+                                <!-- Particular Asset Details-->
+                            </div>
+							
+                            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                <div class="accordion" id="accordionExample">
+								
+                                    <div class="card">
+                                        <div class="card-header" id="headingOne">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link text-left" type="pettyCashButton"
+                                                data-toggle="collapse" data-target="#collapseOne"
+                                                aria-expanded="true" aria-controls="collapseOne">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Procuremnet Non IT
+                                            </button>
+                                             <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+                                            <a href="#" class="btn btn-primary float-right procurementNonIT" id="pettyCashButton" style="color:white;" >New</a>
+                                        </h5>
+                                        </div>
+
+                                        <div id="collapseOne" class="collapse show fade" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <table id="procuremnetNonItTable" class="table table-hover striped">
+                                                    <thead>
+                                                        <th>Procuremnet_Non-IT ID</th>
+                                                        <th>Items</th>
+                                                        <th>Quantity</th>
+                                                        <th>Budget</th>
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+									
+                                    <div class="card">
+                                        <div class="card-header" id="headingTwo">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link collapsed text-left" type="button"
+                                                data-toggle="collapse" data-target="#collapseTwo"
+                                                aria-expanded="false" aria-controls="collapseTwo">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Procuremnet IT
+                                            </button>
+                                            <!-- <button class="btn btn-primary float-right">New</button> -->
+                                            <a href="#" class="btn btn-primary float-right procurementIT" style="color:white;">New</a>
+                                        </h5>
+                                        </div>
+                                        <div id="collapseTwo" class="collapse fade" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <table id="procuremnetItTable" class="table table-hover striped">
+                                                    <thead>
+                                                        <th>Procuremnet_-IT ID</th>
+                                                        <th>Items</th>
+                                                        <th>Quantity</th>
+                                                        <th>Budget</th>
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(() => {
+
+        $('assetId').hide();
+
+        $('a.procurementNonIT').click(() => {
+            console.log('procurementNonIT anchor tag ');
+            var assetId = document.getElementById('assetId').innerHTML;
+            console.log('assetId  : '+assetId);
+            location.assign('/procurement/nonItProducts/'+assetId);
+        });
+
+        $('a.procurementIT').click(() => {
+            console.log('procurementIT anchor tag ');
+            var assetId = document.getElementById('assetId').innerHTML;
+            console.log('assetId  : '+assetId);
+            location.assign('/procurement/itProducts/'+assetId);
+
+        });
+
+
+
+    });
+
+</script>
+

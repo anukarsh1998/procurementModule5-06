@@ -1,0 +1,479 @@
+<% include ../../partials/navbar %>
+<% include ../../partials/messages %>
+<% include ../../partials/footer %>
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+<p1 id="tourbillId"><%= tourbillId %></p1>
+
+<div class="container">
+    <center><h3>AirBussListView Detail</h3></center>
+    <div class="row mt-5 mb-3 align-items-center">
+        <div class="col-md-5">
+            <a href="/expense/tourBillClaim/airRailBusCharges/<%= tourbillId %>" class="btn btn-primary  airRailBusCharges" id="airRailBusCharges" style="color:white;" >New</a>
+           <!--  <button class="btn btn-primary btn-md bg-gray"  id="createNewPettyCashButton">Create New Air/Rail/Bus</button>
+            <button class="btn btn-primary btn-md" id="refresh">Refresh</button> -->
+        </div>
+        <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+        </div>
+        <div class="col-md-2 text-right">
+        <span class="pr-3">Rows Per Page:</span>
+        </div>
+        <div class="col-md-2">
+            <div class="d-flex justify-content-end">
+                <select class="custom-select" name="rowsPerPage" id="changeRows">
+                    <option value="1">1</option>
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+        </div>
+ </div>
+
+ <div id="AirRailBusTable" class="responsive ">
+
+ </div>
+
+</div>
+
+
+
+
+
+<div id="airBusRail" class="modal fade">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">AirRailBus View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+  
+          <div id="detailLoadingSpinner">
+            <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+        </div>
+        <table id="airBusRailTable" class="table">
+
+        </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <div id="AirRailBusTable" class="modal modal-md fade ">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Air Rail Bus Form View</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div id="editModalBody" class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+   <!-- airBusRail Edit Modal  Start -->
+
+   <div id="airBusRailEditModal" class="modal fade ">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Air Rail Bus Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body" id="editModalBody" >
+            <form name="editAirBusForm" id="editAirBusForm" >
+             <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                      <label for="airBusName">Name</label>
+                      <input type="text" disabled class="form-control" id="airBusName" value=""   name="airBusName" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <label for="tourName">TourBill Name</label>
+                      <select id="tourName" class="custom-select custom-select-sm form-control" name="tourName">
+                        
+                      </select>
+                    </div>
+                </div>
+              </div>
+              
+
+              <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label for="departureStation">Departure Station</label>
+                      <input type="text" class="form-control" id="departureStation" value=""   name="departureStation" >
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <label for="departureDate">Departure Date</label>
+                      <input type="date" class="form-control" id="departureDate" value=""   name="departureDate" >
+                    </div>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label for="arrivalStation">Arrival Station</label>
+                      <input type="text" class="form-control" id="arrivalStation" value=""   name="arrivalStation" >
+                    </div>
+                    <div class="col-md-6">
+                      <label for="arrivalDate"></label>Arrival Date</label>
+                      <input type="date" class="form-control" id="arrivalDate" value=""   name="arrivalDate" >
+                      </div>
+                    
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label for="amount">Amount</label>
+                      <input type="number" class="form-control" id="amount" value=""   name="amount" >
+                      </div>
+                      <div class="col-md-6">
+                        <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                        </div>
+                  </div>     
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary" id="editAirBusButton" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+       
+  </div>
+</div>
+
+
+
+<!-- Petty Cash Edit Modal  End -->
+
+
+
+
+
+
+<script>
+    $(document).ready(function(){
+        $('#tourbillId').hide();
+       
+
+        let tourbillId=document.getElementById('tourbillId').innerHTML;
+      //  alert(tourbillId);
+        let columns ={
+            sequence : 'Sequence',
+            name: 'Air/Bus/Train Tour Name ',
+            arrival : 'Arrival Station',
+            departure:'Departure Station',
+            amount : 'Amount',
+            createDdate : 'Created Date',
+            editAction:'Action',
+        }
+
+        
+      var table = $('#AirRailBusTable').tableSortable({
+        data :[],
+        columns,
+        searchField: '#searchField',
+        sorting: true,
+        rowsPerPage: 5,
+        pagination:true,
+        tableWillMount: () => {
+            console.log('table will mount')
+            
+        },
+        tableDidMount: () => {
+            console.log('table did mount');
+
+            $('#spinner').hide();
+        },
+        tableWillUpdate: () => {
+            console.log('table will update')
+        },
+        tableDidUpdate: () => {
+        console.log('table did update');
+       addtionalFunctionalities();
+        
+        },
+        tableWillUnmount: () => console.log('table will unmount'),
+        tableDidUnmount: () => console.log('table did unmount'),
+        onPaginationChange: function(nextPage, setPage) {
+            setPage(nextPage);
+        },
+         
+    });
+
+    onLoadTask();
+    $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+    })
+
+    $('#refresh').click(function() {
+            table.refresh(true);
+            onLoadTask();
+    })
+
+    function onLoadTask()
+    {        
+        $.ajax({
+            url:'/expense/tourBillClaim/getAirbusDetalList',
+            type:'get',
+            dataType:'json',
+            data:{tourbillId:tourbillId}
+        })
+        .done((response)=>{
+            console.log('response : '+JSON.stringify(response));
+            table.setData(response, columns);
+            anchorClickFunctionalities();
+            addtionalFunctionalities();
+
+        })
+        .fail((jqXHR,status,error)=>{
+            console.log('jqXHR: '+jqXHR);
+            console.log('error: '+JSON.stringify(jqXHR));
+
+        })
+      }
+    })
+// View AirBusRail Detail on Modal
+    function anchorClickFunctionalities()
+        {
+                $('a.airRailBusTag').on('click',function(event){
+                        event.stopImmediatePropagation();
+                        event.stopPropagation();
+                        $('#airBusRail').modal('show');
+                        let tourbillId = this.id;
+                        alert('tourbillId  '+tourbillId);
+                        $('#airBusRail').modal('show');
+                        $.ajax({
+                            url : '/expense/tourBillClaim/getAirRailBus',
+                            type:'get',
+                            data : {
+                                tourbillId : tourbillId
+                            },
+                            dataType: 'json',
+                            beforeSend : function(){
+                              $('#detailLoadingSpinner').show();
+                            }
+                        })
+                        .done((response) => {
+                            console.log('AirBusRailDetail  : '+JSON.stringify(response));
+                            $('#detailLoadingSpinner').hide();
+                            if(response.length > 0)
+                            {
+                              let airRailBusRecord = response[0];
+                              let htmlTable = '';
+                              let depDate = new Date(airRailBusRecord.departure_date__c);
+                              depDate.setHours(depDate.getHours() + 5);
+                              depDate.setMinutes(depDate.getMinutes() + 30);
+                              let arriDate = new Date(airRailBusRecord.arrival_date__c);
+                              arriDate.setHours(arriDate.getHours() + 5);
+                              arriDate.setMinutes(arriDate.getMinutes() + 30);
+                              let createdDate = new Date(airRailBusRecord.createddate);
+                              createdDate.setHours(createdDate.getHours() + 5);
+                              createdDate.setMinutes(createdDate.getMinutes() + 30);
+
+
+                              let strDepartureDate = depDate.toLocaleString();
+                              let strArrivalDate = arriDate.toLocaleString();
+                              let strCreatedDate = createdDate.toLocaleString();
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Name</strong></td>';
+                                  htmlTable += '<td>'+airRailBusRecord.airbusrailname+'</td>';
+                                  htmlTable += '<td><strong>TourBill Name</strong></td>';
+                                  htmlTable += '<td>'+airRailBusRecord.tourbillname+'</td>';
+                              htmlTable += '</tr>';
+                               
+                              htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Departure Stationr</strong></td>';
+                              htmlTable += '<td>'+airRailBusRecord.departure_station__c+'</td>';
+                              htmlTable += '<td><strong>Departure Date</strong></td>';
+                              htmlTable += '<td>'+strDepartureDate+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Arrival Station</strong></td>';
+                                  htmlTable += '<td>'+airRailBusRecord.arrival_station__c+'</td>';
+                                  htmlTable += '<td><strong>Arrival Date</strong></td>';
+                                  htmlTable += '<td>'+strArrivalDate+'</td>';
+                              htmlTable += '</tr>';
+
+                              htmlTable += '<tr>';  
+                              htmlTable += '<td><strong>Activity Code</strong></td>';
+                              if(airRailBusRecord.activity_code__c != null)
+                                  htmlTable += '<td>'+airRailBusRecord.activity_code__c+'</td>';
+                                  else
+                                  htmlTable += '<td></td>';
+                               
+                              htmlTable += '<td><strong>Project Task</strong></td>';
+                              if(airRailBusRecord.project_tasks__c != null)
+                                  htmlTable += '<td>'+airRailBusRecord.project_tasks__c+'</td>';
+                                  else
+                                  htmlTable += '<td></td>';
+                              htmlTable += '</tr>';
+
+                              htmlTable += '<tr>';
+                                  
+                                htmlTable += '<td><strong>Amount</strong></td>';
+                                htmlTable += '<td>'+airRailBusRecord.amount__c+'</td>';
+                                  htmlTable += '<td><strong>Created Date</strong></td>';
+                                  htmlTable += '<td>'+strCreatedDate+'</td>';
+                              htmlTable += '</tr>';
+
+                              htmlTable += '<tr>';
+                                  
+                              htmlTable += '<td><strong>View Image</strong></td>';
+                              console.log('airRailBusRecord.heroku_image_url__c) '+airRailBusRecord.heroku_image_url__c);
+                              if(airRailBusRecord.heroku_image_url__c != null && airRailBusRecord.heroku_image_url__c != '' && airRailBusRecord.heroku_image_url__c != 'demo')
+                                  htmlTable += '<td><a target="_blank" href="'+airRailBusRecord.heroku_image_url__c+'" >Click Here</a></td>';
+                              else
+                                  htmlTable += '<td></td>';
+                              
+                                  htmlTable += '<td><strong></strong></td>';
+                                  htmlTable += '<td></td>';
+                              htmlTable += '</tr>';
+
+
+                              $('#airBusRailTable').empty();
+                              $('#airBusRailTable').html(htmlTable);
+                            }
+                           
+                        })
+                        .fail((jqXHR, status, error) =>{
+                          $('#detailLoadingSpinner').hide();
+                          console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                          console.log('error  : '+error);
+                        })
+                
+
+
+
+                        
+                });
+
+
+
+        }
+
+        function formatDate(date) {
+          var d = new Date(date),
+              month = '' + (d.getMonth() + 1),
+              day = '' + d.getDate(),
+              year = d.getFullYear();
+      
+          if (month.length < 2) 
+              month = '0' + month;
+          if (day.length < 2) 
+              day = '0' + day;
+      
+          return [year, month ,day].join('-');
+      }
+
+
+
+    function addtionalFunctionalities()
+    {
+        $('.editAirRailBus').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let tourbillId = this.id;
+            alert('airRailBusId +'+tourbillId);
+            $('#airBusRailEditModal').modal('show'); 
+            $('#airBusRailEditModal').modal('show');
+                        $.ajax({
+                            url : '/expense/tourBillClaim/getAirRailBus',
+                            type:'get',
+                            data : {
+                              tourbillId : tourbillId
+                            },
+                            dataType: 'json',
+                            beforeSend : function(){
+                              $('#detailLoadingSpinner').show();
+                            }
+                        })  
+                        .done((response)=>{
+                          console.log('airBusDEtail  : '+JSON.stringify(response));
+                          let airBusRailRecord = response[0];
+                      //    console.log('airBusRailRecord '+airBusRailRecord.departure_date__c);
+                         let strdeparture = formatDate(new Date(airBusRailRecord.departure_date__c));
+                          let strarrival = formatDate(new Date(airBusRailRecord.arrival_date__c));
+                          console.log('strdeparture '+strdeparture);
+                          document.forms["editAirBusForm"]["airBusName"].value = airBusRailRecord.airbusrailname;
+                          document.forms["editAirBusForm"]["tourName"].value = airBusRailRecord.tourbillname;
+                          document.forms["editAirBusForm"]["departureStation"].value = airBusRailRecord.departure_station__c;
+                          document.forms["editAirBusForm"]["departureDate"].value = strdeparture;
+                          document.forms["editAirBusForm"]["arrivalStation"].value = airBusRailRecord.arrival_station__c;
+                          document.forms["editAirBusForm"]["arrivalDate"].value = strarrival;
+                          document.forms["editAirBusForm"]["amount"].value = airBusRailRecord.amount__c;
+                          
+                          document.forms["editAirBusForm"]["hide"].value = airBusRailRecord.sfid;
+                          let option1 = new Option(airBusRailRecord.tourbillname,airBusRailRecord.tourid,true, true);
+                          console.log('Option1'+option1);
+                          document.forms["editAirBusForm"]["tourName"].appendChild(option1);
+
+                        })
+                        .fail((jqXHR, status, error) => {
+                          console.log('jqXHR   '+JSON.stringify(jqXHR));
+                          console.log('error  '+error);
+                      })
+    
+        })
+        $('#editAirBusButton').on('click',function(event){
+
+          event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    alert('Save Button Clicked !');
+                    var $inputs = $('#editAirBusForm :input');
+
+                    // not sure if you wanted this, but I thought I'd add it.
+                    // get an associative array of just the values.
+                    var values = {};
+                    $inputs.each(function() {
+                        values[this.name] = $(this).val();
+                    });
+                    
+                    alert('formValues : '+JSON.stringify(values));
+
+                    $.ajax({
+                        url : '/expense/tourBillClaim/updateAirRailBus',
+                        type:'post',
+                        data: values,
+                        dataType : 'json'
+                    })
+                    .done((response) => {
+                          console.log('resonse   :'+response);
+                    })
+                    .fail((jqXHR, status, error) => {
+                          console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    })
+
+        })
+    }
+    
+</script>
+

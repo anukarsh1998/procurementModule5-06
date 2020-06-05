@@ -1,0 +1,577 @@
+
+
+   
+    
+    <% include ../partials/navbar %> 
+   
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css" type="text/css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+               
+                <div id="bootstrapModalFullCalendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fullCalModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                    <h4 id="modalTitle" class="modal-title"></h4>
+                </div>
+                <div id="modalBody" class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <a class="btn btn-primary" id="eventUrl" target="_blank">Event Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+      .fc-day-grid-event .fc-content {
+        white-space: nowrap;
+        overflow: hidden;
+        cursor: pointer;
+        color: white;
+      }
+    
+    </style>
+
+
+   
+   
+    
+
+    <script>
+        $(document).ready(function() {
+
+            var today = new Date();
+            var eventsData ;  
+            $.ajax({ 
+                type: 'GET',
+                url: '/users/getevents',
+                data : {
+                    'date': today
+                },
+                dataType: 'json'
+            })
+            .done(function( data ) {
+                console.log( "Sample of data:", data );
+                eventsData = data;
+                console.log('JSON.Stringied Data of events : '+JSON.stringify(eventsData));
+                $('#bootstrapModalFullCalendar').fullCalendar( 'removeEvents');
+                $('#bootstrapModalFullCalendar').fullCalendar( 'addEventSource', eventsData);         
+                $('#bootstrapModalFullCalendar').fullCalendar( 'rerenderEvents' );
+            })
+            .fail(function(jqXHR, textStatus, err){
+                console.log('AJAX error response :',textStatus);
+            }) 
+
+
+
+            /*updating values on next click */
+            $('body').on('click', 'button.fc-next-button', function() {
+                var b = $('#bootstrapModalFullCalendar').fullCalendar('getDate');
+            //  alert(b.format('L'));
+                var date = b.format('L');
+                console.log('date '+date);
+            
+                $.ajax({ 
+                    type: 'GET',
+                    url: '/users/getevents',
+                    data : {
+                        'date': date
+                    },
+                    dataType: 'json'
+                })
+                .done(function( data ) {
+                    console.log( "Sample of data:", data );
+                //  eventsData = data;
+                    $('#bootstrapModalFullCalendar').fullCalendar( 'removeEvents');
+                    $('#bootstrapModalFullCalendar').fullCalendar( 'addEventSource', data);         
+                    $('#bootstrapModalFullCalendar').fullCalendar( 'rerenderEvents' );
+                })
+                .fail(function(jqXHR, textStatus, err){
+                    console.log('AJAX error response :',textStatus);
+                })     
+            });
+
+
+            /*updating values on prev click */
+            $('body').on('click', 'button.fc-prev-button', function() {
+                var b = $('#bootstrapModalFullCalendar').fullCalendar('getDate');
+            //  alert(b.format('L'));
+                var date = b.format('L');
+                console.log('date '+date);
+            
+                $.ajax({ 
+                    type: 'GET',
+                    url: '/users/getevents',
+                    data : {
+                        'date': date
+                    },
+                    dataType: 'json'
+                })
+                .done(function( data ) {
+                    console.log( "Sample of data:", data );
+                //  eventsData = data;
+                    $('#bootstrapModalFullCalendar').fullCalendar( 'removeEvents');
+                    $('#bootstrapModalFullCalendar').fullCalendar( 'addEventSource', data,{textColor : 'white'});         
+                    $('#bootstrapModalFullCalendar').fullCalendar( 'rerenderEvents' );
+                })
+                .fail(function(jqXHR, textStatus, err){
+                    console.log('AJAX error response :',textStatus);
+                })     
+            });
+
+            /*Task Form post method */
+            $('#taskForm').submit(function(e){
+                e.preventDefault();
+                var values = $(this).serialize();
+                console.log('values   '+values);
+                $.ajax({
+                        url: "/timesheets/createtask",
+                        type: "post",
+                        data: values ,
+                        success: function (res) {
+                                alert('Task Saved Successfully');
+                                $("#createTaskModal").modal("hide");
+                                console.log(res)
+                        },
+                        error: function(xhr, status, error) {
+                                console.log(xhr.responseText);
+                        }
+                    });
+             })
+
+
+            /*Timesheet Form post method */
+            $('#fillActualsForm').submit(function(e){
+            e.preventDefault();
+            var values = $(this).serialize();
+            console.log('values   '+values);
+            $.ajax({
+                    url: "/timesheets/fillactuals",
+                    type: "post",
+                    data: values ,
+                    success: function (res) {
+                            alert('Timesheet saved successfully !');
+                            $("#fillActualsModal").modal("hide");
+                            console.log(res)
+                    },
+                    error: function(xhr, status, error) {
+                            console.log(xhr.responseText);
+                    }
+                });
+            })
+
+            $('#bootstrapModalFullCalendar').fullCalendar({
+                header: {
+                    left: '',
+                    center: 'title',
+                    right: 'prev next'
+                },
+                eventClick:  function(event, jsEvent, view) {
+                    $('#modalTitle').html(event.title);
+                    $('#modalBody').html(event.description);
+                    $('#eventUrl').attr('href',event.url);
+                    $('#fullCalModal').modal();
+                    return false;
+                },
+                displayEventTime : false,
+                allDay : true,
+                firstDay: 1,
+                textColor :'white',
+               // nextDayThreshold: '00:00:00',
+               eventClick: function(calEvent, jsEvent, view) {
+                    var dt = calEvent.start.format('YYYY-MM-DD');
+                    //alert(dt);
+                    var dateParts = dt.split('-');
+                    var selectedDate = dateParts[1]  + '/' + dateParts[2] + '/' + dateParts[0];
+                //   alert(selectedDate); console.log('selectedDate   '+selectedDate);
+                    let seletedDate = new Date(selectedDate);
+                    console.log('seletedDate   '+seletedDate);
+                    let currentDate = new Date();
+                    console.log('currentDate  :  '+currentDate);
+                
+                    if(calEvent.title == 'Create Task')
+                    {
+                        console.log('calEvent.start '+calEvent.start);
+                        $('.datepic').val(selectedDate);
+                    
+                        if(seletedDate.getTime() < currentDate.getTime())
+                        {
+                            $('#plannedstarttimeTask').prop("disabled",true);
+                            $('#plannedendtimeTask').prop("disabled",true);
+                        }
+                        else
+                        {
+                            $('#plannedstarttimeTask').prop("disabled",false);
+                            $('#plannedendtimeTask').prop("disabled",false);
+                        }
+
+                        $("#createTaskModal").modal("show");
+                    }
+                    else if(calEvent.title == 'Fill Actuals')
+                    {
+                      
+                       
+                    
+                        if(seletedDate.getTime() > currentDate.getTime())
+                        {
+                              alert('You cannot fill timesheet ahead of the current date !');
+                        }
+                        else
+                        {
+                                $('#dateIncurred').val(selectedDate);
+                                $("#fillActualsModal").modal("show");
+
+                                $('#projectName').change(() => {            
+                                var selectedProject = $("#projectName option:selected").val();
+                                alert("You have selected the project : " + selectedProject );
+                                if(selectedProject != 'None')
+                                {
+                                    $.ajax({ 
+                                    type: 'GET',
+                                    url: '/calendar/getrelatedtasks',
+                                    data : {
+                                            'projectId' : selectedProject,
+                                            'selectedDate' : selectedDate
+                                    },
+                                    dataType: 'json'
+                                    })
+                                    .done(function( taskData ) {
+                                        console.log( "Sample of data:", JSON.stringify(taskData));
+
+                                        if(taskData != null && taskData.length > 0)
+                                        {
+                                            var taskOptions = '';
+                                            taskData.forEach((eachTask) => {
+                                                taskOptions += '<option value="'+eachTask.sfid+'">'+eachTask.name+'</option>';
+                                            })
+                                            $('#selectedTask').append(taskOptions);
+                                            //$('#selectedTask').html(taskOptions);
+                                        }
+                                            
+                                    })
+                                    .fail(function(jqXHR, textStatus, err){
+                                        console.log('AJAX error response :',textStatus);
+                                        
+                                    })
+                                }
+                                else
+                                {
+                                    $("#selectedTask option[value !='None']").remove();  
+                                }
+                              
+                            });
+                        }
+                    }
+                    else if(calEvent.title == 'Details')
+                    {
+                        $.ajax({ 
+                            type: 'GET',
+                            url: '/timesheets/getdetails',
+                            data : {
+                                'date': selectedDate
+                            },
+                            dataType: 'json'
+                        })
+                        .done(function( taskData ) {
+                            console.log( "Sample of data:", JSON.stringify(taskData));
+                            
+                            var tasktableData = '';
+                            tasktableData  += '<thead>';
+                            tasktableData  += '<tr>';
+                            tasktableData  += ' <th>Task Name</th>';
+                            tasktableData  += '<th>Planned Hours</th>';
+                            tasktableData  += '<th>Actual Hours</th>';
+                            tasktableData  += '<th>Date</th>';
+                            tasktableData  += ' <th>Project Name</th>';
+                            tasktableData  += ' <th>Assigned To</th>';
+                            tasktableData  += '</tr>';
+                            tasktableData  += '</thead>';    
+                                                           
+                            taskData.forEach((eachTaskCol) => {
+                                console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
+                                var strDate = eachTaskCol.date.toString().split('T')[0];
+                                tasktableData += '<tr>';
+                                tasktableData  += '<td>'+eachTaskCol.name+'</td>';
+                                tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
+                                tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
+                                tasktableData  += '<td>'+strDate+'</td>';
+                                tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
+                                tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
+                                tasktableData += '</tr>';
+                            });
+                           
+                           // $('#taskDetails').append(tasktableData);
+                            $('#taskDetails').html(tasktableData);
+                            $("#detailsModal").modal("show");
+                        })
+                        .fail(function(jqXHR, textStatus, err){
+                            console.log('AJAX error response :',textStatus);
+                            $("#detailsModal").modal("show");
+                        })     
+                       
+                    }
+                } 
+            });
+
+            var colorStyle = document.getElementsByClassName('fc-title');
+
+            for (var i=0; i<colorStyle.length; i++) {
+                colorStyle[i].style.color = 'white';
+            }
+
+        });
+    </script>
+
+
+
+
+ <!-- Create Task Modal -->
+ <div id="createTaskModal" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createTaskModal">Create Task</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form  id="taskForm" class="needs-validation" novalidate >
+
+            <div class="form-group">  
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip01">Task Description</label>
+                  <input type="text" class="form-control" id="validationTooltip01" placeholder="Task Name"  name="taskname" required>
+                </div>
+               
+                <div class="col-md-6">
+                  <label for="validationTooltip02">Task Type</label>
+                  <select class="custom-select custom-select-sm form-control" name="tasktype">
+                      <option selected>A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                      <option value="D">D</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group"> 
+              <div class="row">
+              <div class="col-md-6">
+                <label for="validationTooltip03">Project</label>
+                <select class="custom-select custom-select-sm form-control" name="projectname">
+                  <% if(projectList.length != 0) { %>
+                   <% projectList.forEach((eachProject) => { %>
+                   <option value="<%= eachProject.sfid %>" ><%= eachProject.name %></option>
+                   <% }) %>
+                  <% } %>
+               </select>
+              </div>
+              <div class="col-md-6">
+                <label for="validationTooltip04">Task Date</label>
+                <input type="text" class="form-control datepic"   id="datePicker" required readonly name="taskdate">
+                
+              </div>
+            </div>
+            </div>
+            
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip02">Assigned Resource</label>
+                  <select class="custom-select custom-select-sm form-control" name="assignedresource">
+                      <% if(contactList.length != 0) { %>
+                       <% contactList.forEach((eachContact) => { %>
+                       <option value="<%= eachContact.sfid %>" ><%= eachContact.name %></option>
+                       <% }) %>
+                      <% } %>
+                   </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="validationTooltipUsername">Status</label>
+                    <select class="custom-select custom-select-sm form-control" name="status" >
+                         <option selected>None</option>
+                         <option value="Started">Started</option>
+                         <option value="On Hold">On Hold</option>
+                         <option value="Completed">Completed</option>
+                    </select>
+                </div>
+              </div>  
+            </div>
+            
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip02">Planned Start Time</label>
+                  <input type="time" class="form-control" id="plannedstarttimeTask" name="plannedstarttime"  required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="validationTooltip02">Planned End Time</label>
+                  <input type="time" class="form-control" id="plannedendtimeTask" name="plannedendtime"  required>
+                </div>
+              </div>  
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" id="submitbutton" class="btn btn-primary">Save</button>
+            </div>
+
+          </form>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Fill Actuals  Modal -->
+  <div id="fillActualsModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fillActualsModal">Fill Actuals</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="fillActualsForm" >
+            <div class="form-group">  
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip01">Project Name</label>
+                  <select class="custom-select custom-select-sm form-control" name="projectName" id="projectName">
+                        <option selected>None</option>
+                        <% if(projectList.length != 0) { %>
+                            <% projectList.forEach((eachProject) => { %>
+                            <option value="<%= eachProject.sfid %>" ><%= eachProject.name %></option>
+                            <% }) %>
+                        <% } %>
+                 </select>
+                </div>
+               
+                <div class="col-md-6">
+                <label for="validationTooltip04">Date Incurred</label>
+                <input type="text" class="form-control datepic" class="dateIncurred" id="dateIncurred" readonly name="dateIncurred" required>
+                 
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group"> 
+              <div class="row">
+              <div class="col-md-6">
+                <label for="selectedTask">Task</label>
+                <select class="custom-select custom-select-sm form-control" name="selectedTask" id="selectedTask" > 
+                        <option value="None" selected>None</option>
+               </select>
+              </div>
+              <div class="col-md-6">
+                <label for="validationTooltipUsername">Status</label>
+                 <select class="custom-select custom-select-sm form-control" name="statusTimesheet">
+                      <option selected>None</option>
+                      <option value="Started">Started</option>
+                      <option value="On Hold">On Hold</option>
+                      <option value="Completed">Completed</option>
+                 </select>
+                
+              </div>
+            </div>
+            </div>
+
+
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltip02">Actual Start Time</label>
+                  <input type="time" class="form-control" id="validationTooltip02" placeholder="Last name" value="Otto" name="plannedStartTimeTimesheet" required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="validationTooltip02">Actual End Time</label>
+                  <input type="time" class="form-control" id="validationTooltip02" placeholder="Last name" value="Otto" name="plannedEndTimeTimesheet" required>
+                </div>
+              </div>  
+            </div>
+            
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6">
+                      <label for="validationTooltip02">Description</label>
+                      <textarea rows="5" class="form-control" id="validationTooltip02" name="descriptionTimesheet" value=" " required >
+                      </textarea>
+                </div>
+
+                <div class="col-md-6">
+                    <label >Representative</label>
+                    <select class="custom-select custom-select-sm form-control" name="representative">
+                        <% if(contactList.length != 0) { %>
+                         <% contactList.forEach((eachContact) => { %>
+                         <option value="<%= eachContact.sfid %>" ><%= eachContact.name %></option>
+                         <% }) %>
+                        <% } %>
+                     </select>
+                </div>
+
+               
+              </div>  
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+
+          </form>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Details  Modal -->
+  <div id="detailsModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailsModal">Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table id="taskDetails" class="table table-hover striped table-responsive" >
+            <thead>
+                
+            </thead>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

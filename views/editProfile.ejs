@@ -1,0 +1,109 @@
+<% include ./partials/navbar %>
+
+<p id='userDetails'><%=userdetail.sfid %></p>
+
+<div class="row mt-5">
+  <div class="col-md-6 m-auto">
+    <div class="card card-body">
+
+        <% include ./partials/messages %>
+        <div id="errorMessages"></div>
+      
+        <form name="editprofile" id="editprofile"  >
+            <div class="form-group">
+                  <div class="col-md-6">
+                      <label for="nam">Name</label>
+                      <input type="text" disabled class="form-control" id="nam" value= '<%=userdetail.name %>' name="nam" required="true">
+                  </div>
+              <div class="col-md-6">
+                <label for="phn">Email</label>
+                <input type="text" disabled class="form-control" id="phn" value='<%=userdetail.email %>'  name="phn" >
+              </div>
+              <div class="col-md-6">
+                <label for="postal">PostalCode</label>
+                <input type="number"  class="form-control" id="postal" value='<%=userdetail.postal_code__c %>' name="postal"  >
+              </div>
+              <div class="col-md-6">
+                <label for="add">Full Address</label>
+                <input type="text"  class="form-control" id="add" value='<%=userdetail.address__c %>'  name="add" >
+              </div>
+              <div class="col-md-6">
+                <input type="hidden"  class="form-control" id="uid" value='<%=userdetail.sfid %>'  name="uid" >
+              </div>
+            </div>
+          <div><button type="submit" class="btn btn-primary" id="saveProf" >Save</button></div>
+        </form>
+
+
+
+      </div>
+    </div>
+ </div>
+
+
+
+<script>
+    $(document).ready(function(){
+        $('#userDetails').hide();
+        let contactId = document.getElementById('userDetails').innerHTML;
+        alert('Profile ID '+contactId);
+        $('#saveProf').on('click',function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();    
+            var $inputs = $('#editprofile :input');
+            var values={};
+            $inputs.each(function() {
+                values[this.name] = $(this).val();
+            })
+            console.log('FormValues '+JSON.stringify(values));
+            $.ajax({
+                url : '/users/updateProfile',
+                type:'post',
+                data: values,
+                dataType : 'json'
+            })
+            .done((response)=>{
+                console.log('Profile Updated Succesfuly');
+                let successText = 'Profile Updated Succesfuly';
+                let errorHtml = '';
+                errorHtml += '<div class="alert alert-success alert-dismissible fade show" role="alert">'+
+                    successText+
+                  '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+                    '<span aria-hidden="true">&times;</span>'+
+                  '</button>'+
+                '</div>';
+                $('#errorMessages').empty();
+                $('#errorMessages').append(errorHtml);
+
+               // alert('Error in Server Side '+JSON.stringify(response));
+            })
+            .fail((jqXHR, status, error) => {
+                console.log('jqXHR  '+JSON.stringify(jqXHR));
+
+              let errList = ['abc','xyz', 'pqr'];
+
+              let errorHtml = '';
+              errList.forEach((eachError) => {
+                errorHtml += '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+
+                    eachError+
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+                      '<span aria-hidden="true">&times;</span>'+
+                    '</button>'+
+                  '</div>';
+              })
+
+
+                
+                errorHtml += '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+
+                  jqXHR.responseText+
+                  '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+                    '<span aria-hidden="true">&times;</span>'+
+                  '</button>'+
+                '</div>';
+                $('#errorMessages').empty();
+                $('#errorMessages').append(errorHtml);
+          }) 
+      })
+})
+</script>

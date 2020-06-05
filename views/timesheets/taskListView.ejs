@@ -1,0 +1,356 @@
+<% include ../partials/navbar %>
+<% include ../partials/footer %>
+<% include ../partials/messages %>
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+
+
+<h1>Timesheet Task ListView</h1>
+<div class="container">
+<div class="row mt-5 mb-3 align-items-center">
+    <div class="col-md-5">
+        <button class="btn btn-primary btn-md" id="refresh">Refresh</button>
+    </div>
+    <div class="col-md-3">
+    <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+    </div>
+    <div class="col-md-2 text-right">
+    <span class="pr-3">Rows Per Page:</span>
+    </div>
+    <div class="col-md-2">
+        <div class="d-flex justify-content-end">
+            <select class="custom-select" name="rowsPerPage" id="changeRows">
+                <option value="1">1</option>
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="tasklListTable" class="responsive " class="row mt-5 mb-3 align-items-center">
+
+</div>
+
+</div>
+
+
+  <div id="taskViewModal" class="modal fade">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Task View Detail</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+  
+          <div id="detailLoadingSpinner">
+            <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+        </div>
+        <table id="taskViewTable" class="table">
+
+        </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+<div id="taskEditModal" class="modal fade ">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Task Edit Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body" id="editModalBody" >
+            <form name="editTaskForm" id="editTaskForm" >
+             <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                      <label for="tskName">Name</label>
+                      <input type="text" disabled class="form-control" id="tskName" value=""   name="tskName" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <label for="assigneTo">Assigneed Resuroce</label>
+                    <input type="text" disabled class="form-control" id="assigneTo" value=""   name="assigneTo" required>
+                   </option>
+                      </select>
+                    </div>
+                </div>
+              </div>
+              
+
+              <div class="form-group">
+                <div class="row">            
+                  <div class="col-md-6">
+                    <label for="start">Start Time</label>
+                      <input type="text" class="form-control" id="start" value=""   name="start" >
+                    </div>
+
+                  <div class="col-md-6">
+                      <label for="endTime">EndTime</label>
+                      <input type="text" class="form-control" id="endTime" value=""   name="endTime" >
+                      </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">            
+                      <div class="col-md-6">
+                        <label for="taskType">Task Type</label><br>
+                        <select name="taskType" id="taskType" style="height: 45px;width:214px;">
+                          <option value="">Choose Task Type</option>
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                          <option value="C">C</option>
+                          <option value="D">D</option>
+                        </select>
+                      </div>
+  
+                      <div class="col-md-6">
+                          <label for="hrs">Planned Hours</label>
+                          <input type="number" disabled class="form-control" id="hrs" value=""   name="hrs" >
+                          </div>
+                    </div>
+              </div>
+              <div class="form-group">
+                <div class="row">            
+                    <div class="col-md-6">
+                       <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                      </div>
+            </div>
+            
+              
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary" id="editTaskButton" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+       
+  </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function() { 
+
+       
+        let columns ={
+            sequence : 'Sequence',
+            name: 'Task ',
+             assigned:'Assigned Resource',
+             hrs:'Plan Hours',
+            startTime:'Start Time',
+            endtime:'End Time',
+            taskType:'Task Type',
+            createDdate : 'Created Date',
+            editAction:'Action',
+
+        }
+        
+      var table = $('#tasklListTable').tableSortable({
+        data :[],
+        columns,
+        searchField: '#searchField',
+        sorting: true,
+        rowsPerPage: 5,
+        pagination:true,
+        tableWillMount: () => {
+            console.log('table will mount')
+            
+        },
+        tableDidMount: () => {
+            console.log('table did mount');
+
+            $('#spinner').hide();
+        },
+        tableWillUpdate: () => {
+            console.log('table will update')
+        //  table.refresh();
+        // onLoadTask();
+        },
+        tableDidUpdate: () => {
+        console.log('table did update');
+   //      anchorClickFunctionalities();
+        
+        },
+        tableWillUnmount: () => console.log('table will unmount'),
+        tableDidUnmount: () => console.log('table did unmount'),
+        onPaginationChange: function(nextPage, setPage) {
+            setPage(nextPage);
+        },
+         
+    });
+
+    
+    $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+        })
+
+        $('#refresh').click(function() {
+            table.refresh(true);
+            onLoadTask();
+        })
+
+
+        $.ajax({
+            url:'/timesheets/getTasklist',
+            type:"get",
+            datatype:'json'
+        })
+        .done((response)=>{
+            console.log('response response response response '+JSON.stringify(response));
+            table.setData(response, columns);
+            anchorClickFunctionalities();
+            anotherEditFunctionality();
+
+         })
+         .fail((jqXHR,status,error)=>{
+             console.log('jqXHR: '+jqXHR);
+             console.log('error: '+JSON.stringify(jqXHR));
+
+         })
+    })
+
+    function anchorClickFunctionalities(){
+      $('a.taskreferenceTag').on('click',function(event){
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        $('#taskViewModal').modal('show');
+        let taskId =this.id;
+        $('#detailLoadingSpinner').show();
+        alert('taskId'+taskId);
+        $.ajax({
+          url : '/timesheets/fetchTaskDetail',
+          type:'get',
+          data : {
+              taskId : taskId
+          },
+          dataType: 'json',
+        })
+        
+        .done((res)=>{
+          $('#detailLoadingSpinner').hide();
+          console.log("jhdgjhd"+JSON.stringify(res));
+          if(res.length>0)
+          {
+            let taskRecord = res[0];
+            let htmlTable = '';
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Name</strong></td>';
+                                  htmlTable += '<td>'+taskRecord.name+'</td>';
+                                  htmlTable += '<td><strong>Assigned Resource</strong></td>';
+                                  htmlTable += '<td>'+taskRecord.sfid+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Plans Hour</strong></td>';
+                                htmlTable += '<td>'+taskRecord.planned_hours__c+'</td>';
+                                htmlTable += '<td><strong> Task Type</strong></td>';
+                                htmlTable += '<td>'+taskRecord.task_type__c+'</td>';
+                            htmlTable += '</tr>';
+                            htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Start Time</strong></td>';
+                              htmlTable += '<td>'+taskRecord.start_time__c+'</td>';
+                              htmlTable += '<td><strong> End Time</strong></td>';
+                              htmlTable += '<td>'+taskRecord.end_time__c+'</td>';
+                          htmlTable += '</tr>';
+                              $('#taskViewTable').empty();
+                              $('#taskViewTable').html(htmlTable);
+          }
+        })
+      })
+    }
+
+
+    
+    function anotherEditFunctionality()
+    {
+        $('.editTask').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let taskId = this.id;
+            alert('taskId ' +taskId);
+            $('#taskEditModal').modal('show');
+                        $.ajax({
+                            url : '/timesheets/fetchTaskDetail',
+                            type:'get',
+                            data : {
+                                taskId : taskId
+                            },
+                            dataType: 'json',
+                         //   beforeSend : function(){
+                          //    $('#detailLoadingSpinner').show();
+                       //     }
+                        })  
+                        .done((response)=>{
+                            alert(JSON.stringify(response));
+                          console.log('taskDetail  : '+JSON.stringify(response));
+                          let taskDetail = response[0];
+                          document.forms["editTaskForm"]["tskName"].value = taskDetail.name;
+                         document.forms["editTaskForm"]["assigneTo"].value = taskDetail.assigned_manager__c;
+                          document.forms["editTaskForm"]["start"].value = taskDetail.start_time__c;
+                          document.forms["editTaskForm"]["endTime"].value = taskDetail.end_time__c;
+                          document.forms["editTaskForm"]["hrs"].value = taskDetail.planned_hours__c;
+                          document.forms["editTaskForm"]["taskType"].value = taskDetail.task_type__c;
+                           //  document.forms["editTaskForm"]["dt"].value = strdeparture;
+                             document.forms["editTaskForm"]["hide"].value = taskDetail.sfid;
+                           })
+                        .fail((jqXHR, status, error) => {
+                          console.log('jqXHR   '+JSON.stringify(jqXHR));
+                          console.log('error  '+error);
+                      })
+    
+        })
+        $('#editTaskButton').on('click',function(event){
+
+          event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    alert('Save Button Clicked !');
+                    var $inputs = $('#editTaskForm :input');
+
+                    // not sure if you wanted this, but I thought I'd add it.
+                    // get an associative array of just the values.
+                    var values = {};
+                    $inputs.each(function() {
+                        values[this.name] = $(this).val();
+                    });
+                    
+                    alert('formValues : '+JSON.stringify(values));
+
+                    $.ajax({
+                        url : '/timesheets/updateTask',
+                        type:'post',
+                        data: values,
+                        dataType : 'json'
+                    })
+                    .done((response) => {
+                          console.log('response   :'+response);
+                    })
+                    .fail((jqXHR, status, error) => {
+                          console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    })
+
+        })
+    }
+</script>

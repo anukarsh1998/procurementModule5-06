@@ -1,0 +1,398 @@
+
+<% include ../../partials/navbar %>
+<% include ../../partials/messages %>
+<% include ../../partials/footer %>
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+
+<center><h3>Telephone/Food Charge Detail List</h3></center>
+<p1 id='tourbillId'><%=tourbillId%></p1>
+<div class="container">
+    <div class="row mt-5 mb-3 align-items-center">
+        <div class="col-md-5">
+            <a href="/expense/tourBillClaim/telephoneFood/<%= tourbillId %>" class="btn btn-primary"  style="color:white;" >New</a>
+            <!-- <button class="btn btn-primary btn-md bg-gray"  id="AirBustour">New Telephone Food Charge</button>
+            <button class="btn btn-primary btn-md" id="refresh">Refresh</button> -->
+        </div>
+        <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+        </div>
+        <div class="col-md-2 text-right">
+        <span class="pr-3">Rows Per Page:</span>
+        </div>
+        <div class="col-md-2">
+            <div class="d-flex justify-content-end">
+                <select class="custom-select" name="rowsPerPage" id="changeRows">
+                    <option value="1">1</option>
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div id="telephoneFoodCharge" class="responsive " class="row mt-5 mb-3 align-items-center">
+    
+    </div>
+    
+    </div>
+    
+
+    <div id="foodChargeModal" class="modal fade">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Telephone &amp; Food View</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+      
+              <div id="detailLoadingSpinner">
+                <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+            </div>
+            <table id="foodChargeTable" class="table">
+    
+            </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+      
+   <!-- Fooding Charge Edit Modal  Start -->
+
+   <div id="FoodingEditModal" class="modal fade ">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">FoodingTelephone  Charge Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body" id="editModalBody" >
+            <form name="editFoodingForm" id="editFoodingForm" >
+             <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                      <label for="foodingName">Name</label>
+                      <input type="text" disabled class="form-control" id="foodingName" value=""   name="foodingName" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <label for="tourName">TourBill Name</label>
+                      <select id="tourName" class="custom-select custom-select-sm form-control" name="tourName">
+                        
+                      </select>
+                    </div>
+                </div>
+              </div>
+              
+
+              <div class="form-group">
+                  <div class="row">            
+                    <div class="col-md-6">
+                        <label for="laundry">Laundry Expense</label>
+                          <input type="text" class="form-control" id="laundry" value=""   name="laundry" >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="foodExp">Fooding Expense</label>
+                              <input type="text" class="form-control" id="foodExp" value=""   name="foodExp" >
+                            </div>
+                  </div>
+              </div>
+              
+              <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label for="total">Total Amount</label>
+                      <input type="number" class="form-control" id="total" value=""   name="total" >
+                      </div>
+                      <div class="col-md-6">
+                        <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                       </div>
+                  </div>     
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary" id="editFoodingButton" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+       
+  </div>
+</div>
+
+<!--Fooding Charge Edit Modal  End -->
+
+
+
+<script>
+    $(document).ready(function(){
+        $('#tourbillId').hide();
+        let tourbillId=document.getElementById('tourbillId').innerHTML;
+     //   alert(tourbillId);
+        let columns ={
+            sequence : 'Sequence',
+            name: 'Boarding/Loading Name ',
+            fooding : 'Fooding Amount',
+            laundry:'Laundry Amount',
+            amount : 'Total Amount',
+            createDdate : 'Created Date',
+            editAction:'Action',
+
+        }
+
+        
+      var table = $('#telephoneFoodCharge').tableSortable({
+        data :[],
+        columns,
+        searchField: '#searchField',
+        sorting: true,
+        rowsPerPage: 5,
+        pagination:true,
+        tableWillMount: () => {
+            console.log('table will mount')
+            
+        },
+        tableDidMount: () => {
+            console.log('table did mount');
+
+            $('#spinner').hide();
+        },
+        tableWillUpdate: () => {
+            console.log('table will update')
+        //  table.refresh();
+        // onLoadTask();
+        },
+        tableDidUpdate: () => {
+        console.log('table did update');
+ //        anchorClickFunctionalities();
+        
+        },
+        tableWillUnmount: () => console.log('table will unmount'),
+        tableDidUnmount: () => console.log('table did unmount'),
+        onPaginationChange: function(nextPage, setPage) {
+            setPage(nextPage);
+        },
+         
+    });
+    $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+        })
+
+        $('#refresh').click(function() {
+            table.refresh(true);
+            onLoadTask();
+        })
+        $.ajax({
+            url:'/expense/tourBillClaim/gettelephoneFoodChargeDetalList',
+            type:'get',
+            dataType:'json',
+            data:{tourbillId:tourbillId}
+        })
+        .done((response)=>{
+            console.log('response : '+JSON.stringify(response));
+            table.setData(response, columns);
+            anchorClickFunctionalities();
+            addtionalFunctionalities();
+
+        })
+        .fail((jqXHR,status,error)=>{
+            console.log('jqXHR: '+jqXHR);
+            console.log('error: '+JSON.stringify(jqXHR));
+
+        })
+
+
+        
+    function anchorClickFunctionalities()
+    {
+            $('a.telephoneChargeTag').on('click',function(event){
+                    event.stopImmediatePropagation();
+                    event.stopPropagation();
+                    $('#foodChargeModal').modal('show');
+                    let tourbillId = this.id;
+                    alert('tourbillId  '+tourbillId);
+                    $('#foodChargeModal').modal('show');
+                    $.ajax({
+                        url : '/expense/tourBillClaim/gettelephoneFoodChargeDetail',
+                        type:'get',
+                        data : {
+                            tourbillId : tourbillId
+                        },
+                        dataType: 'json',
+                        beforeSend : function(){
+                          $('#detailLoadingSpinner').show();
+                        }
+                    })
+                    .done((response) => {
+                        console.log('BoardingDetail  : '+JSON.stringify(response));
+                        $('#detailLoadingSpinner').hide();
+                        if(response.length > 0)
+                        {
+                          let foodChargeRecord = response[0];
+                          let htmlTable = '';
+                          let createdDate = new Date(conveyanceRecord.createddate);
+                          createdDate.setHours(createdDate.getHours() + 5);
+                          createdDate.setMinutes(createdDate.getMinutes() + 30);
+                          let strCreatedDate = createdDate.toLocaleString();
+                          htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Name</strong></td>';
+                              htmlTable += '<td>'+foodChargeRecord.chargegname+'</td>';
+                              htmlTable += '<td><strong>TourBill Name</strong></td>';
+                              htmlTable += '<td>'+foodChargeRecord.tourbillname+'</td>';
+                          htmlTable += '</tr>';
+                           
+                          htmlTable += '<tr>';
+                          htmlTable += '<td><strong>Laundry Expense</strong></td>';
+                          htmlTable += '<td>'+foodChargeRecord.laundry_expense__c+'</td>';
+                          htmlTable += '<td><strong>Fooding Expense</strong></td>';
+                          htmlTable += '<td>'+foodChargeRecord.fooding_expense__c+'</td>';
+                          htmlTable += '</tr>';
+
+                         
+
+
+                          htmlTable += '<tr>';  
+                          htmlTable += '<td><strong>Activity Code</strong></td>';
+                          if(foodChargeRecord.activity_code__c != null)
+                              htmlTable += '<td>'+foodChargeRecord.activity_code__c+'</td>';
+                          else
+                              htmlTable += '<td></td>';
+                      
+                          htmlTable += '<td><strong>Project Task</strong></td>';
+                          if(foodChargeRecord.project_tasks__c != null)
+                              htmlTable += '<td>'+foodChargeRecord.project_tasks__c+'</td>';
+                          else
+                              htmlTable += '<td></td>';
+                          htmlTable += '</tr>';
+
+
+                          htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Total Amount</strong></td>';
+                              htmlTable += '<td>'+foodChargeRecord.total_amount__c+'</td>';
+                              htmlTable += '<td><strong>Created Date</strong></td>';
+                              htmlTable += '<td>'+strCreatedDate+'</td>';;
+                          htmlTable += '</tr>';
+
+                          htmlTable += '<tr>';       
+                          htmlTable += '<td><strong>View Image</strong></td>';
+                          if(airRailBusRecord.heroku_image_url__c != null && foodChargeRecord.heroku_image_url__c != '')
+                              htmlTable += '<td><a target="_blank" href="'+foodChargeRecord.heroku_image_url__c+'" >Click Here</a></td>';
+                          else
+                              htmlTable += '<td></td>';
+                          
+                          htmlTable += '<td><strong>Remarks</strong></td>';
+                          htmlTable += '<td>'+foodChargeRecord.remarks__c+'</td>';
+                          htmlTable += '</tr>';
+    
+
+                          $('#foodChargeTable').empty();
+                          $('#foodChargeTable').html(htmlTable);
+                        }
+                       
+                    })
+                    .fail((jqXHR, status, error) =>{
+                      $('#detailLoadingSpinner').hide();
+                      console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                      console.log('error  : '+error);
+                    })
+            
+
+
+
+                    
+            });
+
+
+
+    }
+    
+    function addtionalFunctionalities()
+    {
+        $('.editFooding').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let tourbillId = this.id;
+            alert('telFoodingCharge'+tourbillId);
+            $('#FoodingEditModal').modal('show'); 
+            $('#FoodingEditModal').modal('show');
+                        $.ajax({
+                            url : '/expense/tourBillClaim/gettelephoneFoodChargeDetail',
+                            type:'get',
+                            data : {
+                              tourbillId : tourbillId
+                            },
+                            dataType: 'json',
+                            beforeSend : function(){
+                              $('#detailLoadingSpinner').show();
+                            }
+                        })  
+                        .done((response)=>{
+                          console.log('telefoodingChargeDEtail  : '+JSON.stringify(response));
+                          let teleFoodingRecord = response[0];
+                          document.forms["editFoodingForm"]["foodingName"].value = teleFoodingRecord.chargegname;
+                         // document.forms["editFoodingForm"]["tourName"].value = teleFoodingRecord.tourbillname;
+                          document.forms["editFoodingForm"]["laundry"].value = teleFoodingRecord.laundry_expense__c;
+                          document.forms["editFoodingForm"]["foodExp"].value = teleFoodingRecord.fooding_expense__c;
+                          document.forms["editFoodingForm"]["total"].value = teleFoodingRecord.total_amount__c;
+                          document.forms["editFoodingForm"]["hide"].value = teleFoodingRecord.sfid;
+                          let option1 = new Option(teleFoodingRecord.tourbillname,teleFoodingRecord.tourid,true, true);
+                          console.log('Option1'+option1);
+                          document.forms["editFoodingForm"]["tourName"].appendChild(option1);
+                        })
+                        .fail((jqXHR, status, error) => {
+                          console.log('jqXHR   '+JSON.stringify(jqXHR));
+                          console.log('error  '+error);
+                      })
+    
+        })
+        $('#editFoodingButton').on('click',function(event){
+
+          event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    alert('Save Button Clicked !');
+                    var $inputs = $('#editFoodingForm :input');
+
+                    // not sure if you wanted this, but I thought I'd add it.
+                    // get an associative array of just the values.
+                    var values = {};
+                    $inputs.each(function() {
+                        values[this.name] = $(this).val();
+                    });
+                    
+                    alert('formValues : '+JSON.stringify(values));
+
+                    $.ajax({
+                        url : '/expense/tourBillClaim/updateTeleFoodingCharge',
+                        type:'post',
+                        data: values,
+                        dataType : 'json'
+                    })
+                    .done((response) => {
+                          console.log('resonse   :'+response);
+                    })
+                    .fail((jqXHR, status, error) => {
+                          console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    })
+
+        })
+    }
+
+
+
+    })
+</script>

@@ -1,0 +1,159 @@
+<% include ../partials/navbar %>
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+
+<div class="row mt-5">
+    <div class="col-md-8 m-auto">
+        <div class="card card-body">
+              <% include ../partials/messages %>
+              <h5><center> List Of PLD Forms For Approval</center></h5>
+
+              <div class="row mt-5 mb-3 align-items-center">
+                <div class="col-md-5">
+                    <button class="btn btn-primary btn-md" id="refresh">Refresh</button>
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+                </div>
+                <div class="col-md-2 text-right">
+                  <span class="pr-3">Rows Per Page:</span>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-flex justify-content-end">
+                        <select class="custom-select" name="rowsPerPage" id="changeRows">
+                            <option value="1">1</option>
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                        </select>
+                    </div>
+                </div>
+        </div>
+        <div class="table-responsive" id="pldApprovalsTableList">
+
+
+
+        </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    $(document).ready(function(event){
+        //event.stopPropagation();
+        ajaxCallData();
+        let columns = {
+            sequence: 'Sr No.',
+            recordName: 'PLD Response Name',
+            currentStatus: 'Current Status',
+            createdDate: 'Created Date',
+            approveBtn : 'Approve', 
+            rejectBtn : 'Reject',
+            
+        };
+
+        var table = $('#pldApprovalsTableList').tableSortable({
+            data :[],
+            columns,
+            searchField: '#searchField',
+            sorting: true,
+            rowsPerPage: 5,
+            pagination:true,
+            tableWillMount: () => {
+                console.log('table will mount');
+                
+                
+            },
+            tableDidMount: () => {
+                console.log('table did mount');
+  
+              //  $('#spinner').hide();
+            },
+            tableWillUpdate: () => {
+                console.log('table will update');
+                
+              //  table.refresh();
+              // onLoadTask();
+            },
+            tableDidUpdate: () => {
+              console.log('table did update');
+             // ajaxCallData();
+              anchorClickFunctionalities();
+              //onLoadTask();
+            },
+            tableWillUnmount: () => console.log('table will unmount'),
+            tableDidUnmount: () => console.log('table did unmount'),
+            onPaginationChange: function(nextPage, setPage) {
+                setPage(nextPage);
+            }, 
+        });
+
+        $('#refresh').click(function() {
+            table.refresh(true);
+            ajaxCallData();
+        })
+  
+        function ajaxCallData()
+        {
+            $.get("/approvals/pldFormsApprovalList",
+            function(returnedData){
+                console.log('returnedData  : '+JSON.stringify(returnedData));
+                if(returnedData.length > 0)
+                {
+                    table.setData(returnedData, columns);
+                    anchorClickFunctionalities();
+                }
+            }).fail(function(error){
+                console.log("error "+error.stack);
+            });  
+        }
+        
+
+       
+
+        function anchorClickFunctionalities()
+        {
+            $(".approveResponse").click(function(event){
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+              //  alert(this.id);
+                let responseId = this.id.substring(7,25);
+              //  alert('responseId  : '+responseId);
+
+                $.post("/approvals/pldApprovalFeedback",{responseId  : responseId, type : 'approve'},function(response){
+                            console.log('response   : '+response);
+                            alert('Approved !');
+                }).fail(function(error){
+                        alert('There occured some error !');
+                });
+            });
+
+            $(".rejectResponse").click(function(event){
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+             //   alert(this.id);
+                let responseId = this.id.substring(6,24);
+             //   alert('responseId  : '+responseId);
+
+                $.post("/approvals/pldApprovalFeedback",{responseId : responseId, type : 'reject'},function(response){
+                    console.log('response   : '+response);
+                    alert('Rejected !');
+                }).fail(function(error){
+                    alert('There occured some error !');
+                });
+            });
+                
+        }
+
+
+    })
+</script>
+      

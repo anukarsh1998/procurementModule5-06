@@ -1,0 +1,378 @@
+<% include ../partials/navbar %>
+
+<% if(showExcelReport){ %>
+
+<div class="row mt-5">
+        <div class="col-md-6 m-auto">
+           <div class="card card-body">
+                <label for="validationTooltip03">Select Project</label>
+                    <select class="custom-select custom-select-sm form-control" id="projectname" name="projectname">'+
+                            <option value="" >Select</option>
+                         <!--   <option value="a030p0000018ScOAAU" >Project 6</option>  -->
+                    </select>
+               
+                </br/>
+
+                <label for="validationTooltip03">Select Project Library</label>
+                <select class="custom-select custom-select-sm form-control" id="projectLibrary" name="projectLibrary">'+
+                        <option value="" >Select</option>
+                </select>
+                <br/>
+
+                <button label="Generate Report" class="btn btn-primary" onClick="generateReport()" id="reportButton">Generate Report</button>
+            </div>
+        </div>
+</div>
+<% } %>
+
+<br/>
+
+<!-- Pld Forms Modal -->
+
+<div class="row mt-5">
+    <div class="col-md-8 m-auto">
+      <div class="card card-body">
+          <h4><center>Available PLD Forms </center></h4>
+          <div  class="table-responsive">
+            <div id="spinnerPldForm">
+                <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+            </div>
+  
+           <table class="table table-striped" id="pldTable">
+  
+           </table>
+          </div>
+      </div>
+    </div>
+  </div>
+  
+
+  <!-- Responses Modal -->
+  <div id="responsesModal" class="modal fade bs-example-modal-xl" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+        <div class="modal-dialog modal-xl" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createTaskModal">View Responses</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="table-responsive">
+                  <div id="spinner">
+                     <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+                  </div>
+                <table id="responsesTable" class="table ">
+      
+                </table>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+             
+            </div>
+          </div>
+        </div>
+      </div>
+
+<script>
+    $(document).ready(function(){
+
+        $.get('/users/getProjectReportsAccessbility',function(response){
+            console.log('getProjects response  '+JSON.stringify(response));
+            if(response.length > 0)
+            {
+                    let projectDropdown = document.getElementById('projectname');
+                    response.forEach((eachRecord)=>{
+                            let option = new Option(eachRecord.name,eachRecord.sfid, false, false);
+                            projectDropdown.appendChild(option);
+                    });
+            }
+
+            
+        }).fail(function(jqXHR,status,err){
+            console.log('jqXHR : '+JSON.stringify(jqXHR));
+            console.log('error : '+err);
+        })
+
+
+
+
+        $('#spinner').hide();
+        $('#spinnerPldForm').hide();
+          $.ajax({
+              url : '/users/getpldForm',
+              type: 'get',
+              dataType :'json',
+              beforeSend: function () { // Before we send the request, remove the .hidden class from the spinner and default to inline-block.
+                //$('#loader').removeClass('hidden');
+                $('#htmlTable').empty();
+                 $('#spinnerPldForm').show();
+              },
+          })
+          .done((response)=>{
+              console.log('response  '+JSON.stringify(response));
+              $('#spinnerPldForm').hide();
+              if(response.length > 0)
+              {
+                let htmlTable = '';
+                htmlTable += '<thead><tr>';
+                htmlTable += '<th>Serial </th>';
+                htmlTable += '<th>Project Name</th>';
+                htmlTable += '<th>Form Name</th>';
+                htmlTable += '<th>Form Link</th>';
+                htmlTable += '<th>Sent Date Time</th>';
+                htmlTable += '<th>View Responses</th>';
+                htmlTable += '</tr></thead>';
+                htmlTable += '<tbody>';
+                let i=1;
+                response.forEach((eachRecord) => {
+                  console.log('type  : '+typeof(eachRecord.createddate));
+                  console.log('eachRecord.pldform_generatedurl__c  : '+eachRecord.pldform_generatedurl__c);
+                  let dateTime = new Date(eachRecord.createddate);
+                  dateTime.setHours(dateTime.getHours() + 5);
+                  dateTime.setMinutes(dateTime.getMinutes() + 30);
+                  dateTime =  dateTime.toLocaleString();
+                  console.log('dateTime  : '+dateTime);
+                  htmlTable += '<tr>';
+                  htmlTable += '<td>'+i+' </td>';
+                  htmlTable += '<td>'+eachRecord.proname+' </td>';
+                  htmlTable += '<td>'+eachRecord.pldname+' </td>';
+                  htmlTable += '<td><a class="btn btn-primary" style="color:white;" href="'+eachRecord.pldform_generatedurl__c+'" target="_blank" >Click Here</a></td>';
+                  htmlTable += '<td>'+dateTime+' </td>';
+                  htmlTable += '<td><a class="btn btn-primary responseModalAnchorId" id="'+eachRecord.project_library__c+'"  style="color:white;" href="#"  >View Responses</a> </td>';
+                  htmlTable += '</tr>';
+                  i++;
+                })
+                htmlTable += '</tbody>';
+                $('#spinnerPldForm').hide();
+                $('#pldTable').html(htmlTable);
+  
+                $("a.responseModalAnchorId").click(function(e){
+                  e.preventDefault();
+                  console.log('Sharma');
+                  $('#responsesModal').modal('show');
+                  let formId = $(this).attr('id');
+                 
+                  $.ajax({
+                      url : '/users/viewResponses',
+                      type: 'get',
+                      data : {
+                        pldformid : formId
+                      },
+                      dataType : 'json',
+                      beforeSend: function () { // Before we send the request, remove the .hidden class from the spinner and default to inline-block.
+                        
+                        $('#responsesTable').empty();
+                         $('#spinner').show();
+                      },
+                  })
+                  .done(function(response){
+                      console.log('response  '+JSON.stringify(response));
+  
+                      let htmlResponsesTable = '';
+                      if(response.length > 0)
+                      {
+                            htmlResponsesTable += '<thead><tr>';
+                            htmlResponsesTable += '<th>Serial </th>';
+                            htmlResponsesTable += '<th>Response Name</th>';
+                            htmlResponsesTable += '<th>Response Date Time</th>';
+                            htmlResponsesTable += '<th>Submit Approval</th>';
+                            htmlResponsesTable += '<th>Status</th>';
+                            htmlResponsesTable += '<th>Preview</th>';
+                            htmlResponsesTable += '<th>Delete</th>';
+                            htmlResponsesTable += '</tr></thead>';
+                            htmlResponsesTable += '<tbody>';
+                            let i=1;
+                            response.forEach((eachRecord)=> {
+                                console.log('type  : '+typeof(eachRecord.createddate));
+                                let dateTime = new Date(eachRecord.createddate);
+                                dateTime.setHours(dateTime.getHours() + 5);
+                                dateTime.setMinutes(dateTime.getMinutes() + 30);
+                                dateTime =  dateTime.toLocaleString();
+                                console.log('dateTime  : '+dateTime);
+                                htmlResponsesTable += '<tr>';
+                                htmlResponsesTable += '<td>'+i+' </td>';
+                                htmlResponsesTable += '<td>'+eachRecord.name+' </td>';
+                                htmlResponsesTable += '<td>'+dateTime+' </td>';
+                                htmlResponsesTable += '<td><button class="btn btn-primary submitFormForApproval" id="'+eachRecord.sfid+'" >Submit For Approval</a> </td>';
+                                if(eachRecord.status__c == 'Approved' || eachRecord.status__c == 'Rejected' || eachRecord.status__c != 'Pending' )
+                                  htmlResponsesTable += '<td>'+eachRecord.status__c+'</td>';
+                                else
+                                htmlResponsesTable += '<td></td>';
+                                if(eachRecord.status__c != null && eachRecord.status__c != 'Pending' )
+                                {
+                                  htmlResponsesTable += '<td><a class="btn btn-primary " href="https://llfdev1-llf1.cs74.force.com/responsepdf?Id='+eachRecord.sfid+'" target="_blank" style="color:white;"  >Preview</a> </td>';
+                                  htmlResponsesTable += '<td><button class="btn btn-danger deleteResponse" id="'+eachRecord.sfid+'" >Delete</a> </td>';
+                                }
+  
+                                
+                                
+                                htmlResponsesTable += '</tr>';
+                                i++;
+                            });
+                            htmlResponsesTable += '</tbody>';
+                      }
+                      else
+                      {
+                        htmlResponsesTable += '<h4>No responses found !</h4>'
+                      }
+  
+                      $('#responsesTable').empty();
+                      $('#responsesTable').append(htmlResponsesTable);
+                    //  $('#loader').addClass('hidden')
+                       $('#spinner').hide();
+  
+  
+  
+                       $('.deleteResponse').on('click',function(event){
+                            event.stopImmediatePropagation();
+                            event.stopPropagation();
+                            
+                            let reponseId = this.id;
+                            alert('Hello I am clicked '+reponseId);
+  
+                            $.post('/users/deletePldResponse',{reponseId : reponseId},function(response){
+                                  console.log('reponse '+response);
+                                  alert(response);
+                            }).fail((error) => {
+                                  console.log('Error');
+                            })
+  
+                                               
+                       });
+  
+                       
+                       $('.submitFormForApproval').on('click',function(event){
+                        event.stopImmediatePropagation();
+                        event.stopPropagation();
+                        
+                        let reponseId = this.id;
+                        alert('Hello I am clicked '+reponseId);
+  
+                        $.ajax({
+                            url :'/users/sendResponseForApproval',
+                            data : {reponseId : reponseId},
+                            type :'post',
+                            dataType: 'json'
+                        })
+                        .done((response) => {
+                            console.log('response  : '+response);
+                        })
+                        .fail((jqXHR, status, error) => {
+                          $('#spinnerPldForm').hide();
+                          console.log('jqXHR   : '+JSON.stringify(jqXHR));
+                          alert(jqXHR.responseText);
+                        })                          
+                   });
+  
+                  })
+                  .fail(function(jqXHR, status, error){
+                    $('#spinner').hide();
+                    $('#spinnerPldForm').hide();
+                    console.log('Error '+error);
+                    console.log('status '+status);
+                  })
+  
+  
+  
+                  
+                  //alert($(this).attr('id')+' clicked!');
+                })
+              }
+  
+             
+          })
+          .fail((jqXHR, status, error) => {
+              $('#spinnerPldForm').hide();
+              console.log('Error '+error);
+              console.log('status '+status);
+          })
+
+
+
+        $('#projectname').on('change',function(e){
+                let selectedProjectId = this.value;
+                console.log('selectedProjectId : '+selectedProjectId);
+               // alert('selectedProjectId  '+selectedProjectId);
+
+                $.get('/users/getRelatedProjectLibraries',{selectedProjectId: selectedProjectId}, function(response){
+                    console.log('project Libraries Responses : '+JSON.stringify(response));
+                    if(response.length > 0)
+                    {
+                        let select = document.getElementById("projectLibrary");
+                        let length = select.options.length;
+                        for (i = length-1; i >= 0; i--) {
+                        select.options[i] = null;
+                        }   
+
+
+                        let option1 = new Option('All','All',false,false);    
+                        document.getElementById('projectLibrary').appendChild(option1);
+
+
+
+                        response.forEach(function(eachRecord){
+                            let option = new Option(eachRecord.pld_questions__c,eachRecord.sfid,false,false);    
+                            document.getElementById('projectLibrary').appendChild(option);
+                        });
+                    }
+                    else
+                    {
+                      //  document.getElementById('projectLibrary').empty();
+                        let select = document.getElementById("projectLibrary");
+                        let length = select.options.length;
+                        for (i = length-1; i >= 0; i--) {
+                        select.options[i] = null;
+                        }
+                        let option1 = new Option('Select','',true,true);    
+                        document.getElementById('projectLibrary').appendChild(option1);
+                    }
+
+                }).fail(function(jqXHR, status, error){
+                    console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                    console.log('error  : '+error);
+                })
+
+
+
+                //Adding Options
+
+              /*  let option1 = new Option('All','All',false,false);    
+                document.getElementById('projectLibrary').appendChild(option1);
+                let option = new Option('Newest form for testing','a1l0p0000006jDRAAY',false,false);    
+                document.getElementById('projectLibrary').appendChild(option); */
+
+
+        })
+
+
+    });
+    function generateReport()
+    {
+        let selectedProjectId =  $('#projectname :selected').val();
+        console.log('typeof(selectedProjectId)  : '+typeof(selectedProjectId));
+        console.log('selectedProjectId  '+selectedProjectId);
+
+        let selectedProjectLibraryId =  $('#projectLibrary :selected').val();
+        console.log('typeof(selectedProjectLibraryId)  : '+typeof(selectedProjectLibraryId));
+        console.log('selectedProjectLibraryId  '+selectedProjectLibraryId);
+        let selectedProjectAndLibraryId = selectedProjectId+'-'+selectedProjectLibraryId;
+
+        if(selectedProjectId == '')
+        {
+            alert('Please select project first');
+        }
+        else if(selectedProjectId != '' && selectedProjectLibraryId == '')
+        {
+            alert('Please select project library');
+        }
+        else
+        {
+            location.assign('http://llfdev1-llf1.cs74.force.com/PldColumnReport?id='+selectedProjectAndLibraryId);
+        }
+
+
+        
+    }
+</script>

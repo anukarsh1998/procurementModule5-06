@@ -1,0 +1,62 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!--   <a class="navbar-brand" href="#">LLF</a> -->
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarColor01">
+          <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+              <a class="nav-link" href="/users/home">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item ">
+                  <a class="nav-link" href="/users/pldReports">M &amp; E</a>
+              </li>
+          <li class="nav-item">
+              <a class="nav-link" href="/expense/">Expense</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="/procurement/">Procurement</a>
+          </li>
+          
+          <li class="nav-item dropdown">   
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-3" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">Timesheets</a>
+              <div class="dropdown-menu dropdown-menu-right dropdown-info" aria-labelledby="navbarDropdownMenuLink-3">
+                      <a class="dropdown-item" href="/timesheets/taskListView">All Tasks</a>
+                      <a class="dropdown-item" href="/timesheets/timesheetListView">All Timsheets</a>
+                      <a class="dropdown-item" href="/users/timesheet">Calendar</a>
+              </div>
+          </li>
+      
+          <% if(objUser.isManager) { %> 
+          <li class="nav-item dropdown" >
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-4" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false"> Manage Approvals</a>
+              <div class="dropdown-menu dropdown-menu-right dropdown-info" aria-labelledby="navbarDropdownMenuLink-4">
+              <a class="dropdown-item" href="/approvals/pldFormApprovals">PLD Form Approval</a>
+              <a class="dropdown-item" href="/approvals/expenseApprovals">Expense Approval</a>
+              <a class="dropdown-item" href="#">Procurement Approval</a>
+              </div>
+          </li>
+          <% } %>
+          
+          </ul>
+          <form class="form my-2 my-lg-0">
+          
+              <ul class="my-2 my-sm-0 navbar-nav">
+                  <li class="nav-item dropdown" style="float:right">
+                      <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-4" data-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
+                      <i class="fas fa-user "></i>&nbsp; <%= objUser.name%> </a>
+                      <div class="dropdown-menu dropdown-menu-right dropdown-info" aria-labelledby="navbarDropdownMenuLink-4">
+                      <a class="dropdown-item" href="/users/editProfile">Edit Profile</a>
+                      <a class="dropdown-item" href="/users/logout">Log out</a>
+                      </div>
+                  </li>
+              </ul>
+          
+          </form>
+      
+      </div>
+      </nav>

@@ -1,0 +1,266 @@
+<% include ../../partials/navbar %>
+<% include ../../partials/messages %>
+<% include ../../partials/footer %>
+
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+
+<center><h3>PettyCash ListView</h3></center>
+<p id="expenseId"><%= expenseId %></p>
+
+<div class="container">
+                <div class="row mt-5 mb-3 align-items-center">
+                    <div class="col-md-5">
+                        <a class="btn btn-primary btn-md bg-gray" href="/expense/pettyCash/<%= expenseId %>" id="createNewPettyCashButton">Create New PettyCash</a>
+                        <a class="btn btn-primary btn-md bg-gray" href="/expense" >Go To Expense Page</a>
+                    </div>
+                    <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+                    </div>
+                    <div class="col-md-2 text-right">
+                    <span class="pr-3">Rows Per Page:</span>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex justify-content-end">
+                            <select class="custom-select" name="rowsPerPage" id="changeRows">
+                                <option value="1">1</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                            </select>
+                        </div>
+                    </div>
+             </div>
+
+             <div id="pettyCashExpenseTable" class="responsive ">
+
+             </div>
+
+</div>
+
+
+
+<!-- Petty Cash Details Modal -->
+
+<div id="pettyCashDetailsModal" class="modal fade">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Petty Cash View</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+      
+              <div id="detailLoadingSpinner">
+                <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+            </div>
+            <table id="pettyCashDetailsTable" class="table">
+
+            </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        
+
+
+<script>
+    $(document).ready(function(){
+       $('#expenseId').hide();
+        let expenseId = document.getElementById('expenseId').innerHTML;
+      //  alert('expenseId  : '+expenseId);
+
+
+    /**************Table Sortable Start ***********/
+
+        let columns ={
+            sequence : 'Sequence',
+            name: 'Petty Cash Name',
+            billNo : 'Bill Number',
+            billDate: 'Bill Date',
+            natureOfExpense: 'Nature Of Expense',
+            createDdate: 'Created Date',
+
+        }
+      
+      var table = $('#pettyCashExpenseTable').tableSortable({
+            data :[],
+            columns,
+            searchField: '#searchField',
+            sorting: true,
+            rowsPerPage: 5,
+            pagination:true,
+            tableWillMount: () => {
+                console.log('table will mount')
+                
+            },
+            tableDidMount: () => {
+                console.log('table did mount');
+
+                $('#spinner').hide();
+            },
+            tableWillUpdate: () => {
+                console.log('table will update')
+            //  table.refresh();
+            // onLoadTask();
+            },
+            tableDidUpdate: () => {
+            console.log('table did update');
+             anchorClickFunctionalities();
+            
+            },
+            tableWillUnmount: () => console.log('table will unmount'),
+            tableDidUnmount: () => console.log('table did unmount'),
+            onPaginationChange: function(nextPage, setPage) {
+                setPage(nextPage);
+            },
+        
+        });
+
+        /**************Table Sortable End ***********/
+
+        $('#changeRows').on('change', function() {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+        })
+
+        $('#refresh').click(function() {
+            table.refresh(true);
+            onLoadTask();
+        })
+
+       $.ajax({
+            url : '/expense/getpettycashlist',
+            type:'get',
+            data : {
+                expenseId : expenseId
+            },
+            dataType: 'json'
+       })
+       .done((response) => {
+           console.log('response  : '+JSON.stringify(response));
+
+           table.setData(response, columns);
+           anchorClickFunctionalities();
+          
+        })
+      .fail((jqXHR, status, error) =>{
+          console.log('jqXHR  : '+JSON.stringify(jqXHR));
+          console.log('error  : '+error);
+        })
+
+
+        function anchorClickFunctionalities()
+        {
+                $('a.pettyCashTag').on('click',function(event){
+                        event.stopImmediatePropagation();
+                        event.stopPropagation();
+                        $('#pettyCashDetailsModal').modal('show');
+                        let pettyCashId = this.id;
+                        alert('pettyCashId  '+pettyCashId);
+                        $('#pettyCashDetailsModal').modal('show');
+
+                         
+                        $.ajax({
+                            url : '/expense/getpettycashDetail',
+                            type:'get',
+                            data : {
+                                pettyCashId : pettyCashId
+                            },
+                            dataType: 'json',
+                            beforeSend : function(){
+                              $('#detailLoadingSpinner').show();
+                            }
+                        })
+                        .done((response) => {
+                            console.log('pettyCashDetails  : '+JSON.stringify(response));
+                            $('#detailLoadingSpinner').hide();
+                            if(response.length > 0)
+                            {
+                              let pettyCashRecord = response[0];
+                              let htmlTable = '';
+                          /*    let billDate = new Date(pettyCashRecord.bill_date__c);
+                              billDate.setHours(billDate.getHours() + 5);
+                              billDate.setMinutes( billDate.getMinutes() + 30 );
+                              let createdDate = new Date(pettyCashRecord.createddate);
+                              createdDate.setHours(createdDate.getHours() + 5);
+                              createdDate.setMinutes( createdDate.getMinutes() + 30 ); */
+                              let strBillDate = new Date(pettyCashRecord.bill_date__c).toLocaleString();
+                              let strCreatedDate = new Date(pettyCashRecord.createddate).toLocaleString();
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Name</strong></td>';
+                                  htmlTable += '<td>'+pettyCashRecord.pettycashname+'</td>';
+                                  htmlTable += '<td><strong>Expense Name</strong></td>';
+                                  htmlTable += '<td>'+pettyCashRecord.expname+'</td>';
+                              htmlTable += '</tr>';
+                               
+                              htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Bill Number</strong></td>';
+                              htmlTable += '<td>'+pettyCashRecord.bill_no__c+'</td>';
+                              htmlTable += '<td><strong>Bill Date</strong></td>';
+                              htmlTable += '<td>'+strBillDate+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Nature Of Expense</strong></td>';
+                                  if(pettyCashRecord.nature_of_exp__c != null)
+                                      htmlTable += '<td>'+pettyCashRecord.nature_of_exp__c+'</td>';
+                                  else
+                                      htmlTable += '<td></td>';
+                                  htmlTable += '<td><strong>Amount</strong></td>';
+                                  htmlTable += '<td>'+pettyCashRecord.amount__c+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Activity Code</strong></td>';
+                                htmlTable += '<td>'+pettyCashRecord.activity_code__c+'</td>';
+                                htmlTable += '<td><strong>Project Task</strong></td>';
+                                if(pettyCashRecord.project_tasks__c != null)
+                                    htmlTable += '<td>'+pettyCashRecord.project_tasks__c+'</td>';
+                                else
+                                    htmlTable += '<td></td>';
+                            htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Description</strong></td>';
+                                  htmlTable += '<td>'+pettyCashRecord.description_of_activity_expenses__c+'</td>';
+                                  htmlTable += '<td><strong>Created Date</strong></td>';
+                                  htmlTable += '<td>'+strCreatedDate+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                htmlTable += '<td><strong>View Image</strong></td>';
+                                if(pettyCashRecord.heroku_image_url__c != null && pettyCashRecord.heroku_image_url__c != '')
+                                  htmlTable += '<td><a target="_blank" href="'+pettyCashRecord.heroku_image_url__c+'" >Click Here</a></td>';
+                                else
+                                  htmlTable += '<td></td>';
+                                  
+                                htmlTable += '<td><strong></strong></td>';
+                                htmlTable += '<td></td>';
+                            htmlTable += '</tr>';
+                              
+                              $('#pettyCashDetailsTable').empty();
+                              $('#pettyCashDetailsTable').html(htmlTable);
+                            }
+                           
+                        })
+                        .fail((jqXHR, status, error) =>{
+                          $('#detailLoadingSpinner').show();
+                          console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                          console.log('error  : '+error);
+                        })
+                
+
+
+
+                        
+                });
+
+
+
+        }
+
+    })
+</script>

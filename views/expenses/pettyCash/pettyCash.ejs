@@ -1,0 +1,214 @@
+<% include ../../partials/navbar %>
+ 
+<style>
+    #formdata .form-control {
+      width: auto;
+      }
+
+</style>
+
+
+    <div id="activityCodes"></div>
+    <p id="expenseId"><%= parentExpenseId %></p>
+
+
+
+
+    <div class="row mt-5">
+       
+        <div class="col-md-8 m-auto">
+            <div class="col-md-5">
+                <a class="btn btn-primary btn-md bg-gray" href="/expense/pettycashlistview?expenseId=<%= parentExpenseId %>" id="createNewPettyCashButton">Go PettyCash ListView</a>
+                <a class="btn btn-primary btn-md bg-gray" href="/expense" >Go To Expense Page</a>
+            </div>
+            <br/>
+          <div class="">
+              <% include ../../partials/messages %>
+              <div id="errorMessages"></div>
+
+              <h4 align="center">Enter Petty Cash Details</h4>
+  
+    
+
+          <form method="post" action="/insertprecash" id="formdata"  enctype="multipart/form-data">
+            <div class="table-responsive">
+            <table class="table table-bordered" id="item_table">
+              <tr>
+              <th>SLIP NO</th>
+              <th>BILL NO.</th>
+              <th>BILL DATE</th>
+              <th>ACTIVITY CODE</th>
+              <th>DESCRIPTION OF ACTIVITY EXPENSES</th>
+              
+
+              <th>NATURE OF EXP</th>
+              <th>AMOUNT</th>
+              <th>FILE</th>
+              <th><button type="button" style="background-color:#2C3E50;" id="addButton" name="add" class="btn btn-success btn-sm add">Add Row</button></th>
+              <th style="display:none;"></th>
+              </tr>
+            </table>
+            <div align="center">
+            
+              <input type="submit" style="background-color:#2C3E50;" name="submit" class="btn btn-info" value="Submit" />
+            </div>
+            </div>
+          </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+$(document).ready(function(){
+ $('#expenseId').hide();
+ $('#activityCodes').hide();
+ $('#addButton').hide();
+ let expenseId = document.getElementById('expenseId').innerHTML; 
+ let lstActivityCodes = [];
+
+  $.ajax({
+      url : '/expense/fetchActivityCodes',
+      data : {
+        parentExpenseId : expenseId
+      },
+      dataType : 'json',
+      type : 'get'
+  })
+  .done((response) => {
+      console.log('response  '+JSON.stringify(response));
+      $('#addButton').show();
+      if(response.length > 0)
+      { 
+        lstActivityCodes = response;
+      }
+  })
+  .fail((jqXHR,text,err) => {
+      console.log('text  '+text + '  err '+err);
+  })
+
+ 
+
+ var count = 1
+ $(document).on('click', '.add', function(){
+    var cnt = count++;
+    var html = '';
+    html += '<tr>';
+    html += '<td>'+cnt+'</td>';
+    html += '<td><input type="text" name="bill_no" class="form-control" value=" " /></td>';
+    html += '<td><input type="date" name="bill_date" class="form-control " /></td>';
+    html += '<td><select id="activity_code'+cnt+'"  name="projectTask"  class="form-control item_unit"></select></td>';
+    html += '<td><textarea  name="desc" class="form-control"></textarea></td>';
+    html += '<td><input type="text" name="nature_exp" class="form-control" /></td>';
+    html += '<td><input type="text" name="amount" class="form-control" /></td>';
+    html += '<td><input type="file" onChange="chkFile(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo" name="imgpath" id="file_'+cnt+'"></td>';
+    html += '<td style="display:none;"><input  type="hidden" name="parentExpenseId" value="<%= parentExpenseId %>" class="form-control" /></td>';
+    html += '<td style="display:none;"><input  type="hidden" id="projectTask'+cnt+'"  name="activity_code"  class="form-control" /></td>';
+    html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
+    
+    $('#item_table').append(html);
+
+    $('#activity_code'+cnt)
+        .append($("<option></option>")
+        .attr("value",'')
+        .text('Select'));	
+      for(let i=0; i< lstActivityCodes.length ;i++)
+      {
+        $('#activity_code'+cnt)
+        .append($("<option></option>")
+        .attr("value",lstActivityCodes[i].sfid)
+        .text(lstActivityCodes[i].activity_code__c));	
+      }
+
+      $('#activity_code'+cnt).on('change',function(){
+          let taskId = this.value;
+          let selectedCode = lstActivityCodes.filter((eachCode)=> {
+            if(eachCode.sfid == taskId)
+              return eachCode;
+          })
+          let label = selectedCode[0].activity_code__c;
+          document.getElementById('projectTask'+cnt).value = label;
+        //  $('#projectTask'+cnt).value = label;
+          console.log('label  :'+label+' value : '+taskId);
+      })
+
+ });
+
+ 
+ 
+ $(document).on('click', '.remove', function(){
+    $(this).closest('tr').remove();
+ });
+
+});
+
+
+$(function () {
+  $('form#formdata').bind('submit', function () {
+    $.ajax({
+      type: 'post',
+      url: '/expense/savePettyCashForm',
+      data: $('form#formdata').serialize(),
+      success: function (data) {
+        console.log(data);
+        
+        let msg = data;
+       if(data == 'Petty Cash Form Saved Succesfully !')
+       {
+        document.getElementById("formdata").reset();
+        let errorHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">'+ data+
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+              '<span aria-hidden="true">&times;</span>'+
+            '</button>'+
+          '</div>';
+          $('#errorMessages').empty();
+          $('#errorMessages').append(errorHtml);
+       }
+       else
+       {
+        let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+ data+
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+              '<span aria-hidden="true">&times;</span>'+
+            '</button>'+
+          '</div>';
+          $('#errorMessages').empty();
+          $('#errorMessages').append(errorHtml);
+       }
+        
+       
+      },
+      fail:function(jqXHR ,status,error){
+        console.log('jqXHR '+JSON.stringify(jqXHR));        
+      }
+
+    });
+    return false;
+  });
+});
+
+
+function chkFile(file1,id) {
+    var file = file1.files[0];
+    var formData = new FormData();
+    formData.append('formData', file);
+
+   
+    $.ajax({
+    type: "POST",
+    url: "/expense/uploadImage",    
+    cache: false,
+    dataType:'json',
+    processData: false,
+    contentType: false,
+    data: formData,
+    success: function (data) {
+      alert('File Uploaded Successfully !');
+      console.log(data);
+    //  var result = JSON.stringify(data)
+     $('#file_'+id).val(data.url);
+     
+     }
+  });
+}
+
+</script>
