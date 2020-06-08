@@ -73,7 +73,7 @@
             <th>ATTACH QUOTE1</th>
             <th>ATTACH QUOTE2</th>
             <th>ATTACH QUOTE3</th>
-            <th>JUSTIFICATION</th>
+         <!--    <th>JUSTIFICATION</th> -->
             
 
             
@@ -137,7 +137,7 @@
         html += '<td><input type="file" onChange="chkFile1(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo1" name="imgpath1" id="file_1'+cnt+'"></td>';
         html += '<td><input type="file" onChange="chkFile2(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo2" name="imgpath2" id="file_2'+cnt+'"></td>';
         html += '<td><input type="file" onChange="chkFile3(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo3" name="imgpath3" id="file_3'+cnt+'"></td>';
-        html += '<td><input type="text" name="justification" id="justification'+cnt+'" disabled class="form-control" /></td>';
+   //     html += '<td><input type="text" name="justification" id="justification'+cnt+'" disabled class="form-control" /></td>';
         //    html += '<td style="display:none;"><input id="impId'+cnt+'" type="hidden" name="impaneledVendorId" value="" class="form-control" /></td>';
         html += '<td style="display:none;"><input  type="hidden" name="parentProcurementId" value="<%= parentAssetId %>" class="form-control" /></td>';
         html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
@@ -338,17 +338,7 @@
     
     $(function () {
       $('form#formdata').bind('submit', function () {
-        alert('qt'+qt);
-        if(qt<3){
-          let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+'Please Give Your JUstification '+
-                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
-              '<span aria-hidden="true">&times;</span>'+
-            '</button>'+
-          '</div>';
-          $('#errorMessages').empty();
-          $('#errorMessages').append(errorHtml);         
-        }
-        else{
+       // alert('qt'+qt);
           $.ajax({
             type: 'post',
             url: '/procurement/nonItProducts',   // Need to make changes in post method url
@@ -365,8 +355,6 @@
               $('#errorMessages').append(errorHtml); 
             }
           });
-          
-        }
    //     var qt1=document.getElementById('file_1'+cnt).value();
         return false;
       });
