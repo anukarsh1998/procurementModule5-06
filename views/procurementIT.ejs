@@ -68,6 +68,7 @@
            <th>QUOTE1</th>
            <th>QUOTE2</th>
            <th>QUOTE3</th>
+           <th>JUSTIFICATION</th>
            
            
            
@@ -107,8 +108,10 @@
     $(document).ready(function(){
      // alert('Hello pettyCash');
      var count = 1
+     qt=0;
      $(document).on('click', '.add', function(){
         var cnt = count++;
+        qt=0;
         var html = '';
         html += '<tr>';
         html += '<td>'+cnt+'</td>';
@@ -127,6 +130,8 @@
         html += '<td><input type="file" onChange="chkFile1(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo1" name="imgpath1" id="file_1'+cnt+'"></td>';
         html += '<td><input type="file" onChange="chkFile2(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo2" name="imgpath2" id="file_2'+cnt+'"></td>';
         html += '<td><input type="file" onChange="chkFile3(this,'+cnt+')" name="fileprety" id="fileprety" class="form-control" /><input type="hidden" value="demo3" name="imgpath3" id="file_3'+cnt+'"></td>';
+        html += '<td><input type="text" name="justification" id="justification'+cnt+'" class="form-control" /></td>';
+        html += '<td style="display:none;"><input type="hidden" id="qtNo'+cnt+'" name="quoteNum" class="form-control" /></td>';
 //      html += '<td style="display:none;"><input id="impId'+cnt+'" type="hidden" name="impaneledVendorId" value="" class="form-control" /></td>';
         html += '<td style="display:none;"><input  type="hidden" name="parentProcurementId" value="<%= parentAssetId %>" class="form-control" /></td>';
         html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
@@ -326,6 +331,7 @@
      
      $(document).on('click', '.remove', function(){
         $(this).closest('tr').remove();
+        qt=0;
      });
     
     });
@@ -355,7 +361,7 @@
       });
     });
     
-    
+    var qt=0;
     function chkFile1(file1,id) {
       var file = file1.files[0];
       var formData = new FormData();
@@ -370,11 +376,15 @@
       contentType: false,
       data: formData,
       success: function (data) {
-        console.log(data);
-      //  var result = JSON.stringify(data)
-       $('#file_1'+id).val(data.url);
-       
-       }
+        qt++;
+        console.log('qttt '+qt);
+         $('#file_1'+id).val(data.url);
+         $('#qtNo'+id).val(qt);
+         if(qt==3)
+         {
+          $('#justification'+id).attr("disabled",true); 
+         }
+        }
     });
   }
   function chkFile2(file1,id) {
@@ -391,9 +401,14 @@
     contentType: false,
     data: formData,
     success: function (data) {
-      console.log(data);
-    //  var result = JSON.stringify(data)
-     $('#file_2'+id).val(data.url);
+      qt++;
+      $('#file_2'+id).val(data.url);
+      $('#qtNo'+id).val(qt);
+      console.log('qt '+qt)
+      if(qt==3)
+      {
+       $('#justification'+id).attr("disabled",true);
+      }
      
      }
   });
@@ -412,10 +427,14 @@ function chkFile3(file1,id) {
   contentType: false,
   data: formData,
   success: function (data) {
-    console.log(data);
-  //  var result = JSON.stringify(data)
-   $('#file_3'+id).val(data.url);
-   
+    qt++;
+    console.log('qt '+qt)
+    $('#file_3'+id).val(data.url);
+    $('#qtNo'+id).val(qt);   
+    if(qt==3)
+    {
+     $('#justification'+id).attr("disabled",true);
+    }
    }
 });
 }

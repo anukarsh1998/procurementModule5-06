@@ -110,29 +110,40 @@ router.get('/nonItProducts/:parentAssetId',verify, (request,response) => {
 router.post('/nonItProducts', (request,response) => {
 
    let nonItFormResult = request.body;
-   console.log('nonItFormResult  '+JSON.stringify(nonItFormResult));
-   const{state,district,itemsCategory,items,itemSpecification,quantity,budget}=request.body;
 
+   console.log('nonItFormResult  '+JSON.stringify(nonItFormResult));
+  /*  let img1=request.body.imgpath1;
+   console.log('=>>'+img1);
+   let img2=request.body.imgpath2;
+   console.log('=>>'+img2);
+   let img3=request.body.imgpath3;
+   console.log('=>>'+img3);
+   let justify=request.body.justification;
+   console.log('justified'+justify); */
+
+   const{state,district,itemsCategory,items,itemSpecification,quantity,budget}=request.body;
    let numberOfRows,lstNonItProcurement = [];
    if(typeof(nonItFormResult.quantity) != 'object')
    {
 
         let schema=joi.object({
             state:joi.string().required().label('Please Choose State'),
-            itemsCategory:joi.string().required().label('Choose itemsCategory & District If Your Choose UP Or UK'),
-            items:joi.string().required().label('Choose your Item'),
+             itemsCategory:joi.string().required().label('Choose itemsCategory & District If Your Choose UP Or UK'),
+             items:joi.string().required().label('Choose your Item'),
             itemSpecification:joi.string().required().label('Fill your ITem Specification'),          
             quantity:joi.number().required().label('Enter your Quantity'),
             budget:joi.number().required().label('fill Your Budget '),
-
         })
         let result=schema.validate({state,items,itemsCategory,itemSpecification,quantity,budget});
-        console.log('validation REsult '+JSON.stringify(result.error));
+        console.log('validation hsh '+JSON.stringify(result.error));
         if(result.error){
             console.log('fd'+result.error);
             response.send(result.error.details[0].context.label);
         }
         else{
+            if(nonItFormResult.quoteNum<3 && (nonItFormResult.justification==null || nonItFormResult.justification=="")){
+                    response.send('Please Enter YOur JUstification for Quote less than 4');    
+           }
             let singleRecordValues = [];
             singleRecordValues.push(nonItFormResult.itemsCategory);
             singleRecordValues.push(nonItFormResult.items);
@@ -166,43 +177,53 @@ router.post('/nonItProducts', (request,response) => {
     
             })
             let result=schema.validate({state:state[i],items:items[i],itemsCategory:itemsCategory[i],itemSpecification:itemSpecification[i],quantity:quantity[i],budget:budget[i]});
-            console.log('validation REsult '+JSON.stringify(result.error));
+            console.log('validation REsult mul'+JSON.stringify(result.error));
             if(result.error){
                 console.log('Validation error'+result.error);
                 response.send(result.error.details[0].context.label);
             }
             else{
-                let singleRecordValues = [];
-                singleRecordValues.push(nonItFormResult.itemsCategory[i]);
-                singleRecordValues.push(nonItFormResult.items[i]);
-               // singleRecordValues.push(nonItFormResult.otherItems[i]);       
-                singleRecordValues.push(nonItFormResult.itemSpecification[i]);
-                singleRecordValues.push(nonItFormResult.quantity[i]);
-                singleRecordValues.push(nonItFormResult.budget[i]);
-                singleRecordValues.push(nonItFormResult.imgpath1[i]);
-                singleRecordValues.push(nonItFormResult.imgpath2[i]);
-                singleRecordValues.push(nonItFormResult.imgpath3[i]);
-                singleRecordValues.push(nonItFormResult.vendor[i]);
-                singleRecordValues.push(nonItFormResult.parentProcurementId[i]);
-                lstNonItProcurement.push(singleRecordValues);
-                console.log('dj'+singleRecordValues);
-     
+                if(nonItFormResult.quoteNum[i]<3 &&(nonItFormResult.justification[i]==null || nonItFormResult.justification[i]=="")){               
+                        response.send('Please Enter YOur JUstification for Quote less than 4');    
+                }
+                else{
+
+                    let singleRecordValues = [];
+                    singleRecordValues.push(nonItFormResult.itemsCategory[i]);
+                    singleRecordValues.push(nonItFormResult.items[i]);
+                   // singleRecordValues.push(nonItFormResult.otherItems[i]);       
+                    singleRecordValues.push(nonItFormResult.itemSpecification[i]);
+                    singleRecordValues.push(nonItFormResult.quantity[i]);
+                    singleRecordValues.push(nonItFormResult.budget[i]);
+                    singleRecordValues.push(nonItFormResult.imgpath1[i]);
+                    singleRecordValues.push(nonItFormResult.imgpath2[i]);
+                    singleRecordValues.push(nonItFormResult.imgpath3[i]);
+                    singleRecordValues.push(nonItFormResult.justification[i]);
+                    singleRecordValues.push(nonItFormResult.vendor[i]);
+                    singleRecordValues.push(nonItFormResult.parentProcurementId[i]);
+                    lstNonItProcurement.push(singleRecordValues);
+                    console.log('dj'+singleRecordValues);
+                }
             }
 
        }
    }
 
-   let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
+   if(lstNonItProcurement.length==numberOfRows){
+    let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
+    console.log('nonItProductsInsertQuery '+nonItProductsInsertQuery);
+    pool.query(nonItProductsInsertQuery)
+    .then((nonItProductsInsertQueryResult) => {
+         console.log('nonItProductsInsertQueryResult  '+JSON.stringify(nonItProductsInsertQueryResult.rows));
+         response.send('Saved Successfully');
+    })
+    .catch((nonItProductsInsertQueryError) => {
+         console.log('nonItProductsInsertQueryError  '+nonItProductsInsertQueryError.stack);
+         response.send('Error Occured !');
+    })
 
-   pool.query(nonItProductsInsertQuery)
-   .then((nonItProductsInsertQueryResult) => {
-        console.log('nonItProductsInsertQueryResult  '+JSON.stringify(nonItProductsInsertQueryResult.rows));
-        response.send('Saved Successfully');
-   })
-   .catch((nonItProductsInsertQueryError) => {
-        console.log('nonItProductsInsertQueryError  '+nonItProductsInsertQueryError.stack);
-        response.send('Error Occured !');
-   })
+   }
+   
 
    
 });
@@ -257,17 +278,25 @@ router.post('/itProducts', (request,response) => {
             response.send(result.error.details[0].context.label);
         }
         else{
-            let singleItProductRecordValue = [];
-            singleItProductRecordValue.push(itFormResult.items);
-            singleItProductRecordValue.push(itFormResult.vendor);
-            singleItProductRecordValue.push(itFormResult.itemSpecification);
-            singleItProductRecordValue.push(itFormResult.quantity);
-            singleItProductRecordValue.push(itFormResult.budget);
-            singleItProductRecordValue.push(itFormResult.imgpath1);
-            singleItProductRecordValue.push(itFormResult.imgpath2);
-            singleItProductRecordValue.push(itFormResult.imgpath3);
-            singleItProductRecordValue.push(itFormResult.parentProcurementId);
-            lstItProducts.push(singleItProductRecordValue);
+            if(itFormResult.quoteNum<3 &&(itFormResult.justification==null || itFormResult.justification=="")){
+                    response.send('Please Enter YOur JUstification for Quote less than 4');     
+             }
+             else{
+                let singleItProductRecordValue = [];
+                singleItProductRecordValue.push(itFormResult.items);
+                singleItProductRecordValue.push(itFormResult.vendor);
+                singleItProductRecordValue.push(itFormResult.itemSpecification);
+                singleItProductRecordValue.push(itFormResult.quantity);
+                singleItProductRecordValue.push(itFormResult.budget);
+                singleItProductRecordValue.push(itFormResult.imgpath1);
+                singleItProductRecordValue.push(itFormResult.imgpath2);
+                singleItProductRecordValue.push(itFormResult.imgpath3);
+                singleItProductRecordValue.push(itFormResult.justification);
+                singleItProductRecordValue.push(itFormResult.parentProcurementId);
+                lstItProducts.push(singleItProductRecordValue);
+                console.log('else '+lstItProducts);
+             }          
+           
         }
     }
     else
@@ -276,7 +305,6 @@ router.post('/itProducts', (request,response) => {
         console.log('rowCount= '+numberOfRows);
         for(let i=0; i< numberOfRows ; i++)
         {
-
             const schema = joi.object({
                 state:joi.string().required().label('Please chose State First'),
              //   district:joi.string().label('chose district') 
@@ -291,27 +319,33 @@ router.post('/itProducts', (request,response) => {
                 console.log('fd'+result.error);
                 response.send(result.error.details[0].context.label);
             }
-            else{
-
-              let singleItProductRecordValue = [];
-            singleItProductRecordValue.push(itFormResult.items[i]);
-            singleItProductRecordValue.push(itFormResult.vendor[i]);
-            singleItProductRecordValue.push(itFormResult.itemSpecification[i]);
-            singleItProductRecordValue.push(itFormResult.quantity[i]);
-            singleItProductRecordValue.push(itFormResult.budget[i]);
-            singleItProductRecordValue.push(itFormResult.imgpath1[i]);
-            singleItProductRecordValue.push(itFormResult.imgpath2[i]);
-            singleItProductRecordValue.push(itFormResult.imgpath3[i]);
-            singleItProductRecordValue.push(itFormResult.parentProcurementId[i]);
-            lstItProducts.push(singleItProductRecordValue);
+            else{                
+                if(itFormResult.quoteNum[i]<3 &&(itFormResult.justification[i]==null || itFormResult.justification[i]=="")){
+                    response.send('Please Enter YOur JUstification for Quote less than 4 in row number'+i);     
+             }
+             else{
+                let singleItProductRecordValue = [];
+                singleItProductRecordValue.push(itFormResult.items[i]);
+                singleItProductRecordValue.push(itFormResult.vendor[i]);
+                singleItProductRecordValue.push(itFormResult.itemSpecification[i]);
+                singleItProductRecordValue.push(itFormResult.quantity[i]);
+                singleItProductRecordValue.push(itFormResult.budget[i]);
+                singleItProductRecordValue.push(itFormResult.imgpath1[i]);
+                singleItProductRecordValue.push(itFormResult.imgpath2[i]);
+                singleItProductRecordValue.push(itFormResult.imgpath3[i]);
+                singleItProductRecordValue.push(itFormResult.justification[i]);
+                singleItProductRecordValue.push(itFormResult.parentProcurementId[i]);
+                lstItProducts.push(singleItProductRecordValue);
+             }
             }
         }
         console.log('lstProduct '+lstItProducts);
     }
 
     console.log('lstItProducts  '+JSON.stringify(lstItProducts));
-
-    const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c, Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
+   if(lstItProducts.length==numberOfRows)
+   {
+    const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c,justification__c ,Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
     console.log(itProductsInsertQuery);
     pool.query(itProductsInsertQuery)
     .then((itProductsInsertQueryResult) => {
@@ -322,7 +356,7 @@ router.post('/itProducts', (request,response) => {
         console.log('itProductsInsertQueryError  : '+itProductsInsertQueryError.stack);
         response.send('Error Occurred !');
     })
- 
+   }
     
 });
 
