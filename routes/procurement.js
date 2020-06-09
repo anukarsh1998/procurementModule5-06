@@ -144,6 +144,7 @@ router.post('/nonItProducts', (request,response) => {
             if(nonItFormResult.quoteNum<3 && (nonItFormResult.justification==null || nonItFormResult.justification=="")){
                     response.send('Please Enter YOur JUstification for Quote less than 4');    
            }
+           else{
             let singleRecordValues = [];
             singleRecordValues.push(nonItFormResult.itemsCategory);
             singleRecordValues.push(nonItFormResult.items);
@@ -154,10 +155,14 @@ router.post('/nonItProducts', (request,response) => {
             singleRecordValues.push(nonItFormResult.imgpath1);
             singleRecordValues.push(nonItFormResult.imgpath2);
             singleRecordValues.push(nonItFormResult.imgpath3);
+            singleRecordValues.push(nonItFormResult.quoteNum    );
             singleRecordValues.push(nonItFormResult.justification);
             singleRecordValues.push(nonItFormResult.vendor);
             singleRecordValues.push(nonItFormResult.parentProcurementId);
             lstNonItProcurement.push(singleRecordValues);
+            console.log('lstNOnIt'+lstNonItProcurement);
+           }
+      
 
         }      
    }
@@ -198,6 +203,7 @@ router.post('/nonItProducts', (request,response) => {
                     singleRecordValues.push(nonItFormResult.imgpath1[i]);
                     singleRecordValues.push(nonItFormResult.imgpath2[i]);
                     singleRecordValues.push(nonItFormResult.imgpath3[i]);
+                    singleRecordValues.push(nonItFormResult.quoteNum[i]);
                     singleRecordValues.push(nonItFormResult.justification[i]);
                     singleRecordValues.push(nonItFormResult.vendor[i]);
                     singleRecordValues.push(nonItFormResult.parentProcurementId[i]);
@@ -208,9 +214,9 @@ router.post('/nonItProducts', (request,response) => {
 
        }
    }
-
-   if(lstNonItProcurement.length==numberOfRows){
-    let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
+   console.log('lstNonItProcurement:'+lstNonItProcurement.length+' number of rows :'+nonItFormResult.quantity.length);
+   if(lstNonItProcurement.length==nonItFormResult.quantity.length){
+    let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,Number_of_quotes__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
     console.log('nonItProductsInsertQuery '+nonItProductsInsertQuery);
     pool.query(nonItProductsInsertQuery)
     .then((nonItProductsInsertQueryResult) => {
@@ -221,11 +227,7 @@ router.post('/nonItProducts', (request,response) => {
          console.log('nonItProductsInsertQueryError  '+nonItProductsInsertQueryError.stack);
          response.send('Error Occured !');
     })
-
    }
-   
-
-   
 });
 
 
@@ -291,6 +293,7 @@ router.post('/itProducts', (request,response) => {
                 singleItProductRecordValue.push(itFormResult.imgpath1);
                 singleItProductRecordValue.push(itFormResult.imgpath2);
                 singleItProductRecordValue.push(itFormResult.imgpath3);
+                singleItProductRecordValue.push(itFormResult.quoteNum);
                 singleItProductRecordValue.push(itFormResult.justification);
                 singleItProductRecordValue.push(itFormResult.parentProcurementId);
                 lstItProducts.push(singleItProductRecordValue);
@@ -333,6 +336,7 @@ router.post('/itProducts', (request,response) => {
                 singleItProductRecordValue.push(itFormResult.imgpath1[i]);
                 singleItProductRecordValue.push(itFormResult.imgpath2[i]);
                 singleItProductRecordValue.push(itFormResult.imgpath3[i]);
+                singleItProductRecordValue.push(itFormResult.quoteNum[i]);
                 singleItProductRecordValue.push(itFormResult.justification[i]);
                 singleItProductRecordValue.push(itFormResult.parentProcurementId[i]);
                 lstItProducts.push(singleItProductRecordValue);
@@ -345,7 +349,7 @@ router.post('/itProducts', (request,response) => {
     console.log('lstItProducts  '+JSON.stringify(lstItProducts));
    if(lstItProducts.length==numberOfRows)
    {
-    const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c,justification__c ,Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
+    const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c,Number_of_quotes__c,justification__c ,Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
     console.log(itProductsInsertQuery);
     pool.query(itProductsInsertQuery)
     .then((itProductsInsertQueryResult) => {
