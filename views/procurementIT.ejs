@@ -60,6 +60,7 @@
            <th>OTHER ITEMS</th>
            <th>VENDOR PICKLIST</th>
            <th>COST PER UNIT ITEM</th>
+           <th>UNIT</th>
            <th>VENDOR GST NUMBER</th>
            <th>ITEMS SPECIFICATION</th>
            <th>QUANTITY</th>
@@ -123,6 +124,7 @@
         html +='<td><input id="otherItems'+cnt+'" type="text" name="otherItems" class="form-control" disabled="true" /></td>';
         html += '<td><select id="vendor'+cnt+'" name="vendor" class="form-control item_unit"><option value="">Select</option></select></td>';      
         html +='<td><input id="unitCost'+cnt+'" type="text" name="unitCost" class="form-control" readonly="true"  /></td>';
+        html +='<td><input id="unit'+cnt+'" type="text" name="unit" class="form-control" readonly="true"  /></td>';  
         html +='<td><input id="gst'+cnt+'" type="text" name="gst" class="form-control" readonly="true"  /></td>';
         html += '<td><input type="text" name="itemSpecification" class="form-control" /></td>';
         html += '<td><input type="number" name="quantity" class="form-control" /></td>';
@@ -229,6 +231,8 @@
             let unCost=document.getElementById('unitCost'+cnt);
             unCost.value=response[0].per_unit_cost__c;
             alert('per_unit_cost__c'+response[0].per_unit_cost__c);
+            let itemUnit=document.getElementById('unit'+cnt);
+            itemUnit.value=response[0].unit__c;
             }
         })
         .fail((jqXHR,text,err) => {

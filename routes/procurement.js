@@ -434,7 +434,7 @@ router.get('/getCostPerUnit',(request,response)=>{
     let sid=request.query.sid;
     console.log('seleceted ID =>'+sid);
     pool
-    .query('SELECT sfid,Per_Unit_Cost__c FROM salesforce.Item_Description__c where 	Impaneled_Vendor__c=$1',[sid])
+    .query('SELECT sfid,Per_Unit_Cost__c,unit__c FROM salesforce.Item_Description__c where 	Impaneled_Vendor__c=$1',[sid])
     .then((querryResult)=>{
         console.log('queryResult  =>'+JSON.stringify(querryResult)+' '+ querryResult.rowCount);
         response.send(querryResult.rows);
