@@ -88,6 +88,8 @@
                     </div>
                 </div>
             </div>
+        
+            
         <div class="form-group">
             <div class="row">
               <div class="col-md-6">
@@ -145,6 +147,7 @@
           </div>
   </div>
 </div>
+</div></div>
 
     
 
@@ -270,7 +273,7 @@
             tableDidUpdate: () => {
             console.log('table did update');
              anchorClickFunctionalities();
-           //  additionalEditFunctionality();
+            additionalEditFunctionality();
             
             },
             tableWillUnmount: () => console.log('table will unmount'),
@@ -297,7 +300,6 @@
                console.log('response it : '+JSON.stringify(response));
                table.setData(response, columns);
                anchorClickFunctionalities();
-               additionalEditFunctionality();
               
               
             })
@@ -315,8 +317,6 @@
             vendorIDS=this.id;
             let vendorId = this.id;
             alert('vendorTag=>'+vendorId);
-          //  $('#popup').modal('show'); 
-          //  console.log('Modal');
             $("#popup").modal("show");
             $.ajax({
                 type : 'GET',
@@ -414,9 +414,42 @@
             $('.editVendor').on('click',function(event){
               event.stopPropagation();
               event.stopImmediatePropagation();
-              let vendorEditId = this.id;
-              alert('vendorEditId modal ID=>'+vendorEditId);
+              let vendorId = this.id;
+              alert('vendorEditId modal ID=>'+vendorId);
               $('#venderEditModal').modal('show'); 
+              $.ajax({
+                url : '/procurement/getVendorDetail',
+                type:'get',
+                data : {
+                    vendorId : vendorId
+                },
+                dataType: 'json',
+                beforeSend : function(){
+                  $('#detailLoadingSpinner').show();
+                }
+            })
+          .then((response)=>{
+            console.log('response from Edit Ajax +='+JSON.stringify(response));
+            console.log('rtecordDeatail '+response.VendorDetail[0].name);
+            document.forms["editvendor"]["vendorId"].value = response.VendorDetail[0].name;
+            document.forms["editvendor"]["ser"].value = response.VendorDetail[0].services__c;
+            document.forms["editvendor"]["item"].value = response.VendorDetail[0].items__c;
+            document.forms["editvendor"]["name"].value = response.VendorDetail[0].vendor_name__c;
+            document.forms["editvendor"]["cont"].value = response.VendorDetail[0].contact_no__c;
+            document.forms["editvendor"]["bankDetail"].value = response.VendorDetail[0].bank_details__c;
+            document.forms["editvendor"]["ifsc"].value = response.VendorDetail[0].bank_ifsc_code__c;
+            document.forms["editvendor"]["pan"].value = response.VendorDetail[0].pan_no__c;
+            document.forms["editvendor"]["add"].value = response.VendorDetail[0].address__c;
+            document.forms["editvendor"]["acc"].value = response.VendorDetail[0].bank_account_no__c;
+            document.forms["editvendor"]["state"].value = response.VendorDetail[0].state__c;
+            document.forms["editvendor"]["district"].value = response.VendorDetail[0].district__c;
+            document.forms["editvendor"]["hide"].value = response.VendorDetail[0].sfid;
+          })
+          .fail((jqXHR, status, error) =>{
+            $('#detailLoadingSpinner').show();
+            console.log('jqXHR  : '+JSON.stringify(jqXHR));
+            console.log('error  : '+error);
+          })
             })
         }
         

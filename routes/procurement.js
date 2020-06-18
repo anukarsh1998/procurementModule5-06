@@ -703,7 +703,7 @@ router.get('/getVendorDetail',async(request,response)=>{
     let recordDeatil={};
     await
     pool
-    .query('select sfid ,name,vendor_Name__c ,services__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,State__c,District__c '+
+    .query('select sfid ,name,vendor_Name__c ,services__c,contact_no__c,bank_details__c,pan_no__c,address__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,State__c,District__c '+
     'FROM salesforce.Impaneled_Vendor__c where sfid=$1',[vendorId])
     .then((queryResult)=>{
         console.log('queryResult +>'+JSON.stringify(queryResult.rows));
