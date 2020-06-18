@@ -1,0 +1,423 @@
+<% include ./partials/navbar %>
+<% include ./partials/footer %>
+<% include ./partials/messages %>
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+<h4 style="text-align: center;">Vendor LIST VIEW</h4>
+<div class="container">
+    <div class="row mt-5 mb-3 align-items-center">
+        <div class="col-md-5">
+            <a class="btn btn-primary btn-md bg-gray" href="/procurement/createvendor" id="createNewVendor">Create New  Vendor</a>
+            <a class="btn btn-primary btn-md bg-gray" href="/expense" >Refresh</a>
+        </div>
+        <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+        </div>
+        <div class="col-md-2 text-right">
+        <span class="pr-3">Rows Per Page:</span>
+        </div>
+        <div class="col-md-2">
+            <div class="d-flex justify-content-end">
+                <select class="custom-select" name="rowsPerPage" id="changeRows">
+                    <option value="1">1</option>
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+        </div>
+ </div>
+
+ <div id="vendorListViewTable" class="responsive ">
+
+ </div>
+
+</div>
+
+
+<!-- vendor edit Modal  modal -->
+<div id="venderEditModal" class="modal fade ">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">  Vendor Edit   Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body" id="editModalBody" >
+            <form name="editvendor" id="editvendor" >
+             <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                      <label for="vendorId">Impaneled Vendor ID</label>
+                      <input type="text" disabled class="form-control" id="vendorId" value=""   name="vendorId" >
+                    </div>
+                    
+                    <div class="col-md-6">
+                    <label for="ser"> Services</label>
+                      <input type="text" id="ser"  class="form-control" value="" name="ser" required>
+                    </div>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                    <label for="item">Item  </label>
+                    <input type="text" class="form-control" id="item" value=""   name="item" >
+                    </div>
+
+                  <div class="col-md-6">
+                    <label for="name">Vendor Name </label>
+                    <input type="text"  class="form-control" id="name" value=""   name="name" >
+                  </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                  <div class="col-md-6">
+                  <label for="cont">Contact No. </label>
+                    <input type="number" class="form-control" id="cont" value=""   name="cont" >
+                  </div>
+                  <div class="col-md-6">
+                    <label for="bankDetail">Bank Detail </label>
+                    <input type="text" class="form-control" id="bankDetail" value=""   name="bankDetail" >
+                    </div>
+                </div>
+            </div>
+        <div class="form-group">
+            <div class="row">
+              <div class="col-md-6">
+              <label for="ifsc">Bank IFSC Code </label>
+                <input type="text" class="form-control" id="ifsc" value=""   name="ifsc" >
+              </div>
+              <div class="col-md-6">
+                <label for="pan"> Pan Number </label>
+                <input type="text" class="form-control" id="pan" value=""   name="pan" >
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+              
+              
+              <div class="col-md-6">
+              <label for="add">Addresss </label>
+                <input type="text" class="form-control" id="add" value=""   name="add" >
+              </div>
+              <div class="col-md-6">
+                <label for="acc"> Account Number </label>
+                <input type="text" class="form-control" id="acc" value=""   name="acc" >
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+              
+              
+              <div class="col-md-6">
+              <label for="state">state </label>
+                <input type="text" class="form-control" id="state" value=""   name="state" >
+              </div>
+              <div class="col-md-6">
+                <label for="district">  District </label>
+                <input type="text" class="form-control" id="district" value=""   name="district" >
+                </div>
+            </div>
+        </div>
+
+              <div class="form-group">
+                  <div class="row">
+                   
+                      <div class="col-md-6">
+                        <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                        </div>
+                  </div>     
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary" id="editVendorButton" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+  </div>
+</div>
+
+    
+
+
+<!-- End of Edi tmodal -->
+
+
+<!-- Modal Popup For VendorList Detail & Their Related data -->
+
+
+
+<div class="modal fade" id="popup">
+    
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Impaneled Vendor  </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <nav>
+                            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Details</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Related</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                <!-- Particular Asset Details -->
+                                <table id="vendorDetail" class="table table-hover striped">
+                                    <!-- Inside code is handled by Jquery to add dyanamic Content -->
+                                </table>
+                                <!-- Particular Asset Details-->
+                            </div>
+							
+                            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                <div class="accordion" id="accordionExample">
+								
+                                    <div class="card">
+                                        <div class="card-header" id="headingOne">
+                                            <h5 class="mb-0">
+                                            <button class="btn btn-link text-left" type="pettyCashButton"
+                                                data-toggle="collapse" data-target="#collapseOne"
+                                                aria-expanded="true" aria-controls="collapseOne">
+                                                <i class="fa fa-angle-double-right mr-3"></i>Item Description
+                                            </button>
+                                             <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+                                            <a href="#" class="btn btn-primary float-right newVendor" id="newVendor" style="color:white;" >New</a>
+                                        </h5>
+                                        </div>
+
+                                        <div id="collapseOne" class="collapse show fade" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <table id="ItemDescriptionTable" class="table table-hover striped">
+                                                    
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+									
+        
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script>
+    $(document).ready(function(){
+        let columns ={
+            sequence : 'Sequence',
+            name: ' Vendor Name',
+            service: ' services',
+            item : 'Item',
+            gst: 'Bank GST No.',
+            acc: 'Bank Account No.',
+            state:'State',
+            district:' District',
+            editAction:'Action',
+        }
+        var table = $('#vendorListViewTable').tableSortable({
+            data :[],
+            columns,
+            searchField: '#searchField',
+            sorting: true,
+            rowsPerPage: 5,
+            pagination:true,
+            tableWillMount: () => {
+                console.log('table will mount')
+                
+            },
+            tableDidMount: () => {
+                console.log('table did mount');
+
+                $('#spinner').hide();
+            },
+            tableWillUpdate: () => {
+                console.log('table will update')
+            //  table.refresh();
+            // onLoadTask();
+            },
+            tableDidUpdate: () => {
+            console.log('table did update');
+             anchorClickFunctionalities();
+           //  additionalEditFunctionality();
+            
+            },
+            tableWillUnmount: () => console.log('table will unmount'),
+            tableDidUnmount: () => console.log('table did unmount'),
+            onPaginationChange: function(nextPage, setPage) {
+                setPage(nextPage);
+            },
+        
+        });
+        $('#changeRows').on('change', function() {
+            table.updateRowsPerPage(parseInt($(this).val(), 10));
+            })
+    
+        /    $('#refresh').click(function() {
+                table.refresh(true);
+                onLoadTask();
+            })    
+            $.ajax({
+                url : '/procurement/getVendorsList',
+                type:'get',
+                dataType: 'json'
+           })
+           .done((response) => {
+               console.log('response it : '+JSON.stringify(response));
+               table.setData(response, columns);
+               anchorClickFunctionalities();
+               additionalEditFunctionality();
+              
+              
+            })
+          .fail((jqXHR, status, error) =>{
+              console.log('jqXHR  : '+JSON.stringify(jqXHR));
+              console.log('error  : '+error);
+            })
+    })
+   var vendorIDS;
+    function anchorClickFunctionalities()
+    {
+        $('a.vendorTag').on('click',function(event){
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            vendorIDS=this.id;
+            let vendorId = this.id;
+            alert('vendorTag=>'+vendorId);
+          //  $('#popup').modal('show'); 
+          //  console.log('Modal');
+            $("#popup").modal("show");
+            $.ajax({
+                type : 'GET',
+                url  : '/procurement/getVendorDetail',
+                data : {
+                    'vendorId' : vendorId
+                },
+                dataType : 'json'
+            })
+            .done((data)=>{
+                let recordData=data[0];
+                console.log('DATA DEtails=>'+JSON.stringify(data.VendorDetail));
+                let record=data.VendorDetail;
+                console.log('DATA record=>'+JSON.stringify(record));
+                if(data.VendorDetail.length>0)
+                {
+                    console.log('Inside Vendor Details'); 
+                        let vendorDetailRow = '';
+                        data.VendorDetail.forEach((eachRecord) => {
+                            vendorDetailRow += '<tr>';
+                            vendorDetailRow += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Item Metrics</h5></td>';    
+                            vendorDetailRow += '</tr>';
+
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong> Name<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.name+'</td>';
+                                    vendorDetailRow += '<td><strong>Services<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.services__c+'</td>';
+                                vendorDetailRow += '</tr>'; 
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong> Vendor Name<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.vendor_name__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Items<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.items__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>  Statae<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.state__c+'</td>';
+                                    vendorDetailRow += '<td><strong>District<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.district__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>  GST No.<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.gst_no__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Bank IFSC<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.bank_ifsc_code__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong> Account No.<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.bank_account_no__c+'</td>';
+                                vendorDetailRow += '</tr>'; 
+                                    $('#vendorDetail').html(vendorDetailRow);
+
+                        })
+                }
+
+                if(data.item.length>0){
+                    console.log('INSIDE Item Description')
+                    let itemDescription = '';
+                    itemDescription+='<thead>  <th>Item Name</th><th>Category</th><th>Item</th><th>Unit</th><th>Cost Per Unit</th></thead>';
+                    data.item.forEach((each)=>{
+                        itemDescription
+                        itemDescription += '<td>'+each.name +'</td>'; 
+                        itemDescription += '<td>'+each.category__c +'</td>'; 
+                        itemDescription += '<td>'+each.items__c +'</td>'; 
+                        itemDescription += '<td>'+each.unit__c +'</td>'; 
+                        itemDescription += '<td>'+each.per_unit_cost__c +'</td></tr>';
+                    })
+                    itemDescription+=  '<td colspan="6"><center><a target="_blank" href="/procurement/ItemDescriptionListView?vendorId='+vendorIDS+'">ViewlAll</a></centre></td>';
+                   
+                   console.log('iddd'+data.VendorDetail.sfid);
+                        $('#ItemDescriptionTable').empty();
+                    $('#ItemDescriptionTable').append(itemDescription);
+                }
+            })
+            .fail((jqXHR, textStatus, err) =>{
+                console.log('textStatus  : '+textStatus);
+            })
+        })
+    }
+
+        $('a.newVendor').click(() => {
+            console.log('newVendor anchor tag ');
+            //var assetId = document.getElementById('assetId').innerHTML;
+            console.log('vendorIDS  : '+vendorIDS);
+            location.assign('/procurement/ItemDescription/'+vendorIDS);           
+        })
+        $('a.itemDescTag').click(() => {
+            console.log('ItemDescription view List anchor tag ');
+            //var assetId = document.getElementById('assetId').innerHTML;
+            console.log('vendorIDS  : '+vendorIDS);
+            location.assign('/procurement/ItemDescription/'+vendorIDS);           
+        })
+        function additionalEditFunctionality(){
+            $('.editVendor').on('click',function(event){
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              let vendorEditId = this.id;
+              alert('vendorEditId modal ID=>'+vendorEditId);
+              $('#venderEditModal').modal('show'); 
+            })
+        }
+        
+</script>

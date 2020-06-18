@@ -1,0 +1,115 @@
+<% include ./partials/navbar %>
+<% include ./partials/footer %>
+<% include ./partials/messages %>
+<p id="vendorId"><%= vendorId %></p>
+<link rel="stylesheet" href="/stylesheets/table-sortable.css">
+<script src="/scripts/table-sortable.js" ></script>
+
+<h4 style="text-align: center;">Item Description LIST VIEW</h4>
+<div class="container">
+    <div class="row mt-5 mb-3 align-items-center">
+        <div class="col-md-5">
+            <a class="btn btn-primary btn-md bg-gray" href="/procurement/getVendorListView" id="createNewItem">Create New ItemDescription</a>
+            <a class="btn btn-primary btn-md bg-gray" href="/expense" >Refresh</a>
+        </div>
+        <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
+        </div>
+        <div class="col-md-2 text-right">
+        <span class="pr-3">Rows Per Page:</span>
+        </div>
+        <div class="col-md-2">
+            <div class="d-flex justify-content-end">
+                <select class="custom-select" name="rowsPerPage" id="changeRows">
+                    <option value="1">1</option>
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+        </div>
+ </div>
+
+ <div id="ItemDescriptionTable" class="responsive ">
+
+ </div>
+
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#vendorId').hide();
+        var id = document.getElementById('vendorId').innerHTML;
+        alert('id '+id);
+
+        let columns ={
+            sequence : 'Sequence',
+            name: ' Item Description Name',
+            category: ' services',
+            item : 'Item',
+            unit:'Unit',
+            cost:'Per Unit Cost',
+            vendor:'Vendor Name',
+            editAction:'Action',
+        }
+        var table = $('#ItemDescriptionTable').tableSortable({
+            data :[],
+            columns,
+            searchField: '#searchField',
+            sorting: true,
+            rowsPerPage: 5,
+            pagination:true,
+            tableWillMount: () => {
+                console.log('table will mount')
+                
+            },
+            tableDidMount: () => {
+                console.log('table did mount');
+
+                $('#spinner').hide();
+            },
+            tableWillUpdate: () => {
+                console.log('table will update')
+            //  table.refresh();
+            // onLoadTask();
+            },
+            tableDidUpdate: () => {
+            console.log('table did update');
+          //   anchorClickFunctionalities();
+          //  additionalEditFunctionality();
+            
+            },
+            tableWillUnmount: () => console.log('table will unmount'),
+            tableDidUnmount: () => console.log('table did unmount'),
+            onPaginationChange: function(nextPage, setPage) {
+                setPage(nextPage);
+            },
+        
+        });
+        $('#changeRows').on('change', function() {
+            table.updateRowsPerPage(parseInt($(this).val(), 10));
+            })
+    
+        /    $('#refresh').click(function() {
+                table.refresh(true);
+                onLoadTask();
+            })    
+            $.ajax({
+                url : '/procurement/getItemList',
+                type:'get',
+                data:{id:id},
+                dataType: 'json'
+           })
+           .done((response) => {
+               console.log('response it : '+JSON.stringify(response));
+               table.setData(response, columns);
+               //anchorClickFunctionalities();
+              
+              
+            })
+          .fail((jqXHR, status, error) =>{
+              console.log('jqXHR  : '+JSON.stringify(jqXHR));
+              console.log('error  : '+error);
+            })
+    })
+</script>

@@ -3,6 +3,9 @@ const verify = require('../config/verifyToken');
 const format = require('pg-format');
 const joi = require('@hapi/joi');
 const Router = require('express-promise-router');
+const { response, request } = require('express');
+const { body } = require('express-validator');
+const { json } = require('body-parser');
 const router = new Router();
 
 router.get('/',verify,(request, response)=> {
@@ -646,5 +649,216 @@ router.post('/updateProcurementIt',(request,response)=>{
     })
   })
 
+router.get('/getVendorListView',verify,(request,response)=>{
+    let objUser=request.user;
+    console.log('user '+objUser);  
+    response.render('VendorlistView',{objUser});
 
+})
+
+router.get('/getVendorsList',(request,response)=>{
+    let qry ='select sfid ,name,vendor_Name__c ,services__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,State__c,District__c '+
+     'FROM salesforce.Impaneled_Vendor__c ';
+     console.log('qry  =>'+qry)
+     pool.query(qry)
+     .then((vendorQueryResult) => {
+         console.log('vendorQueryResult  : '+JSON.stringify(vendorQueryResult.rows));
+         if(vendorQueryResult.rowCount>0){
+
+            let modifiedList = [],i =1;
+            vendorQueryResult.rows.forEach((eachRecord) => {
+              let obj = {};
+              obj.sequence = i;
+              obj.name = '<a href="#" class="vendorTag" id="'+eachRecord.sfid+'" >'+eachRecord.name+'</a>';
+              obj.vendorname=eachRecord.vendor_Name__c;
+              obj.service = eachRecord.services__c;
+              obj.item=eachRecord.items__c;
+              obj.gst=eachRecord.gst_no__c;
+              obj.acc=eachRecord.bank_account_no__c;
+              obj.item_category = eachRecord.bank_IFSC_Code__c;
+              obj.state = eachRecord.state__c;
+              obj.district=eachRecord.district__c;
+              obj.editAction = '<button href="#" class="btn btn-primary editVendor" id="'+eachRecord.sfid+'" >Edit</button>'
+              i= i+1;
+              modifiedList.push(obj);
+            })
+            response.send(modifiedList);
+        }
+        else
+        {
+            response.send([]);
+        }
+     })
+     .catch((error) => {
+         console.log('error  : '+error.stack);
+         response.send('Error Occurred !');
+     })
+})
+router.get('/getVendorDetail',async(request,response)=>{
+    let vendorId=request.query.vendorId;
+    console.log('vendorId '+vendorId);
+    
+    let qry ='';
+    console.log('qry Detail =>'+qry);
+    let recordDeatil={};
+    await
+    pool
+    .query('select sfid ,name,vendor_Name__c ,services__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,State__c,District__c '+
+    'FROM salesforce.Impaneled_Vendor__c where sfid=$1',[vendorId])
+    .then((queryResult)=>{
+        console.log('queryResult +>'+JSON.stringify(queryResult.rows));
+        recordDeatil.VendorDetail=queryResult.rows;
+        console.log('record '+recordDeatil);
+
+        //response.send(queryResult.rows);
+    })
+    .catch((error)=>{
+        console.log('error =>'+JSON.stringify(error.stack));
+        response.send(error);
+    })
+await
+pool
+.query('select sfid ,name,Impaneled_Vendor__c,Unit__c,	Items__c,Per_Unit_Cost__c,Category__c '+
+'FROM salesforce.Item_Description__c where impaneled_vendor__c=$1',[vendorId])
+.then((itemdescriptionQueryy)=>{
+    console.log('ten description =>'+JSON.stringify(itemdescriptionQueryy.rows));
+    recordDeatil.item=itemdescriptionQueryy.rows;
+})
+.catch((error)=>{
+    console.log('error '+error.stack);
+    response.send(error);
+})
+console.log('reccord' +recordDeatil);
+response.send(recordDeatil);
+})
+router.get('/createvendor',verify,(request,response)=>{
+    let objUser=request.user;
+    console.log('user '+objUser);
+    response.render('createImpaneledVendor',{objUser});
+})
+router.get('/ItemDescription/:parentVendor',verify,(request,response)=>{
+    let parentVendor = request.params.parentVendor;
+    console.log('parentVendor '+parentVendor);
+    let objUser=request.user;
+    console.log('user '+objUser);
+    response.render('ItemDescriptionForm',{parentVendor,objUser});
+
+})
+router.post('/saveItemDescription',(request,response)=>{
+    let body = request.body;
+    console.log('body  : '+JSON.stringify(body));
+    const{name,items,category,unit,other,hide}=request.body;
+    let record = [];
+    record.push(name);
+    record.push(items);
+    record.push(category);
+    record.push(unit);
+    record.push(other);
+    record.push(hide);
+    let recordlist=[];
+recordlist.push(record);
+console.log(recordlist);
+
+let itemDescQuery = format('INSERT INTO salesforce.Item_Description__c (name,Items__c, Category__c,Unit__c,Other_Items__c,Impaneled_Vendor__c ) VALUES %L returning id',recordlist);
+console.log('impaneledVendor=>'+itemDescQuery);
+pool
+.query(itemDescQuery)
+.then((querryResult)=>{
+    console.log('QuerryResult'+JSON.stringify(querryResult));
+    response.send('Succesfully Inserted');
+})
+.catch((error)=>{
+    console.log(error.stack);
+    response.send(error);
+})
+})
+  router.post('/saveVendor',(request,response)=>{
+    let body = request.body;
+    console.log('body  : '+JSON.stringify(body));
+    const{name,service,items,cont,bankkDet,ifsc,pan,gst,add,accNo,state,url,other,district}=request.body;
+    console.log(name+service+items+cont+bankkDet+ifsc+pan+gst+add+accNo+state+url+other+district);
+
+    
+    let record = [];
+    record.push(name);
+    record.push(service);
+    record.push(items);
+    record.push(cont);
+    record.push(bankkDet);
+    record.push(ifsc);
+    record.push(pan);
+    record.push(gst);
+    record.push(add);
+    record.push(accNo);
+    record.push(state);
+    record.push(district);
+    record.push(url);
+    record.push(other);
+
+let recordlist=[];
+recordlist.push(record);
+console.log(recordlist);
+
+       let impaneledVendor = format('INSERT INTO salesforce.Impaneled_Vendor__c (Vendor_Name__c, Services__c,Items__c,Contact_No__c,Bank_Details__c,Bank_IFSC_Code__c, PAN_No__c,GST_No__c,Address__c,Bank_Account_No__c,State__c,District__c, Quote_Public_URL__c,Others__c ) VALUES %L returning id',recordlist);
+       console.log('impaneledVendor=>'+impaneledVendor);
+    pool.query(impaneledVendor)
+    .then((vendorQueryResult) => {
+        console.log('vendorQueryResult  : '+JSON.stringify(vendorQueryResult.rows));
+        response.send('Saved Successfully !');
+    })
+    .catch((error) => {
+        console.log('error  : '+error.stack);
+        response.send('Error Occurred !');
+    })
+  
+
+    })
+router.get('/ItemDescriptionListView',verify,(request,response)=>{
+    let objUser=request.user;
+    console.log('user '+objUser);
+    let vendorId = request.query.vendorId;
+    console.log('vendor Id =>'+vendorId);
+    response.render('ItemDescriptionListView',{objUser,vendorId});
+
+})
+
+router.get('/getItemList',(request,response)=>{
+    let id=request.query.id;
+    console.log('Idd '+id);
+    let qry='select item.sfid ,item.name as itemName,item.items__c, item.category__c,item.per_unit_cost__c,item.unit__c,item.other_items__c,vend.name as vendername,item.impaneled_vendor__c '+
+                'FROM salesforce.Item_Description__c item '+
+                'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
+                'ON item.Impaneled_Vendor__c = vend.sfid '+
+                'where item.impaneled_vendor__c=$1 ';
+   console.log('qyer '+qry)
+    pool
+    .query(qry, [id])
+    .then((querryResult)=>{
+        console.log('QueryyResult '+JSON.stringify(querryResult.rows));
+        if(querryResult.rowCount>0){
+
+            let modifieldList = [],i =1;
+            querryResult.rows.forEach((eachRecord) => {
+              let obj = {};
+              obj.sequence = i;
+              obj.name = '<a href="#" class="itemTag" id="'+eachRecord.sfid+'" >'+eachRecord.itemname+'</a>';
+              obj.category = eachRecord.category__c;
+              obj.item = eachRecord.items__c;
+              obj.unit = eachRecord.unit__c;
+              obj.cost = eachRecord.per_unit_cost__c;
+              obj.vendor=eachRecord.vendername;
+              obj.editAction = '<button href="#" class="btn btn-primary editItemDescription" id="'+eachRecord.sfid+'" >Edit</button>'
+              i= i+1;
+              modifieldList.push(obj);
+            })
+            response.send(modifieldList);
+        }
+        else
+        response.send('[]');
+    })
+    .catch((error)=>{
+        console.log('error '+error.stack);
+        response.send(error);
+    })
+})
 module.exports = router;

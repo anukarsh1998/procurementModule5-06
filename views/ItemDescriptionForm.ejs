@@ -1,0 +1,122 @@
+<% include ./partials/navbar %>
+<% include ./partials/footer %>
+<% include ./partials/messages %>
+<p id="vendorID"><%= parentVendor %></p>
+<div class="">
+    <div id="errorMessages"></div>
+<form  id="formdata" name="formdata" method="POST" >
+  
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-6">
+            <label for="name">Item Description name </label>
+             <input type="text" class="form-control" id="name" value="" required="true"   name="name" > 
+            </div>
+          <div class="col-md-6">
+            <label for="category">Item Category </label>
+            <select name="category" id="category" class="form-control item_unit itemsCategory"><option value="">Select</option></select>
+          </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-6">
+            <label for="unit">Unit</label>
+             <input type="text" class="form-control" id="unit" value=""  required="true" name="unit" > 
+            </div>
+          <div class="col-md-6">
+                <label for="cost">Per Unit Cost </label>
+                 <input type="text" class="form-control" id="cost" value=""   name="cost" > 
+                </div>
+        </div>
+    </div>
+
+
+
+    <div class="form-group">
+        <div class="row">
+          <div class="col-md-6">
+            <label for="items">Item  </label>
+            <select name="items" id="items" class="form-control item_unit itemsCategory"><option value="">Select</option></select>
+          </div>
+          <div class="col-md-6">
+            <label for="other">  Others </label>
+             <input type="other" class="form-control" id="other" value=""   name="other" > 
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="row">
+          <div class="col-md-6">
+             <input type="hidden" class="form-control" id="hide" value="" required="true"  name="hide" > 
+            </div>
+        </div>
+    </div>
+    <button style="text-align: center;" type="submit" class="btn btn-primary" id="CreateVendor" >Save</button>
+</form>
+</div>
+<script>
+    var itemsCategory = [ "Stationery", "Printing", "Electrical", "Events", "MaterialsOnRent", "Miscellaneous"];
+    var Stationery = ["A4 Size Paper Rim", "Pen", "Pencil", "Sharpner", "Eraser", "Markers", "Files", "White", "Magnetic Board", "Other Items"];
+    var Printing = ["Books", "Brochures", "Leaflets", "Binding", "Posters", "Backdrop", "Standees", "Caps", "Certificates", "Other Items"];
+    var Electrical = ["Lights", "UPS", "Inverter", "Battery", "Extension Board", "Heater", "Fans", "Other Items"];
+    var Events = ["Suggested Hostels", "Other Items"];
+    var MaterialsOnRent = ["Projector", "AV Systems", "Hardware Peripherals", "Other Items"];
+    var Miscellaneous = ["Maintenance", "Any Other Expense"];
+    $(document).ready(function(){
+        $('#vendorID').hide();
+        let vendId = document.getElementById('vendorID').innerHTML;
+        alert('venbderoIDv'+vendId);
+        document.forms["formdata"]["hide"].value = vendId;
+       // var hide= document.getElementById('hide').innerHTML=vendId;
+       // alert('bc '+hide);
+        for(i=0;i<itemsCategory.length;i++)
+        {
+           $('#category')
+                   .append($("<option></option>")
+                   .attr("value",itemsCategory[i])
+                   .text(itemsCategory[i]));		
+        }
+    })
+    var subListValue="";
+    let itemsCategoryValue;
+    $('#category').on('change', function() {
+      $('#items').empty();
+      itemsCategoryValue = this.value;
+      subListValue = eval(this.value); 
+      alert('subListValue  '+subListValue);
+      for(i=0;i<subListValue.length;i++)
+      {
+       
+        $('#items')
+          .append($("<option></option>")
+          .attr("value",subListValue[i])
+          .text(subListValue[i]));		
+     }
+    })
+
+     $(function () {
+        $('form#formdata').bind('submit', function () {
+          $.ajax({
+            type: 'post',
+            url: '/procurement/saveItemDescription',   // Need to make changes in post method url
+            data: $('form#formdata').serialize(),
+            success: function (data) {
+              console.log(data);
+             // alert(data);
+              let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+ data+
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+                  '<span aria-hidden="true">&times;</span>'+
+                '</button>'+
+              '</div>';
+              $('#errorMessages').empty();
+              $('#errorMessages').append(errorHtml); 
+            }
+          });
+          
+          return false;
+        })
+      }) 
+
+
+</script>
