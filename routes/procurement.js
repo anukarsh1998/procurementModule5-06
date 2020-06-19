@@ -394,7 +394,7 @@ router.get('/getRelatedQuote',(request, response) => {
     })
 
 });
-router.get('/getCostandGSt',(request,response)=>{
+router.get('/getCostandGSt',async(request,response)=>{
     let data=request.query.data;
     console.log('Data requiremet'+JSON.stringify(data));
     let st =data[0].state;
@@ -405,31 +405,58 @@ router.get('/getCostandGSt',(request,response)=>{
     console.log('state'+st);
     let qry='';
     let lst=[];
+    let vender=[];
+    let itemDesId=[];
+    let qryItem='select sfid ,name,Impaneled_Vendor__c from salesforce.Item_Description__c WHERE Items__c =$1';  
+     console.log('qryItem '+qryItem);
+     await
+     pool.query(qryItem,[ite])
+     .then((result)=>{
+         console.log('result '+JSON.stringify(result.rows));
+         result.rows.forEach((each)=>{
+            itemDesId.push(each);
+         })
+     })
+     .catch((error)=>{
+         console.log('Error  '+JSON.stringify(error.stack));
+         response.send(error);
+     })
      if(dstr=='' || dstr==null)
      {
-         qry='SELECT sfid,vendor_name__c,GST_No__c,	Quote_Public_URL__c FROM salesforce.Impaneled_Vendor__c WHERE state__c = $1 AND items__c = $2';
+         qry='SELECT sfid,vendor_name__c,GST_No__c,	Quote_Public_URL__c FROM salesforce.Impaneled_Vendor__c WHERE state__c = $1 ';
          lst.push(st);
          lst.push(ite);
          console.log('qryyy '+qry+'lstItem '+lst);
      }
      else{
-         qry='SELECT sfid,vendor_name__c,GST_No__c,Quote_Public_URL__c FROM salesforce.Impaneled_Vendor__c WHERE state__c = $1 AND District__c = $2 AND items__c = $3 ';
-         lst=[st,dstr,ite];
+         qry='SELECT sfid,vendor_name__c,GST_No__c,Quote_Public_URL__c FROM salesforce.Impaneled_Vendor__c WHERE state__c = $1 AND District__c = $2  ';
+         lst=[st,dstr];
          console.log('qry '+qry+'lst '+lst);
      }
+     console.log("items "+JSON.stringify(itemDesId));
+     await
      pool
      .query(qry,lst)
      .then((querryResult)=>{
          console.log('querryResult '+JSON.stringify(querryResult.rows));
          if(querryResult.rowCount>0)
          {
-            response.send(querryResult.rows);
+            querryResult.rows.forEach((each)=>{
+                   itemDesId.forEach((eachItem)=>{
+                       if(each.sfid==eachItem.impaneled_vendor__c){
+                        vender.push(each);
+                       }
+            })
+           })  
+           console.log
+           response.send(vender);                   
          }       
      })
      .catch((querryError)=>{
          console.log('querryError '+querryError.stack);
          response.send(querryError);
      })
+     
     
 })
 
@@ -437,7 +464,7 @@ router.get('/getCostPerUnit',(request,response)=>{
     let sid=request.query.sid;
     console.log('seleceted ID =>'+sid);
     pool
-    .query('SELECT sfid,Per_Unit_Cost__c,unit__c FROM salesforce.Item_Description__c where 	Impaneled_Vendor__c=$1',[sid])
+    .query('SELECT sfid,Per_Unit_Cost__c,unit__c,items__c FROM salesforce.Item_Description__c where Impaneled_Vendor__c =$1',[sid])
     .then((querryResult)=>{
         console.log('queryResult  =>'+JSON.stringify(querryResult)+' '+ querryResult.rowCount);
         response.send(querryResult.rows);
@@ -703,7 +730,7 @@ router.get('/getVendorDetail',async(request,response)=>{
     let recordDeatil={};
     await
     pool
-    .query('select sfid ,name,vendor_Name__c ,services__c,contact_no__c,bank_details__c,pan_no__c,address__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,State__c,District__c '+
+    .query('select sfid ,name,vendor_Name__c ,services__c,contact_no__c,name_of_signing_authority__c,bank_details__c,pan_no__c,address__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,ownerid,Others__c,quote_public_url__c,State__c,District__c '+
     'FROM salesforce.Impaneled_Vendor__c where sfid=$1',[vendorId])
     .then((queryResult)=>{
         console.log('queryResult +>'+JSON.stringify(queryResult.rows));
@@ -775,14 +802,13 @@ pool
   router.post('/saveVendor',(request,response)=>{
     let body = request.body;
     console.log('body  : '+JSON.stringify(body));
-    const{name,service,items,cont,bankkDet,ifsc,pan,gst,add,accNo,state,url,other,district}=request.body;
-    console.log(name+service+items+cont+bankkDet+ifsc+pan+gst+add+accNo+state+url+other+district);
+    const{name,authority, cont,bankkDet,ifsc,pan,gst,add,accNo,state,url,other,district}=request.body;
+    console.log(name+authority+cont+bankkDet+ifsc+pan+gst+add+accNo+state+url+other+district);
 
     
     let record = [];
     record.push(name);
-    record.push(service);
-    record.push(items);
+    record.push(authority);
     record.push(cont);
     record.push(bankkDet);
     record.push(ifsc);
@@ -799,7 +825,7 @@ let recordlist=[];
 recordlist.push(record);
 console.log(recordlist);
 
-       let impaneledVendor = format('INSERT INTO salesforce.Impaneled_Vendor__c (Vendor_Name__c, Services__c,Items__c,Contact_No__c,Bank_Details__c,Bank_IFSC_Code__c, PAN_No__c,GST_No__c,Address__c,Bank_Account_No__c,State__c,District__c, Quote_Public_URL__c,Others__c ) VALUES %L returning id',recordlist);
+       let impaneledVendor = format('INSERT INTO salesforce.Impaneled_Vendor__c (Vendor_Name__c,Name_of_Signing_Authority__c,Contact_No__c,Bank_Details__c,Bank_IFSC_Code__c, PAN_No__c,GST_No__c,Address__c,Bank_Account_No__c,State__c,District__c, Quote_Public_URL__c,Others__c ) VALUES %L returning id',recordlist);
        console.log('impaneledVendor=>'+impaneledVendor);
     pool.query(impaneledVendor)
     .then((vendorQueryResult) => {

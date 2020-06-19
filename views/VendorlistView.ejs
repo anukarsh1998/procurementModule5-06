@@ -243,10 +243,11 @@
             name: ' Vendor Name',
             service: ' services',
             item : 'Item',
-            gst: 'Bank GST No.',
-            acc: 'Bank Account No.',
             state:'State',
             district:' District',
+            gst: 'Bank GST No.',
+            acc: 'Bank Account No.',
+           
             editAction:'Action',
         }
         var table = $('#vendorListViewTable').tableSortable({
@@ -341,33 +342,58 @@
                             vendorDetailRow += '</tr>';
 
                                 vendorDetailRow += '<tr>';
-                                    vendorDetailRow += '<td><strong> Name<strong></td>';
+                                    vendorDetailRow += '<td><strong>Impaneled Vendor ID<strong></td>';
                                     vendorDetailRow += '<td>'+eachRecord.name+'</td>';
-                                    vendorDetailRow += '<td><strong>Services<strong></td>';
-                                    vendorDetailRow += '<td>'+eachRecord.services__c+'</td>';
+                                    vendorDetailRow += '<td><strong>  State<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.state__c+'</td>';
                                 vendorDetailRow += '</tr>'; 
+
                                 vendorDetailRow += '<tr>';
-                                    vendorDetailRow += '<td><strong> Vendor Name<strong></td>';
-                                    vendorDetailRow += '<td>'+eachRecord.vendor_name__c+'</td>';
-                                    vendorDetailRow += '<td><strong>Items<strong></td>';
-                                    vendorDetailRow += '<td>'+eachRecord.items__c+'</td>';
-                                vendorDetailRow += '</tr>';
-                                vendorDetailRow += '<tr>';
-                                    vendorDetailRow += '<td><strong>  Statae<strong></td>';
-                                    vendorDetailRow += '<td>'+eachRecord.state__c+'</td>';
                                     vendorDetailRow += '<td><strong>District<strong></td>';
                                     vendorDetailRow += '<td>'+eachRecord.district__c+'</td>';
+                                    vendorDetailRow += '<td><strong> Vendor Name<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.vendor_name__c+'</td>';
                                 vendorDetailRow += '</tr>';
                                 vendorDetailRow += '<tr>';
-                                    vendorDetailRow += '<td><strong>  GST No.<strong></td>';
-                                    vendorDetailRow += '<td>'+eachRecord.gst_no__c+'</td>';
-                                    vendorDetailRow += '<td><strong>Bank IFSC<strong></td>';
-                                    vendorDetailRow += '<td>'+eachRecord.bank_ifsc_code__c+'</td>';
+                    
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>Name of Signing Authority <strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.name_of_signing_authority__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Contact no.<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.contact_no__c+'</td>';
                                 vendorDetailRow += '</tr>';
                                 vendorDetailRow += '<tr>';
-                                    vendorDetailRow += '<td><strong> Account No.<strong></td>';
+
+                                    vendorDetailRow += '<tr>';
+                                        vendorDetailRow += '<td><strong> Bank Detail <strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.bank_details__c+'</td>';
+                                        vendorDetailRow += '<td><strong> Bank IFSC Code<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.bank_ifsc_code__c+'</td>';
+                                    vendorDetailRow += '</tr>';
+                                    vendorDetailRow += '<tr>';
+
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>PAN<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.pan_no__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Address<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.address__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>  Bank Account No.<strong></td>';
                                     vendorDetailRow += '<td>'+eachRecord.bank_account_no__c+'</td>';
+                                    vendorDetailRow += '<td><strong> Owner<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.ownerid+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>Others/etc<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.others__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Quote Public URL<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.quote_public_url__c+'</td>';
                                 vendorDetailRow += '</tr>'; 
+                                vendorDetailRow += '<tr>';
+                                        vendorDetailRow += '<td><strong>GST No.<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.gst_no__c+'</td>';
+                                vendorDetailRow += '</tr>';
                                     $('#vendorDetail').html(vendorDetailRow);
 
                         })

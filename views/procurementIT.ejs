@@ -204,7 +204,7 @@
 
 
 
-        var lstVendorDetail=[]; let sid='';
+        var lstVendorDetail=[]; let it=''; let sid='';
         $('#vendor'+cnt).on('change',function(){
           let sif =this.value;
           console.log('sfidSelected = '+sif);
@@ -228,11 +228,16 @@
         .done((response)=>{
           console.log('response '+JSON.stringify(response));
             if(response.length>0){
-            let unCost=document.getElementById('unitCost'+cnt);
-            unCost.value=response[0].per_unit_cost__c;
-            alert('per_unit_cost__c'+response[0].per_unit_cost__c);
-            let itemUnit=document.getElementById('unit'+cnt);
-            itemUnit.value=response[0].unit__c;
+              response.forEach((each)=>{
+                if(each.items__c==it){
+                  let unCost=document.getElementById('unitCost'+cnt);
+                  unCost.value=each.per_unit_cost__c;
+                  //alert('unit for Item'+each.unit__c);
+                  let itemUnit=document.getElementById('unit'+cnt);
+                  itemUnit.value=each.unit__c;
+      
+                }
+              })
             }
         })
         .fail((jqXHR,text,err) => {
@@ -260,6 +265,7 @@
         $('#items'+cnt).on('change',function(){
          alert('Selected States=> '+sts+' & District =>'+dstr);
         // $('#'+cnt).empty();
+            it=this.value;
             itemsValue = this.value;
             alert( itemsValue);
             console.log('itemsValue others '+itemsValue);
@@ -295,7 +301,7 @@
                 .done((response) => {
                     console.log('Vendor ResultData '+JSON.stringify(response));
                     console.log('length '+response.length);
-                    console.log('dgsdh '+response[0].vendor_name__c);
+                    console.log('Vendor name '+response[0].vendor_name__c);
                        
                       for(let i=0;i<response.length;i++)
                       {

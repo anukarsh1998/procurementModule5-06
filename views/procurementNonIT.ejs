@@ -212,7 +212,7 @@
 
 
 
-        var lstVendorDetail=[]; let sid='';
+        var lstVendorDetail=[]; let itVal=''; let sid='';
         $('#vendor'+cnt).on('change',function(){
           alert('quoted Ref=>'+lstVendorDetail[0].quote_public_url__c);
          
@@ -238,12 +238,16 @@
           .done((response)=>{
             console.log('response '+JSON.stringify(response));
             if(response.length>0){
-            let unCost=document.getElementById('unitCost'+cnt);
-            unCost.value=response[0].per_unit_cost__c;
-            alert('unit for Item'+response[0].unit__c);
-            let itemUnit=document.getElementById('unit'+cnt);
-            itemUnit.value=response[0].unit__c;
-
+              response.forEach((each)=>{
+                if(each.items__c==itVal){
+                  let unCost=document.getElementById('unitCost'+cnt);
+                  unCost.value=each.per_unit_cost__c;
+                  //alert('unit for Item'+each.unit__c);
+                  let itemUnit=document.getElementById('unit'+cnt);
+                  itemUnit.value=each.unit__c;
+      
+                }
+              })
             }
           })
           .fail((jqXHR,text,err) => {
@@ -279,6 +283,8 @@
               }
 
               $('#'+cnt).on('change', function() {
+                
+                  itVal=this.value;
 
                    itemValue = this.value;
                   // alert('your Choose'+itemValue);
@@ -301,7 +307,11 @@
                         console.log('Vendor ResultData '+JSON.stringify(response));
                         console.log('length '+response.length);
                         console.log('dgsdh '+response[0].vendor_name__c);
-                           
+                        let select = document.getElementById("vendor"+cnt);
+                        let length = select.options.length;
+                        for (i = length-1; i > 0; i--) {
+                          select.options[i] = null;
+                         }
                           for(let i=0;i<response.length;i++)
                           {
                             $('#vendor'+cnt)
