@@ -4,12 +4,12 @@
 <link rel="stylesheet" href="/stylesheets/table-sortable.css">
 <script src="/scripts/table-sortable.js" ></script>
 
-<h4 style="text-align: center;">Vendor LIST VIEW</h4>
+<h4 style="text-align: center;">Impaneled Vendor LIST VIEW</h4>
 <div class="container">
     <div class="row mt-5 mb-3 align-items-center">
         <div class="col-md-5">
             <a class="btn btn-primary btn-md bg-gray" href="/procurement/createvendor" id="createNewVendor">Create New  Vendor</a>
-            <a class="btn btn-primary btn-md bg-gray" href="/expense" >Refresh</a>
+            <a class="btn btn-primary btn-md bg-gray" href="/procurement/getvendorListView" >Refresh</a>
         </div>
         <div class="col-md-3">
         <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
@@ -55,27 +55,41 @@
                       <label for="vendorId">Impaneled Vendor ID</label>
                       <input type="text" disabled class="form-control" id="vendorId" value=""   name="vendorId" >
                     </div>
-                    
                     <div class="col-md-6">
-                    <label for="ser"> Services</label>
-                      <input type="text" id="ser"  class="form-control" value="" name="ser" required>
-                    </div>
+                        <label for="name">Vendor Name </label>
+                        <input type="text"  class="form-control" id="name" value=""   name="name" >
+                      </div>
                 </div>
               </div>
-              
               <div class="form-group">
                 <div class="row">
-                    <div class="col-md-6">
-                    <label for="item">Item  </label>
-                    <input type="text" class="form-control" id="item" value=""   name="item" >
-                    </div>
-
+                  
+                  
                   <div class="col-md-6">
-                    <label for="name">Vendor Name </label>
-                    <input type="text"  class="form-control" id="name" value=""   name="name" >
+                  <label for="state">state </label>
+                    <select id="state" name="state" class="form-control item_unit"><option value="">Select</option></select>
                   </div>
+                  <div class="col-md-6">
+                    <label for="district">  District </label>
+                    <select id="district" name="district" class="form-control item_unit" ><option value="">Select</option></select>
+                    </div>
                 </div>
             </div>
+
+
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-md-6">
+                  <label for="aacc">Bank Account  No. </label>
+                  <input type="number" class="form-control" id="aacc" value=""   name="aacc" >
+                  </div>
+                  <div class="col-md-6">
+                    <label for="auth">Name of Signing Authority </label>
+                    <input type="text" class="form-control" id="auth" value=""   name="auth" >
+                    </div>
+                </div>
+            </div>
+        
             <div class="form-group">
                 <div class="row">
                   <div class="col-md-6">
@@ -111,8 +125,8 @@
                 <input type="text" class="form-control" id="add" value=""   name="add" >
               </div>
               <div class="col-md-6">
-                <label for="acc"> Account Number </label>
-                <input type="text" class="form-control" id="acc" value=""   name="acc" >
+                <label for="gst">Bank GST No. </label>
+                <input type="text" class="form-control" id="gst" value=""   name="gst" >
                 </div>
             </div>
         </div>
@@ -121,19 +135,20 @@
               
               
               <div class="col-md-6">
-              <label for="state">state </label>
-                <input type="text" class="form-control" id="state" value=""   name="state" >
+              <label for="other">Others </label>
+                <input type="text" class="form-control" id="other" value=""   name="other" >
               </div>
               <div class="col-md-6">
-                <label for="district">  District </label>
-                <input type="text" class="form-control" id="district" value=""   name="district" >
+                <label for="quote">Quote Public URL </label>
+                <input type="text" class="form-control" id="quote" value=""   name="quote" >
                 </div>
             </div>
         </div>
+        
 
               <div class="form-group">
                   <div class="row">
-                   
+                    
                       <div class="col-md-6">
                         <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
                         </div>
@@ -241,8 +256,6 @@
         let columns ={
             sequence : 'Sequence',
             name: ' Vendor Name',
-            service: ' services',
-            item : 'Item',
             state:'State',
             district:' District',
             gst: 'Bank GST No.',
@@ -441,6 +454,66 @@
               event.stopPropagation();
               event.stopImmediatePropagation();
               let vendorId = this.id;
+              let dist='';
+              let st =["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh",
+              "Jharkhand", "Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha",
+              "Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura", "Uttar Pradesh","Uttarakhand","West Bengal"];
+              let dstrUP=["Noida","Ghaziabad","Kanpur Nagar","Kanpur Dehat","Unnao"];
+              let dstrUK=["Almora","Bageshwar","Chamoli","Champawat","Dehradun","Haridwar","Nainital","Pauri Garhwal","Pithoragarh"];
+              if(st.length > 0)
+              {
+                for(let i=0; i < st.length; i++)
+                {
+                  $('#state')
+                  .append($("<option></option>")
+                  .attr("value",st[i])
+                  .text(st[i]))
+                }
+              }
+              $('#state').on('change',function(){
+                let state =this.value;
+                sts=state;
+                alert("selcted"+sts);
+                let select = document.getElementById("district");
+                let length = select.options.length;
+                for (i = length-1; i > 0; i--) {
+                    if(dist!=null){
+                        select.options[i] = null;
+                    }
+                  }
+              //  alert('You Choose'+state);
+                if(state=='Uttar Pradesh')
+                {
+                 $('#district').attr("readonly",false);
+                 alert('You Choose=> '+state);
+                 $('#district')
+                   .append($("<option></option>")
+                   .attr("value","")
+                   .text("select District"))
+                  for(let i=0; i <dstrUP.length; i++)
+                  {
+                   $('#district')
+                   .append($("<option></option>")
+                   .attr("value",dstrUP[i])
+                   .text(dstrUP[i]))
+                  }
+                }
+                 else if(state=='Uttarakhand')
+                {
+                 alert('You Choose=> '+state);
+                 $('#district').attr("readonly",false);
+                  for(let i=0; i <dstrUK.length; i++)
+                  {
+                   $('#district')
+                   .append($("<option></option>")
+                   .attr("value",dstrUK[i])
+                   .text(dstrUK[i]))
+                  }
+                }
+             })
+
+
+
               alert('vendorEditId modal ID=>'+vendorId);
               $('#venderEditModal').modal('show'); 
               $.ajax({
@@ -457,18 +530,21 @@
           .then((response)=>{
             console.log('response from Edit Ajax +='+JSON.stringify(response));
             console.log('rtecordDeatail '+response.VendorDetail[0].name);
+            dist=response.VendorDetail[0].state__c;
             document.forms["editvendor"]["vendorId"].value = response.VendorDetail[0].name;
-            document.forms["editvendor"]["ser"].value = response.VendorDetail[0].services__c;
-            document.forms["editvendor"]["item"].value = response.VendorDetail[0].items__c;
             document.forms["editvendor"]["name"].value = response.VendorDetail[0].vendor_name__c;
             document.forms["editvendor"]["cont"].value = response.VendorDetail[0].contact_no__c;
             document.forms["editvendor"]["bankDetail"].value = response.VendorDetail[0].bank_details__c;
             document.forms["editvendor"]["ifsc"].value = response.VendorDetail[0].bank_ifsc_code__c;
             document.forms["editvendor"]["pan"].value = response.VendorDetail[0].pan_no__c;
             document.forms["editvendor"]["add"].value = response.VendorDetail[0].address__c;
-            document.forms["editvendor"]["acc"].value = response.VendorDetail[0].bank_account_no__c;
+            document.forms["editvendor"]["aacc"].value = response.VendorDetail[0].bank_account_no__c;
+            document.forms["editvendor"]["auth"].value = response.VendorDetail[0].name_of_signing_authority__c; 
+            document.forms["editvendor"]["district"].value=response.VendorDetail[0].district__c;
             document.forms["editvendor"]["state"].value = response.VendorDetail[0].state__c;
-            document.forms["editvendor"]["district"].value = response.VendorDetail[0].district__c;
+            document.forms["editvendor"]["quote"].value = response.VendorDetail[0].quote_public_url__c;
+            document.forms["editvendor"]["gst"].value = response.VendorDetail[0].gst_no__c;
+            document.forms["editvendor"]["other"].value = response.VendorDetail[0].others__c;
             document.forms["editvendor"]["hide"].value = response.VendorDetail[0].sfid;
           })
           .fail((jqXHR, status, error) =>{
@@ -477,6 +553,40 @@
             console.log('error  : '+error);
           })
             })
-        }
+            
+          $('#editVendorButton').on('click',function(event){
+
+            event.preventDefault();
+                      event.stopPropagation();
+                      event.stopImmediatePropagation();
+                      alert('Save Button Clicked !');
+                      var $inputs = $('#editvendor :input');
+  
+                      // not sure if you wanted this, but I thought I'd add it.
+                      // get an associative array of just the values.
+                      var values = {};
+                      $inputs.each(function() {
+                          values[this.name] = $(this).val();
+                          console.log('fomvalues=> '+JSON.stringify(values));
+                      });
+                      console.log('fomvalues=> '+JSON.stringify(values));
+                      alert('formValues : '+JSON.stringify(values));
+                      $.ajax({
+                        url : '/procurement/updateVendor',
+                        type:'post',
+                        data: values,
+                        dataType : 'json'
+                    })
+                    .done((response) => {
+                          console.log('resonse   :'+response);
+                          alert("Vendor update Succesfully succesfullly Updated!");
+                    })
+                    .fail((jqXHR, status, error) => {
+                          console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    }) 
+                    })
         
+        }
+
+
 </script>

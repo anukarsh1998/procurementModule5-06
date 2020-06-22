@@ -10,8 +10,8 @@
     <div class="row mt-5 mb-3 align-items-center">
         <div class="col-md-5">
             <a class="btn btn-primary btn-md bg-gray" href="/procurement/getVendorListView" id="createNewItem">Create New ItemDescription</a>
-            <a class="btn btn-primary btn-md bg-gray" href="/expense" >Refresh</a>
-        </div>
+           <!--  <a class="btn btn-primary btn-md bg-gray" href="/procurement/" >Refresh</a> -->
+               </div>
         <div class="col-md-3">
         <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
         </div>
@@ -35,6 +35,113 @@
  </div>
 
 </div>
+<!-- DEtail Modal -->
+<div id="itemModalDetail" class="modal fade">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Item Description View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+  
+          <div id="detailLoadingSpinner">
+            <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+        </div>
+        <table id="itemDetailTable" class="table">
+
+        </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Edit modal Item DEscription -->
+<div id="itemModal" class="modal fade ">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Item Description Edit Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      
+        <div class="modal-body" id="editModalBody" >
+            <form name="edititem" id="edititem" >
+             <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                      <label for="itemname"> Item Description Name</label>
+                      <input type="text" disabled class="form-control" id="itemname" value=""   name="itemname" >
+                    </div>
+                    <div class="col-md-6">
+                        <label for="vendor">Vendor Name </label>
+                        <input type="text"  class="form-control" id="vendor" value=""   name="vendor" >
+                      </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  
+                  
+                  <div class="col-md-6">
+                  <label for="cate">Category </label>
+                    <select id="cate" name="cate" class="form-control item_unit"><option value="">Select</option></select>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="item">  Item </label>
+                    <select id="item" name="item" class="form-control item_unit" ><option value="">Select</option></select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="row">
+                  <div class="col-md-6">
+                  <label for="unit">Unit </label>
+                    <input type="text" class="form-control" id="unit" value=""   name="unit" >
+                  </div>
+                  <div class="col-md-6">
+                    <label for="cost"> Cost Per Unit </label>
+                    <input type="number" class="form-control" id="cost" value=""   name="cost" >
+                    </div>
+                </div>
+            </div>
+             
+
+              <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-6">
+                        <label for="other"> Other Items</label>
+                        <input type="text" class="form-control" id="other" value=""   name="other" >
+                        </div>
+                      <div class="col-md-6">
+                        <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                        </div>
+                  </div>     
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary" id="editItemButton" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+  </div>
+</div>
+</div></div>
+
+    
+
+
+
 
 <script>
     $(document).ready(function(){
@@ -76,7 +183,7 @@
             tableDidUpdate: () => {
             console.log('table did update');
           //   anchorClickFunctionalities();
-          //  additionalEditFunctionality();
+               additionalEditFunctionality();
             
             },
             tableWillUnmount: () => console.log('table will unmount'),
@@ -101,9 +208,10 @@
                 dataType: 'json'
            })
            .done((response) => {
-               console.log('response it : '+JSON.stringify(response));
+               console.log('response item : '+JSON.stringify(response));
                table.setData(response, columns);
                //anchorClickFunctionalities();
+               anchorClickFunctionalities();
               
               
             })
@@ -112,4 +220,155 @@
               console.log('error  : '+error);
             })
     })
+    function anchorClickFunctionalities()
+        {
+                $('a.itemDetailTag').on('click',function(event){
+                        event.stopImmediatePropagation();
+                        event.stopPropagation();
+                        $('#itemModalDetail').modal('show');
+                        let itemId = this.id;
+                        alert('itemId  '+itemId);
+                        $('#itemModalDetail').modal('show');
+                        $.ajax({
+                            url : '/procurement/getItemDetail',
+                            type:'get',
+                            data : {
+                                itemId : itemId
+                            },
+                            dataType: 'json',
+                            beforeSend : function(){
+                              $('#detailLoadingSpinner').show();
+                            }
+                        })
+                        .done((response) => {
+                            console.log('Item DEatil  : '+JSON.stringify(response));
+                            $('#detailLoadingSpinner').hide();
+                            if(response.length > 0)
+                            {
+                                let htmlTable='';
+                              htmlTable += '<tr>';
+                                  htmlTable += '<td><strong>Name</strong></td>';
+                                  htmlTable += '<td>'+response[0].itemname+'</td>';
+                                  htmlTable += '<td><strong>Vendor Name</strong></td>';
+                                  htmlTable += '<td>'+response[0].vendername+'</td>';
+                              htmlTable += '</tr>';
+                              htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Item Category</strong></td>';
+                                htmlTable += '<td>'+response[0].category__c+'</td>';
+                                htmlTable += '<td><strong> Item</strong></td>';
+                                htmlTable += '<td>'+response[0].items__c+'</td>';
+                            htmlTable += '</tr>';
+                            htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Unit </strong></td>';
+                                htmlTable += '<td>'+response[0].unit__c+'</td>';
+                                htmlTable += '<td><strong>Cost Per Unit</strong></td>';
+                                htmlTable += '<td>'+response[0].per_unit_cost__c+'</td>';
+                            htmlTable += '</tr>';
+                            htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Other </strong></td>';
+                                htmlTable += '<td>'+response[0].other_items__c+'</td>';
+                            htmlTable += '</tr>';
+                              $('#itemDetailTable').empty();
+                              $('#itemDetailTable').html(htmlTable);
+                            }
+                        })
+                        .fail((jqXHR, status, error) =>{
+                            $('#detailLoadingSpinner').hide();
+                            console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                            console.log('error  : '+error);
+                          })
+                })
+            }
+
+
+
+
+
+    function additionalEditFunctionality(){
+        $('.editItem').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let itemId = this.id;
+            
+    var itemsCategory = [ "Stationery", "Printing", "Electrical", "Events", "MaterialsOnRent", "Miscellaneous","IT"];
+    var Stationery = ["A4 Size Paper Rim", "Pen", "Pencil", "Sharpner", "Eraser", "Markers", "Files", "White", "Magnetic Board", "Other Items"];
+    var Printing = ["Books", "Brochures", "Leaflets", "Binding", "Posters", "Backdrop", "Standees", "Caps", "Certificates", "Other Items"];
+    var Electrical = ["Lights", "UPS", "Inverter", "Battery", "Extension Board", "Heater", "Fans", "Other Items"];
+    var Events = ["Suggested Hostels", "Other Items"];
+    var MaterialsOnRent = ["Projector", "AV Systems", "Hardware Peripherals", "Other Items"];
+    var Miscellaneous = ["Maintenance", "Any Other Expense"];
+    let  IT =["External Hard disk", "Pen drive", "Desktop Mouse","Keyboard",
+     "Ram", "Monitor", "CPU", "UPS" ,"Battery", "Software", "Laptop", "Desktop", "Laptop Chargers", "Base", "Screen",
+     "Printer", "LCD projector", "Toner", "Cartridge", "Plasma",
+     "Servers", "Telephones", "Camera", "Tablets","OtherItems"];
+    for(i=0;i<itemsCategory.length;i++)
+    {
+       $('#cate')
+               .append($("<option></option>")
+               .attr("value",itemsCategory[i])
+               .text(itemsCategory[i]));		
+    }
+    
+            alert(' editItem Modal ID=>'+itemId);
+              $('#itemModal').modal('show'); 
+              $.ajax({
+                url : '/procurement/getItemDetail',
+                type:'get',
+                data : {
+                    itemId : itemId
+                },
+                dataType: 'json',
+                beforeSend : function(){
+                  $('#detailLoadingSpinner').show();
+                }
+            })
+            .then((response)=>{
+            console.log('response from Item Edit Ajax +='+JSON.stringify(response[0]));
+            document.forms["edititem"]["itemname"].value = response[0].itemname;
+            document.forms["edititem"]["vendor"].value = response[0].vendername;
+            document.forms["edititem"]["cate"].value = response[0].category__c;
+            document.forms["edititem"]["item"].value = response[0].items__c;
+            document.forms["edititem"]["unit"].value = response[0].unit__c;
+            document.forms["edititem"]["cost"].value = response[0].per_unit_cost__c;
+            document.forms["edititem"]["other"].value = response[0].other_items__c;
+            document.forms["edititem"]["hide"].value = response[0].sfid;
+            })
+            .fail((jqXHR, status, error) =>{
+                $('#detailLoadingSpinner').show();
+                console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                console.log('error  : '+error);
+              })
+        })
+        $('#editItemButton').on('click',function(event){
+            event.preventDefault();
+                      event.stopPropagation();
+                      event.stopImmediatePropagation();
+                      alert('Save Button Clicked !');
+                      var $inputs = $('#edititem :input');
+  
+                      // not sure if you wanted this, but I thought I'd add it.
+                      // get an associative array of just the values.
+                      var values = {};
+                      $inputs.each(function() {
+                          values[this.name] = $(this).val();
+                          console.log('fomvalues=> '+JSON.stringify(values));
+                      });
+                      console.log('fomvalues=> '+JSON.stringify(values));
+                      alert('formValues : '+JSON.stringify(values));
+                      $.ajax({
+                        url : '/procurement/updateItemescription',
+                        type:'post',
+                        data: values,
+                        dataType : 'json'
+                    })
+                    .done((response) => {
+                          console.log('resonse   :'+response);
+                          alert("Item Description succesfullly Updated!");
+                    })
+                    .fail((jqXHR, status, error) => {
+                          console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    }) 
+                    })
+        
+    }
 </script>

@@ -217,7 +217,22 @@ router.post('/nonItProducts', (request,response) => {
 
        }
    }
-   console.log('lstNonItProcurement:'+lstNonItProcurement.length+' number of rows :'+nonItFormResult.quantity.length);
+   if(typeof(nonItFormResult.quantity) != 'object')
+   {
+    let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,Number_of_quotes__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
+    console.log('nonItProductsInsertQuery '+nonItProductsInsertQuery);
+    pool.query(nonItProductsInsertQuery)
+    .then((nonItProductsInsertQueryResult) => {
+         console.log('nonItProductsInsertQueryResult  '+JSON.stringify(nonItProductsInsertQueryResult.rows));
+         response.send('Saved Successfully');
+    })
+    .catch((nonItProductsInsertQueryError) => {
+         console.log('nonItProductsInsertQueryError  '+nonItProductsInsertQueryError.stack);
+         response.send('Error Occured !');
+    })
+   }
+   else{
+    console.log('lstNonItProcurement:'+lstNonItProcurement.length+' number of rows :'+nonItFormResult.quantity.length);
    if(lstNonItProcurement.length==nonItFormResult.quantity.length){
     let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,Number_of_quotes__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
     console.log('nonItProductsInsertQuery '+nonItProductsInsertQuery);
@@ -231,6 +246,7 @@ router.post('/nonItProducts', (request,response) => {
          response.send('Error Occured !');
     })
    }
+}
 });
 
 
@@ -350,6 +366,21 @@ router.post('/itProducts', (request,response) => {
     }
 
     console.log('lstItProducts  '+JSON.stringify(lstItProducts));
+    if(typeof(itFormResult.quantity)!='object'){
+        console.log('single row');
+        const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c,Number_of_quotes__c,justification__c ,Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
+        console.log(itProductsInsertQuery);
+        pool.query(itProductsInsertQuery)
+        .then((itProductsInsertQueryResult) => {
+            console.log('itProductsInsertQueryResult  : '+JSON.stringify(itProductsInsertQueryResult.rows));
+            response.send('Saved Successfully !');
+        })
+        .catch((itProductsInsertQueryError) => {
+            console.log('itProductsInsertQueryError  : '+itProductsInsertQueryError.stack);
+            response.send('Error Occurred !');
+        })
+
+    }
    if(lstItProducts.length==numberOfRows)
    {
     const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c,Number_of_quotes__c,justification__c ,Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
@@ -855,7 +886,7 @@ router.get('/getItemList',(request,response)=>{
                 'FROM salesforce.Item_Description__c item '+
                 'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
                 'ON item.Impaneled_Vendor__c = vend.sfid '+
-                'where item.impaneled_vendor__c=$1 ';
+                'where item.impaneled_vendor__c=$1 AND item.sfid IS NOT null';
    console.log('qyer '+qry)
     pool
     .query(qry, [id])
@@ -865,15 +896,16 @@ router.get('/getItemList',(request,response)=>{
 
             let modifieldList = [],i =1;
             querryResult.rows.forEach((eachRecord) => {
+                console.log('sfid '+eachRecord.sfid);
               let obj = {};
               obj.sequence = i;
-              obj.name = '<a href="#" class="itemTag" id="'+eachRecord.sfid+'" >'+eachRecord.itemname+'</a>';
+              obj.name = '<a href="#" class="itemDetailTag" id="'+eachRecord.sfid+'" >'+eachRecord.itemname+'</a>';
               obj.category = eachRecord.category__c;
               obj.item = eachRecord.items__c;
               obj.unit = eachRecord.unit__c;
               obj.cost = eachRecord.per_unit_cost__c;
               obj.vendor=eachRecord.vendername;
-              obj.editAction = '<button href="#" class="btn btn-primary editItemDescription" id="'+eachRecord.sfid+'" >Edit</button>'
+              obj.editAction = '<button href="#" class="btn btn-primary editItem" id="'+eachRecord.sfid+'" >Edit</button>'
               i= i+1;
               modifieldList.push(obj);
             })
@@ -886,5 +918,99 @@ router.get('/getItemList',(request,response)=>{
         console.log('error '+error.stack);
         response.send(error);
     })
+})
+router.post('/updateVendor',(request,response)=>{
+    let body = request.body;
+    console.log('body  : '+JSON.stringify(body));
+    const { name, state,district,aacc,auth,cont,bankDetail,ifsc,pan,add,gst,other,quote,hide} = request.body;
+    console.log('state state state  '+state);
+    console.log('Vendor id  '+hide);
+    console.log('name  '+name);
+    console.log('district  '+district);
+    console.log('aacc  '+aacc);
+    console.log('auth  '+auth);
+    console.log('cont  '+cont);
+    console.log('bankDetail  '+bankDetail);
+    console.log('ifsc  '+ifsc);
+    console.log('pan  '+pan);
+    console.log('add  '+add);
+    console.log('gst  '+gst);
+    console.log('other'  +other);
+    console.log('quote  '+quote);
+    let updateQuerry = 'UPDATE salesforce.Impaneled_Vendor__c SET '+
+                         'vendor_Name__c = \''+name+'\', '+
+                         'District__c = \''+district+'\', '+
+                         'State__c = \''+state+'\', '+
+                         'Bank_Account_No__c = \''+aacc+'\', '+
+                         'contact_no__c = \''+cont+'\', '+
+                         'name_of_signing_authority__c = \''+auth+'\', '+
+                         'name = \''+bankDetail+'\', '+
+                         'Bank_IFSC_Code__c = \''+ifsc+'\', '+
+                         'pan_no__c = \''+pan+'\', '+
+                         'address__c = \''+add+'\', '+
+                         'GST_No__c = \''+gst+'\', '+ 
+                         'Others__c = \''+other+'\', '+ 
+                         'quote_public_url__c = \''+quote+'\' '+                       
+                         'WHERE sfid = $1';
+  console.log('updateQuerry  '+updateQuerry);
+    pool
+    .query(updateQuerry,[hide])
+    .then((updateQuerryResult) => {     
+             console.log('updateQuerryResult =>>'+JSON.stringify(updateQuerryResult));
+             response.send('Success');
+    })
+    .catch((updatetError) => {
+         console.log('updatetError'+updatetError.stack);
+         response.send('Error');
+    })
+})
+router.get('/getItemDetail',(request,response)=>{
+let itemId=request.query.itemId;
+console.log('itemId '+itemId);
+let qry='select item.sfid ,item.name as itemName,item.items__c, item.category__c,item.per_unit_cost__c,item.unit__c,item.other_items__c,vend.name as vendername,item.impaneled_vendor__c '+
+                'FROM salesforce.Item_Description__c item '+
+                'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
+                'ON item.Impaneled_Vendor__c = vend.sfid '+
+                'where item.sfid=$1 ';
+pool.query(qry,[itemId])
+.then((itemdescriptionQueryy)=>{
+console.log('Item description Detail=>'+JSON.stringify(itemdescriptionQueryy.rows));
+response.send(itemdescriptionQueryy.rows);
+})
+.catch((error)=>{
+    console.log('error '+error.stack);
+    response.send(error);
+})
+})
+router.post('/updateItemescription',(request,resposne)=>{
+    let body = request.body;
+    console.log('body  : '+JSON.stringify(body));
+    const { item, cate,cost,unit,other,quote,hide} = request.body;
+    console.log('item    '+item);
+    console.log('cost  '+cost);
+    console.log('cate  '+cate);
+    console.log('unit  '+unit);
+    console.log('other  '+other);
+    console.log('Item ID  '+hide);
+    let updateQuerry = 'UPDATE salesforce.Item_Description__c SET '+
+    'category__c = \''+cate+'\', '+
+    'items__c = \''+item+'\', '+
+    'unit__c = \''+unit+'\', '+
+    'per_unit_cost__c = \''+cost+'\', '+
+    'Other_Items__c= \''+other+'\' '+
+    'WHERE sfid = $1';
+console.log('updateQuerry  '+updateQuerry);
+pool
+.query(updateQuerry,[hide])
+.then((updateQuerryResult) => {     
+console.log('updateQuerryResult =>>'+JSON.stringify(updateQuerryResult));
+response.send('Success');
+})
+.catch((updatetError) => {
+console.log('updatetError'+updatetError.stack);
+response.send('Error');
+})
+
+
 })
 module.exports = router;
