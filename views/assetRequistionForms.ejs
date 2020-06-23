@@ -148,7 +148,41 @@
                         console.log('Inside Asset Details'); 
                         let assetDetailsTableRows = '';      
                         assetDetails.assetFormDetails.forEach((assetDetailsRecord) => {
-                                    console.log('Inside Loop');
+                            let plane = new Date(assetDetailsRecord.requested_closure_plan_date__c);
+                            plane.setHours(plane.getHours() + 5);
+                            plane.setMinutes(plane.getMinutes() + 30);
+                            let planDt = plane.toLocaleString();
+                            let actu = new Date(assetDetailsRecord.requested_closure_actual_date__c);
+                            actu.setHours(actu.getHours() + 5);
+                            actu.setMinutes(actu.getMinutes() + 30);
+                            let actualDt = actu.toLocaleString();
+                                    console.log('Inside Loop'+actualDt);
+
+                                    assetDetailsTableRows += '<tr>';
+                                        assetDetailsTableRows += '<td><strong>Asset Requisition Name<strong></td>';
+                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.name+'</td>';
+                                        assetDetailsTableRows += '<td><strong>Activity Code<strong></td>';
+                                            assetDetailsTableRows += '<td>'+assetDetailsRecord.activity_code__c+'</td>';
+                                        assetDetailsTableRows += '</tr>'; 
+                                        assetDetailsTableRows += '<tr>';
+                                            assetDetailsTableRows += '<td><strong>Requested Closure Plan Date<strong></td>';
+                                                assetDetailsTableRows += '<td>'+ planDt+'</td>';
+                                                assetDetailsTableRows += '<td><strong>Requested Closure Actual Date<strong></td>';
+                                                    assetDetailsTableRows += '<td>'+actualDt+'</td>';
+                                            assetDetailsTableRows += '</tr>';       
+                                        assetDetailsTableRows += '<tr>';
+                                            assetDetailsTableRows += '<td><strong>Submitted By Heroku User<strong></td>';
+                                                assetDetailsTableRows += '<td>'+ '<%=objUser.name %>'+'</td>';
+                                                assetDetailsTableRows += '<td><strong>Project/Department<strong></td>';
+                                                    assetDetailsTableRows += '<td>'+ 'Need Query Join'+'</td>';
+                                            assetDetailsTableRows += '</tr>';   
+                                        assetDetailsTableRows += '<tr>';
+                                            assetDetailsTableRows += '<td><strong>  Approval Status<strong></td>';
+                                            assetDetailsTableRows += '<td>'+assetDetailsRecord.approval_status__c+'</td>';
+                                            assetDetailsTableRows += '<td><strong>GST<strong></td>';
+                                                assetDetailsTableRows += '<td>'+assetDetailsRecord.gst__c+'</td>';
+                                            assetDetailsTableRows += '</tr>';  
+                                        
                                     
                                     assetDetailsTableRows += '<tr>';
                                     assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Item Metrics</h5></td>';    
@@ -161,6 +195,38 @@
                                     assetDetailsTableRows += '<td>'+assetDetailsRecord.number_of_non_it_product__c+'</td>';
                                     assetDetailsTableRows += '</tr>';   
                                     
+                                    assetDetailsTableRows += '<tr>';
+                                        assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Approval Status </h5></td>';    
+                                        assetDetailsTableRows += '</tr>';
+                                       
+                                        assetDetailsTableRows += '<tr>';
+                                            assetDetailsTableRows += '<td><strong> Project Manager/Reporting Man. Approval<strong></td>';
+                                            assetDetailsTableRows += '<td>'+assetDetailsRecord.manager_approval__c+'</td>';
+                                            assetDetailsTableRows += '<td><strong>Procurement Head Approval<strong></td>';
+                                            assetDetailsTableRows += '<td>'+assetDetailsRecord.	procurement_head_approval__c+'</td>';
+                                            assetDetailsTableRows += '</tr>';
+                                            assetDetailsTableRows += '<tr>';
+                                                assetDetailsTableRows += '<td><strong>Procurement Committee Approval<strong></td>';
+                                                assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_committee_approval__c+'</td>';
+                                                assetDetailsTableRows += '<td><strong>Accounts Approval<strong></td>';
+                                                assetDetailsTableRows += '<td>'+assetDetailsRecord.accounts_approval__c+'</td>';
+                                                assetDetailsTableRows += '</tr>';
+                                                assetDetailsTableRows += '<tr>';
+                                                    assetDetailsTableRows += '<td><strong>Management Approval<strong></td>';
+                                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval__c+'</td>';
+                                                    assetDetailsTableRows += '<td><strong>Chairperson Approval<strong></td>';
+                                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.chairperson_approval__c+'</td>';
+                                                    assetDetailsTableRows += '</tr>';
+                                                    assetDetailsTableRows += '<tr>';
+                                                        assetDetailsTableRows += '<td><strong> Committee Approved Counts<strong></td>';
+                                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.committee_approved_counts__c+'</td>';
+                                                        assetDetailsTableRows += '<td><strong>Comittee Rejected Count<strong></td>';
+                                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.comittee_rejected_count__c+'</td>';
+                                                        assetDetailsTableRows += '</tr>';
+
+
+
+
                                     assetDetailsTableRows += '<tr>';
                                     assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Amount Information</h5></td>';    
                                     assetDetailsTableRows += '</tr>';
@@ -186,27 +252,33 @@
                     if(assetDetails.nonItProducts.length > 0)
                     {
                         let nonItProductTable = '';
+                        nonItProductTable+='<thead>  <th>Procuremnet_Non-IT ID</th><th>Items</th><th>Quantity</th><th>Budget</th></thead>';
                         assetDetails.nonItProducts.forEach((eachNonIt) => {
-                            nonItProductTable += '<td>'+eachNonIt.name +'</td>';
+                            nonItProductTable += '<tr><td>'+eachNonIt.name +'</td>';
                             nonItProductTable += '<td>'+eachNonIt.items__c +'</td>';
                             nonItProductTable += '<td>'+eachNonIt.quantity__c +'</td>';
-                            nonItProductTable += '<td>'+eachNonIt.budget__c +'</td>';  
+                            nonItProductTable += '<td>'+eachNonIt.budget__c +'</td></tr>';  
 
                         })
-                        $('#procuremnetNonItTable').append(nonItProductTable);
+                        nonItProductTable+=  '<td colspan="6"><center><a target="_blank" href="/procurement/getNonItProcurementListVIew">ViewlAll</a></centre></td>';
+                            $('#procuremnetNonItTable').empty();
+                            $('#procuremnetNonItTable').append(nonItProductTable);
                     }
 
 
                     if(assetDetails.itProducts.length > 0)
                     {
                         let itProductTable = '';
+                        itProductTable+='<thead>  <th>ProcuremnetName</th><th>Items</th><th>Quantity</th><th>Budget</th></thead>';
                         assetDetails.itProducts.forEach((eachIt)=> {
-                            itProductTable += '<td>'+eachIt.name +'</td>';
+                            console.log('chdc'+JSON.stringify(eachIt));
+                            itProductTable += '<tr><td>'+eachIt.name +'</td>';
                             itProductTable += '<td>'+eachIt.items__c +'</td>';
                             itProductTable += '<td>'+eachIt.quantity__c +'</td>';
-                            itProductTable += '<td>'+eachIt.budget__c +'</td>';      
-
+                            itProductTable += '<td>'+eachIt.budget__c +'</td></tr>';      
                         })
+                        itProductTable+=  '<td colspan="6"><center><a target="_blank" href="/procurement/getProcurementItListView">ViewlAll</a></centre></td>';
+                            $('#procuremnetItTable').empty();
                         $('#procuremnetItTable').append(itProductTable);   
                     }
             })
@@ -244,6 +316,36 @@
 
         $('#createAssetRequisitionFormButton').click(function() {
             $('#createAssetRequisitionForm').modal('show');
+            $('#assetRequisitionSubmitbutton').on('click',function(event){
+                alert('clcker save button');
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+             //   alert('Save Button Clicked !');
+                var $inputs = $('#assetRequisitionForm :input');
+
+                // not sure if you wanted this, but I thought I'd add it.
+                // get an associative array of just the values.
+                var values = {};
+                $inputs.each(function() {
+                    values[this.name] = $(this).val();
+                    //console.log('fomvalues=> '+JSON.stringify(values));
+                });
+                alert('formValues : '+JSON.stringify(values));
+                $.ajax({
+                  url : '/procurement/insertAsssetForm',
+                  type:'post',
+                  data: values,
+                  dataType : 'json'
+              })
+              .done((response) => {
+                    console.log('resonse   :'+response);
+              })
+              .fail((jqXHR, status, error) => {
+                    console.log('jqXHR  '+JSON.stringify(jqXHR));
+              })        
+
+            })
         })
 
         
@@ -283,7 +385,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <form  id="tourBillClaimForm" class="needs-validation" novalidate >
+          <form  id="assetRequisitionForm" class="needs-validation" novalidate >
 
           <div class="form-group">  
               <div class="row">
@@ -310,7 +412,22 @@
 
               <div class="col-md-6">
                     <label for="planDate">Requested Closure Plan Date</label>
-                    <input type="date" class="form-control" id="planDate" >
+                    <input type="date" class="form-control" id="planDate"  name="planDate" >
+                </div>
+          </div>
+        </div> 
+
+
+        <div class="form-group">  
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="gst">GST</label>
+                    <input type="text" class="form-control" id="gst"   name="gst" required>
+                </div>
+
+              <div class="col-md-6">
+                    <label for="act">Activity code </label>
+                    <input type="text" class="form-control" id="act" >
                 </div>
           </div>
         </div> 
@@ -320,31 +437,13 @@
               <div class="col-md-6">
                     <label for="submittedBy">Submitted By</label>
                     <select id="submittedBy" name="submittedBy" class="form-control">
-  
+                         <option value="<%= objUser.sfid %>"><%= objUser.name %></option> 
                     </select>
               </div>
 
-              <div class="col-md-6">
-                    <label for="gst">GST</label>
-                    <input type="text" class="form-control" id="gst"   name="gst" required>
-                </div>
           </div>
         </div> 
 
-
-        <div class="form-group">  
-              <div class="row">
-                <div class="col-md-6">
-                        <label for="validationTooltip01">Approval Status</label>
-                        <select class="form-control" name="approvalStatus" id="approvalStatus" readonly="true" >
-
-
-                        </select>
-                </div>
-
-                
-            </div>
-          </div> 
 
 
           <div class="form-group">  
@@ -366,7 +465,7 @@
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" id="tourBillClaimSubmitbutton"  class="btn btn-primary">Save</button>
+              <button type="submit" id="assetRequisitionSubmitbutton"  class="btn btn-primary">Save</button>
             </div>
 
           </form>
@@ -485,12 +584,6 @@
                                         <div id="collapseOne" class="collapse show fade" aria-labelledby="headingOne" data-parent="#accordionExample">
                                             <div class="card-body">
                                                 <table id="procuremnetNonItTable" class="table table-hover striped">
-                                                    <thead>
-                                                        <th>Procuremnet_Non-IT ID</th>
-                                                        <th>Items</th>
-                                                        <th>Quantity</th>
-                                                        <th>Budget</th>
-                                                    </thead>
                                                 </table>
                                             </div>
                                         </div>

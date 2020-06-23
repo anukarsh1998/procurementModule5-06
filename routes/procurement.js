@@ -39,7 +39,11 @@ router.get('/details',verify, async(request, response) => {
 
     await
     pool
-    .query('SELECT id, sfid, Name, Project_Department__c, Approval_Status__c, Number_Of_IT_Product__c, Number_Of_Non_IT_Product__c, Procurement_IT_total_amount__c, Procurement_Non_IT_total_amount__c, Total_amount__c FROM  salesforce.Asset_Requisition_Form__c WHERE sfid = $1',[assetId])
+    .query('SELECT id, sfid, Name,Activity_Code__c, GST__c,Requested_Closure_Plan_Date__c,Requested_Closure_Actual_Date__c,Project_Department__c, '+
+    'Manager_Approval__c,Management_Approval__c,Procurement_Committee_Approval__c,Chairperson_Approval__c,Committee_Approved_Counts__c,'+
+    'Comittee_Rejected_Count__c,Procurement_Committee_Status__c,Accounts_Approval__c,Procurement_Head_Approval__c, Approval_Status__c,'+
+    'Number_Of_IT_Product__c, Number_Of_Non_IT_Product__c, Procurement_IT_total_amount__c, Procurement_Non_IT_total_amount__c, Total_amount__c '+
+    'FROM  salesforce.Asset_Requisition_Form__c WHERE sfid = $1',[assetId])
     .then((assetQueryResult)=> {
         if(assetQueryResult.rowCount > 0)
         {
@@ -100,6 +104,31 @@ router.get('/details',verify, async(request, response) => {
 
 });
 
+router.post('/insertAsssetForm',(request,response)=>{
+    let body = request.body;
+    console.log('Form Value =>'+JSON.stringify(body));
+   const{assetRequisitionName,projectName,actualDate,planDate,gst,submittedBy,spocApproval,availableInStock}=request.body;
+   console.log('Asset name=> '+assetRequisitionName);
+   console.log('Asset projectName=> '+projectName);
+   console.log('Asset actualDate=> '+actualDate);
+   console.log('Asset planDate=> '+planDate);
+   console.log('Asset gst=> '+gst);
+   console.log('Asset spocApproval=> '+submittedBy);
+   console.log('Asset spocApproval=> '+spocApproval);
+   console.log('availableInStock=> '+availableInStock);
+   let query ='INSERT INTO salesforce.Asset_Requisition_Form__c (name,Project_Department__c,Requested_Closure_Actual_Date__c,Requested_Closure_Plan_Date__c,GST__c,Submitted_By_Heroku_User__c,Is_SPOC_Approved__c,Available_In_Stock__c) values ($1,$2,$3,$4,$5,$6,$7,$8)';
+   console.log('asset Insert Query= '+query);
+   pool
+   .query(query,[assetRequisitionName,projectName,actualDate,planDate,gst,submittedBy,spocApproval,availableInStock])
+   .then((assetQueryResult) => {     
+            console.log('assetQueryResult.rows '+JSON.stringify(assetQueryResult.rows));
+            response.send('Success');
+   })
+   .catch((assetInserError) => {
+        console.log('assetInserError   '+assetInserError.stack);
+        response.send('Error');
+   })
+})
 
 router.get('/nonItProducts/:parentAssetId',verify, (request,response) => {
 
@@ -133,7 +162,7 @@ router.post('/nonItProducts', (request,response) => {
             state:joi.string().required().label('Please Choose State'),
              itemsCategory:joi.string().required().label('Choose itemsCategory & District If Your Choose UP Or UK'),
              items:joi.string().required().label('Choose your Item'),
-            itemSpecification:joi.string().required().label('Fill your ITem Specification'),          
+            itemSpecification:joi.string().required().label('Fill your Item Specification'),          
             quantity:joi.number().required().label('Enter your Quantity'),
             budget:joi.number().required().label('fill Your Budget '),
         })
@@ -145,7 +174,7 @@ router.post('/nonItProducts', (request,response) => {
         }
         else{
             if(nonItFormResult.quoteNum<3 && (nonItFormResult.justification==null || nonItFormResult.justification=="")){
-                    response.send('Please Enter YOur JUstification for Quote less than 4');    
+                    response.send('Please Enter Your Justification for Quote less than 3');    
            }
            else{
             let singleRecordValues = [];
@@ -192,7 +221,7 @@ router.post('/nonItProducts', (request,response) => {
             }
             else{
                 if(nonItFormResult.quoteNum[i]<3 &&(nonItFormResult.justification[i]==null || nonItFormResult.justification[i]=="")){               
-                        response.send('Please Enter YOur JUstification for Quote less than 4');    
+                        response.send('Please Enter your Justification for Quote less than 3');    
                 }
                 else{
 
@@ -300,7 +329,7 @@ router.post('/itProducts', (request,response) => {
         }
         else{
             if(itFormResult.quoteNum<3 &&(itFormResult.justification==null || itFormResult.justification=="")){
-                    response.send('Please Enter YOur JUstification for Quote less than 4');     
+                    response.send('Please Enter Your Justification for Quote less than 3');     
              }
              else{
                 let singleItProductRecordValue = [];
@@ -343,7 +372,7 @@ router.post('/itProducts', (request,response) => {
             }
             else{                
                 if(itFormResult.quoteNum[i]<3 &&(itFormResult.justification[i]==null || itFormResult.justification[i]=="")){
-                    response.send('Please Enter YOur JUstification for Quote less than 4 in row number'+i);     
+                    response.send('Please Enter Your Justificaton for Quote less than 3 in row number');     
              }
              else{
                 let singleItProductRecordValue = [];
