@@ -36,14 +36,19 @@ router.get('/details',verify, async(request, response) => {
     console.log('assetId   '+assetId);
 
     var assetFormAndRelatedRecords = {};
-
+    
+ let qyr='SELECT asset.id, asset.sfid,asset.name as name ,asset.Activity_Code__c, asset.GST__c,asset.Requested_Closure_Plan_Date__c,asset.Requested_Closure_Actual_Date__c,asset.Project_Department__c, '+
+ 'asset.Manager_Approval__c,asset.Management_Approval__c,asset.Procurement_Committee_Approval__c,asset.Chairperson_Approval__c,asset.Committee_Approved_Counts__c,'+
+ 'asset.Comittee_Rejected_Count__c,asset.Procurement_Committee_Status__c,asset.Accounts_Approval__c,asset.Procurement_Head_Approval__c,asset.Approval_Status__c,'+
+ 'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid '+
+ 'FROM  salesforce.Asset_Requisition_Form__c asset '+
+  'INNER JOIN salesforce.Milestone1_Project__c proj '+
+  'ON asset.Project_Department__c =  proj.sfid '+
+   'WHERE asset.sfid = $1';
+   console.log('qry '+qyr);
     await
     pool
-    .query('SELECT id, sfid, Name,Activity_Code__c, GST__c,Requested_Closure_Plan_Date__c,Requested_Closure_Actual_Date__c,Project_Department__c, '+
-    'Manager_Approval__c,Management_Approval__c,Procurement_Committee_Approval__c,Chairperson_Approval__c,Committee_Approved_Counts__c,'+
-    'Comittee_Rejected_Count__c,Procurement_Committee_Status__c,Accounts_Approval__c,Procurement_Head_Approval__c, Approval_Status__c,'+
-    'Number_Of_IT_Product__c, Number_Of_Non_IT_Product__c, Procurement_IT_total_amount__c, Procurement_Non_IT_total_amount__c, Total_amount__c '+
-    'FROM  salesforce.Asset_Requisition_Form__c WHERE sfid = $1',[assetId])
+    .query(qyr,[assetId])
     .then((assetQueryResult)=> {
         if(assetQueryResult.rowCount > 0)
         {
