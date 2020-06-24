@@ -9,7 +9,7 @@
 <div class="container">
     <div class="row mt-5 mb-3 align-items-center">
         <div class="col-md-5">
-            <a class="btn btn-primary btn-md bg-gray" href="/procurement/getVendorListView" id="createNewItem">Create New ItemDescription</a>
+            <a class="btn btn-primary btn-md bg-gray" href="/procurement/getVendorListView" id="createNewItem">Create New Item</a>
            <!--  <a class="btn btn-primary btn-md bg-gray" href="/procurement/" >Refresh</a> -->
                </div>
         <div class="col-md-3">
@@ -152,12 +152,11 @@
 
         let columns ={
             sequence : 'Sequence',
-            name: ' Item Description Name',
-            category: ' services',
-            item : 'Item',
+            name: ' Item ID',
+            category: 'Category',
+            item : 'Items',
             unit:'Unit',
             cost:'Per Unit Cost',
-            vendor:'Vendor Name',
             editAction:'Action',
         }
         var table = $('#ItemDescriptionTable').tableSortable({

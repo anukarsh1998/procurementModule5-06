@@ -1,0 +1,165 @@
+<% include ./partials/navbar %>
+<% include ./partials/footer %>
+<% include ./partials/messages %>
+<p id="vendorid"><%=parentId %></p><br>
+<h4 style="text-align: center;"><strong>Vendor Details</strong></h4><br>
+<form name="editvendor" id="editvendor" >
+    <div class="form-group">
+       <div class="row">
+           <div class="col-md-6">
+             <label for="vendorId">Impaneled Vendor ID</label>
+             <input type="text" readonly="true" class="form-control" id="vendorId" value=""   name="vendorId" >
+           </div>
+           <div class="col-md-6">
+               <label for="name">Vendor Name </label>
+               <input type="text"  readonly="true" class="form-control" id="name" value=""   name="name" >
+             </div>
+       </div>
+     </div>
+     <div class="form-group">
+       <div class="row">
+         
+         
+         <div class="col-md-6">
+         <label for="state">state </label>
+         <input type="text" readonly="true" class="form-control" id="state" value=""   name="state" >
+         <!--   <select id="state" name="state" class="form-control item_unit"><option value="">Select</option></select>
+          --></div>
+         <div class="col-md-6">
+           <label for="district">  District </label>
+           
+         <input type="text" readonly="true" class="form-control" id="district" value=""   name="district" >
+           
+         <!--   <select id="district" name="district" class="form-control item_unit" ><option value="">Select</option></select>
+       -->     </div>
+       </div>
+   </div>
+
+
+     <div class="form-group">
+       <div class="row">
+         <div class="col-md-6">
+         <label for="aacc">Bank Account  No. </label>
+         <input type="number" readonly="true" class="form-control" id="aacc" value=""   name="aacc" >
+         </div>
+         <div class="col-md-6">
+           <label for="auth">Name of Signing Authority </label>
+           <input type="text" readonly="true" class="form-control" id="auth" value=""   name="auth" >
+           </div>
+       </div>
+   </div>
+
+   <div class="form-group">
+       <div class="row">
+         <div class="col-md-6">
+         <label for="cont">Contact No. </label>
+           <input type="number" readonly="true" class="form-control" id="cont" value=""   name="cont" >
+         </div>
+         <div class="col-md-6">
+           <label for="bankDetail">Bank Detail </label>
+           <input type="text" readonly="true" class="form-control" id="bankDetail" value=""   name="bankDetail" >
+           </div>
+       </div>
+   </div>
+
+   
+<div class="form-group">
+   <div class="row">
+     <div class="col-md-6">
+     <label for="ifsc">Bank IFSC Code </label>
+       <input type="text" readonly="true" class="form-control" id="ifsc" value=""   name="ifsc" >
+     </div>
+     <div class="col-md-6">
+       <label for="pan"> Pan Number </label>
+       <input type="text" readonly="true" class="form-control" id="pan" value=""   name="pan" >
+       </div>
+   </div>
+</div>
+<div class="form-group">
+   <div class="row">
+     
+     
+     <div class="col-md-6">
+     <label for="add">Addresss </label>
+       <input type="text" readonly="true" class="form-control" id="add" value=""   name="add" >
+     </div>
+     <div class="col-md-6">
+       <label for="gst">Bank GST No. </label>
+       <input type="text" readonly="true" class="form-control" id="gst" value=""   name="gst" >
+       </div>
+   </div>
+</div>
+<div class="form-group">
+   <div class="row">
+     
+     
+     <div class="col-md-6">
+     <label for="other">Others </label>
+       <input type="text" readonly="true" class="form-control" id="other" value=""   name="other" >
+     </div>
+     <div class="col-md-6">
+       <label for="quote">Quote Public URL </label>
+       <input type="text" readonly="true" class="form-control" id="quote" value=""   name="quote" >
+       </div>
+   </div>
+</div>
+
+
+        <div class="form-group">
+            <div class="row">
+            
+                <div class="col-md-6">
+                <input type="hidden" class="form-control" id="hide" value=""   name="hide" >
+                </div>
+            </div>     
+        </div>
+     <div class="modal-footer">
+        <!--  <button type="submit" class="btn btn-primary" id="editVendorButton" data-dismiss="modal">Save</button>
+         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+     </div>
+   </form>
+<script>
+$(document).ready(function(){
+$('#vendorid').hide();
+    let parentId=document.getElementById('vendorid').innerHTML;
+    alert('vendorid '+vendorid);
+    $.ajax({
+    url : '/procurement/getVendorDetail',
+    type:'get',
+    data : {
+        vendorId : parentId
+    },
+    dataType: 'json',
+})
+.then((response)=>{
+    console.log('reponse fro Vendoe DEtail Modal Ajax '+JSON.stringify(response));
+    if(response.VendorDetail.length>0)
+    {
+
+        document.forms["editvendor"]["vendorId"].value = response.VendorDetail[0].name;
+        document.forms["editvendor"]["vendorId"].value = response.VendorDetail[0].name;
+            document.forms["editvendor"]["name"].value = response.VendorDetail[0].vendor_name__c;
+            document.forms["editvendor"]["cont"].value = response.VendorDetail[0].contact_no__c;
+            document.forms["editvendor"]["bankDetail"].value = response.VendorDetail[0].bank_details__c;
+            document.forms["editvendor"]["ifsc"].value = response.VendorDetail[0].bank_ifsc_code__c;
+            document.forms["editvendor"]["pan"].value = response.VendorDetail[0].pan_no__c;
+            document.forms["editvendor"]["add"].value = response.VendorDetail[0].address__c;
+            document.forms["editvendor"]["aacc"].value = response.VendorDetail[0].bank_account_no__c;
+            document.forms["editvendor"]["auth"].value = response.VendorDetail[0].name_of_signing_authority__c; 
+            document.forms["editvendor"]["district"].value=response.VendorDetail[0].district__c;
+            document.forms["editvendor"]["state"].value = response.VendorDetail[0].state__c;
+            document.forms["editvendor"]["quote"].value = response.VendorDetail[0].quote_public_url__c;
+            document.forms["editvendor"]["gst"].value = response.VendorDetail[0].gst_no__c;
+            document.forms["editvendor"]["other"].value = response.VendorDetail[0].others__c;
+
+    }
+})
+.fail((jqXHR, status, error) =>{
+    $('#detailLoadingSpinners').show();
+    console.log('jqXHR  : '+JSON.stringify(jqXHR));
+    console.log('error  : '+error);
+})
+
+})
+
+</script>

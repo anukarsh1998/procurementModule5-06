@@ -9,8 +9,8 @@
     <div class="form-group">
         <div class="row">
             <div class="col-md-6">
-            <label for="name">Item Description name </label>
-             <input type="text" class="form-control" id="name" value="" required="true"   name="name" > 
+            <label for="name">Item ID </label>
+            <!--  <input type="text" class="form-control" id="name" value="" required="true"   name="name" >  -->
             </div>
           <div class="col-md-6">
             <label for="category">Item Category </label>
@@ -24,10 +24,10 @@
             <label for="unit">Unit</label>
              <input type="text" class="form-control" id="unit" value=""  required="true" name="unit" > 
             </div>
-          <div class="col-md-6">
-                <label for="cost">Per Unit Cost </label>
-                 <input type="text" class="form-control" id="cost" value=""   name="cost" > 
-                </div>
+            <div class="col-md-6">
+              <label for="items">Item  </label>
+              <select name="items" id="items" class="form-control item_unit itemsCategory"><option value="">Select</option></select>
+            </div>
         </div>
     </div>
 
@@ -36,9 +36,9 @@
     <div class="form-group">
         <div class="row">
           <div class="col-md-6">
-            <label for="items">Item  </label>
-            <select name="items" id="items" class="form-control item_unit itemsCategory"><option value="">Select</option></select>
-          </div>
+            <label for="cost">Per Unit Cost </label>
+             <input type="text" class="form-control" id="cost" value=""   name="cost" > 
+            </div>
           <div class="col-md-6">
             <label for="other">  Others </label>
              <input type="other" class="form-control" id="other" value=""   name="other" > 

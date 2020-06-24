@@ -40,7 +40,9 @@ router.get('/details',verify, async(request, response) => {
  let qyr='SELECT asset.id, asset.sfid,asset.name as name ,asset.Activity_Code__c, asset.GST__c,asset.Requested_Closure_Plan_Date__c,asset.Requested_Closure_Actual_Date__c,asset.Project_Department__c, '+
  'asset.Manager_Approval__c,asset.Management_Approval__c,asset.Procurement_Committee_Approval__c,asset.Chairperson_Approval__c,asset.Committee_Approved_Counts__c,'+
  'asset.Comittee_Rejected_Count__c,asset.Procurement_Committee_Status__c,asset.Accounts_Approval__c,asset.Procurement_Head_Approval__c,asset.Approval_Status__c,'+
- 'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid '+
+ 'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid, '+
+ 'asset.Management_Approval_Activity_Code__c,asset.Management_Approval_for_fortnight_limit__c, '+
+ 'asset.Management_Approval_less_than_3_quotes__c,asset.Procurement_Comt_Approval_for_fortnight__c '+
  'FROM  salesforce.Asset_Requisition_Form__c asset '+
   'INNER JOIN salesforce.Milestone1_Project__c proj '+
   'ON asset.Project_Department__c =  proj.sfid '+
@@ -111,8 +113,10 @@ router.get('/details',verify, async(request, response) => {
 
 router.post('/insertAsssetForm',(request,response)=>{
     let body = request.body;
+    let planDate=request.body.planDate;
+    let actualDate=request.body.actualDate;
     console.log('Form Value =>'+JSON.stringify(body));
-   const{assetRequisitionName,projectName,actualDate,planDate,gst,submittedBy,spocApproval,availableInStock}=request.body;
+   const{assetRequisitionName,projectName,gst,submittedBy,spocApproval,availableInStock}=request.body;
    console.log('Asset name=> '+assetRequisitionName);
    console.log('Asset projectName=> '+projectName);
    console.log('Asset actualDate=> '+actualDate);
@@ -121,12 +125,21 @@ router.post('/insertAsssetForm',(request,response)=>{
    console.log('Asset spocApproval=> '+submittedBy);
    console.log('Asset spocApproval=> '+spocApproval);
    console.log('availableInStock=> '+availableInStock);
+   if(planDate==''){
+       console.log('dsjjd');
+       planDate=null;      
+   }
+   if(actualDate==''){
+    console.log('dsjjd'+actualDate+'aa');
+    actualDate=null;      
+}
+console.log(planDate+'  +'+actualDate);
    let query ='INSERT INTO salesforce.Asset_Requisition_Form__c (name,Project_Department__c,Requested_Closure_Actual_Date__c,Requested_Closure_Plan_Date__c,GST__c,Submitted_By_Heroku_User__c,Is_SPOC_Approved__c,Available_In_Stock__c) values ($1,$2,$3,$4,$5,$6,$7,$8)';
    console.log('asset Insert Query= '+query);
    pool
    .query(query,[assetRequisitionName,projectName,actualDate,planDate,gst,submittedBy,spocApproval,availableInStock])
    .then((assetQueryResult) => {     
-            console.log('assetQueryResult.rows '+JSON.stringify(assetQueryResult.rows));
+            console.log('assetQueryResult.rows '+JSON.stringify(assetQueryResult));
             response.send('Success');
    })
    .catch((assetInserError) => {
@@ -282,9 +295,6 @@ router.post('/nonItProducts', (request,response) => {
    }
 }
 });
-
-
-
 
 
 router.get('/itProducts/:parentAssetId',verify, (request,response) => {
@@ -556,21 +566,26 @@ router.get('/getProjectList',(request,response) => {
 
 })
 
-router.get('/getProcurementItListView',verify,(request,response)=>{
+router.get('/getProcurementItListView/:parentAssetId',verify,(request,response)=>{
     let objUser=request.user;
     console.log('user '+objUser);
-    response.render('procurementListView',{objUser});
+    let parentAssetId = request.params.parentAssetId;
+    console.log('parentAssetId  '+parentAssetId);
+    response.render('procurementListView',{objUser,parentAssetId:parentAssetId});
 })
 
 router.get('/itProcurementList',(request,response)=>{
+    let parentAssetId=request.query.parentId;
+    console.log('parentAssetId '+parentAssetId);
     console.log('Your are inside the IT PRCUREMENT List Router method');
     let qry='SELECT procIT.sfid,procIT.Name as procItName ,procIT.Items__c ,procIT.Product_Service_specification__c,vend.name as venderName,procIT.Quantity__c, procIT.Budget__c,procIT.Impaneled_Vendor__c '+
             'FROM salesforce.Product_Line_Item_IT__c procIT '+
             'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
-            'ON procIT.Impaneled_Vendor__c =  vend.sfid ';
+            'ON procIT.Impaneled_Vendor__c =  vend.sfid '+
+            'WHERE procIT.Asset_Requisition_Form__c=$1';
             console.log('qyer '+qry)
      pool
-    .query(qry)
+    .query(qry,[parentAssetId])
     .then((querryResult)=>{
         console.log('querryResult'+JSON.stringify(querryResult.rows)+'ROWCOUNT: '+querryResult.rowCount);
         if(querryResult.rowCount>0){
@@ -624,21 +639,26 @@ router.get('/getProcurementITDetail',(request,response)=>{
     })
 })
 /**********************************  NON IT PROCUREMENT LIST VIEW   ******************************/
-router.get('/getNonItProcurementListVIew',verify,(request,response)=>{
+router.get('/getNonItProcurementListVIew/:parentAssetId',verify,(request,response)=>{
     let objUser=request.user;
     console.log('user '+objUser);
-    response.render('getNonItProcurementList',{objUser});
+    let parentAssetId = request.params.parentAssetId;
+    console.log('parentAssetId  '+parentAssetId);
+    response.render('getNonItProcurementList',{objUser,parentAssetId: parentAssetId});
+    
 })
 
 router.get('/NonItProcurementList',(request,response)=>{
-    console.log('nonIT DETAIL LIST ');
+    let parentAssetId=request.query.parentId;
+    console.log('nonIT DETAIL LIST for parent id=  '+parentAssetId);
     let qry='SELECT proc.sfid,proc.Name as procName ,proc.Items__c ,proc.Products_Services_Name__c,vend.name as vendorName,proc.Product_Service__c,proc.Quantity__c, proc.Budget__c,proc.Impaneled_Vendor__c '+
     'FROM salesforce.Product_Line_Item__c proc '+
     'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
-    'ON proc.Impaneled_Vendor__c =  vend.sfid ';
+    'ON proc.Impaneled_Vendor__c =  vend.sfid '+
+    'WHERE proc.Asset_Requisition_Form__c=$1';
     console.log('Queryy=> '+qry);
     pool
-    .query(qry)
+    .query(qry,[parentAssetId])
     .then((querryResult)=>{
         console.log('querryResultnonIt'+JSON.stringify(querryResult.rows)+'ROWCOUNT: '+querryResult.rowCount);
         if(querryResult.rowCount>0){
@@ -675,7 +695,8 @@ router.get('/NonItProcurementList',(request,response)=>{
 router.get('/getProcurementDetail',(request,response)=>{
     let procurementId=request.query.procurementId;
     console.log('getProcurementITDetail Id='+procurementId);
-    let qry='SELECT proc.sfid,proc.Name as procName ,proc.Items__c ,proc.Products_Services_Name__c,vend.name as vendorName,proc.Product_Service__c,proc.Quantity__c, proc.Budget__c,proc.Impaneled_Vendor__c '+
+    let qry='SELECT proc.sfid,proc.Name as procName ,proc.Items__c ,proc.Others__c,proc.Approvers__c,proc.Products_Services_Name__c,vend.name as vendorName,proc.Product_Service__c,proc.Quantity__c, proc.Budget__c,proc.Impaneled_Vendor__c, '+
+    'proc.State__c,proc.District__c,proc.Quote1__c,proc.Quote2__c,proc.Quote3__c,proc.Per_Unit_Cost__c,proc.unit__c,proc.Number_of_quotes__c,proc.justification__c '+
     'FROM salesforce.Product_Line_Item__c proc '+
     'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
     'ON proc.Impaneled_Vendor__c =  vend.sfid '+
@@ -749,7 +770,7 @@ router.get('/getVendorListView',verify,(request,response)=>{
 })
 
 router.get('/getVendorsList',(request,response)=>{
-    let qry ='select sfid ,name,vendor_Name__c ,services__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,State__c,District__c '+
+    let qry ='select sfid ,name,vendor_Name__c ,services__c,address__c,items__c,GST_No__c,Bank_IFSC_Code__c ,Bank_Account_No__c,State__c,District__c '+
      'FROM salesforce.Impaneled_Vendor__c ';
      console.log('qry  =>'+qry)
      pool.query(qry)
@@ -762,12 +783,8 @@ router.get('/getVendorsList',(request,response)=>{
               let obj = {};
               obj.sequence = i;
               obj.name = '<a href="#" class="vendorTag" id="'+eachRecord.sfid+'" >'+eachRecord.name+'</a>';
-              obj.vendorname=eachRecord.vendor_Name__c;
-              obj.service = eachRecord.services__c;
-              obj.item=eachRecord.items__c;
-              obj.gst=eachRecord.gst_no__c;
-              obj.acc=eachRecord.bank_account_no__c;
-              obj.item_category = eachRecord.bank_IFSC_Code__c;
+              obj.vendorname=eachRecord.vendor_name__c;
+              obj.add=eachRecord.address__c;
               obj.state = eachRecord.state__c;
               obj.district=eachRecord.district__c;
               obj.editAction = '<button href="#" class="btn btn-primary editVendor" id="'+eachRecord.sfid+'" >Edit</button>'
@@ -786,6 +803,16 @@ router.get('/getVendorsList',(request,response)=>{
          response.send('Error Occurred !');
      })
 })
+
+router.get('/getVondor/:parentId',verify,(request,resposne)=>{
+    let parentId=request.params.parentId;
+    let objUser=request.user;
+    console.log('obhUser =>'+objUser);
+    console.log('parentId '+parentId);
+    resposne.render('vendorDetailPage',{parentId,objUser});
+})
+
+
 router.get('/getVendorDetail',async(request,response)=>{
     let vendorId=request.query.vendorId;
     console.log('vendorId '+vendorId);
@@ -839,10 +866,11 @@ router.get('/ItemDescription/:parentVendor',verify,(request,response)=>{
 router.post('/saveItemDescription',(request,response)=>{
     let body = request.body;
     console.log('body  : '+JSON.stringify(body));
-    const{name,items,category,unit,other,hide}=request.body;
+    const{name,items,category,unit,cost,other,hide}=request.body;
     let record = [];
-    record.push(name);
+    //record.push(name);
     record.push(items);
+    record.push(cost);
     record.push(category);
     record.push(unit);
     record.push(other);
@@ -851,7 +879,7 @@ router.post('/saveItemDescription',(request,response)=>{
 recordlist.push(record);
 console.log(recordlist);
 
-let itemDescQuery = format('INSERT INTO salesforce.Item_Description__c (name,Items__c, Category__c,Unit__c,Other_Items__c,Impaneled_Vendor__c ) VALUES %L returning id',recordlist);
+let itemDescQuery = format('INSERT INTO salesforce.Item_Description__c (Items__c,Per_Unit_Cost__c, Category__c,Unit__c,Other_Items__c,Impaneled_Vendor__c ) VALUES %L returning id',recordlist);
 console.log('impaneledVendor=>'+itemDescQuery);
 pool
 .query(itemDescQuery)

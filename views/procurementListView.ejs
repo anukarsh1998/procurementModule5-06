@@ -1,6 +1,7 @@
 <% include ./partials/navbar %>
 <% include ./partials/footer %>
 <% include ./partials/messages %>
+<p id ="parentId"><%=parentAssetId %></p>
 <link rel="stylesheet" href="/stylesheets/table-sortable.css">
 <script src="/scripts/table-sortable.js" ></script>
 
@@ -9,7 +10,7 @@
     <div class="row mt-5 mb-3 align-items-center">
         <div class="col-md-5">
          <!--    <a class="btn btn-primary btn-md bg-gray" href="#" id="">Create New It Procurement</a> -->
-            <a class="btn btn-primary btn-md bg-gray" href="/procurement/getProcurementItListView" >Refresh</a>
+         <!--    <a class="btn btn-primary btn-md bg-gray" href="/procurement/getProcurementItListView/"+<%=parentAssetId %> >Refresh</a> -->
         </div>
         <div class="col-md-3">
         <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
@@ -83,7 +84,7 @@
                     </div>
                     
                     <div class="col-md-6">
-                    <label for="vendorName">Vendor Name</label>
+                    <label for="vendorName">Impaneled Vendor Name</label>
                       <input type="text" id="vendorName" disabled class="form-control" value="" name="vendorName" required>
                     </div>
                 </div>
@@ -139,7 +140,8 @@
 
 <script>
     $(document).ready(function(){
-    
+      let parentId=document.getElementById('parentId').innerHTML;
+      alert('parentId '+parentId);
     /**************Table Sortable Start ***********/
 
         let columns ={
@@ -202,6 +204,7 @@
        $.ajax({
             url : '/procurement/itProcurementList',
             type:'get',
+            data:{parentId:parentId},
             dataType: 'json'
        })
        .done((response) => {
@@ -244,8 +247,9 @@
                               htmlTable += '<tr>';
                                 htmlTable += '<td><strong>Name</strong></td>';
                                 htmlTable += '<td>'+record.procitname+'</td>';
-                                htmlTable += '<td><strong>Vendor</strong></td>';
-                                htmlTable += '<td>'+record.vendername+'</td>';
+                                htmlTable += '<td><strong>ImpaneledVendor Name</strong></td>';
+                                htmlTable += '<td>'+'<a href="#" class="vendorDetTag" id="'+record.impaneled_vendor__c+'" >'+record.vendername+'</a>'+'</td>';
+                         
                             htmlTable += '</tr>';
                             htmlTable += '<tr>';
                                 htmlTable += '<td><strong>Item</strong></td>';
@@ -262,6 +266,7 @@
                             $('#procItTable').empty();
                             $('#procItTable').html(htmlTable);
                             }
+                            vendorDetailFunction();
 
             })
             .fail((jqXHR, status, error) =>{
@@ -272,6 +277,20 @@
       
           })
         }
+        function vendorDetailFunction(){
+          $('a.vendorDetTag').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let vendorId = this.id;
+            alert('vendor id '+vendorId);
+            location.href = "/procurement/getVondor/"+vendorId;             
+        })
+      }
+
+
+
+
+
         function additionalEditFunctionality(){
           $('.editProcIt').on('click',function(event){
             event.stopPropagation();

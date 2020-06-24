@@ -1,6 +1,7 @@
 <% include ./partials/navbar %>
 <% include ./partials/footer %>
 <% include ./partials/messages %>
+<p id ="parentId"><%=parentAssetId %></p>
 <link rel="stylesheet" href="/stylesheets/table-sortable.css">
 <script src="/scripts/table-sortable.js" ></script>
 <div>
@@ -11,7 +12,7 @@
     <div class="row mt-5 mb-3 align-items-center">
         <div class="col-md-5">
           <!--   <a class="btn btn-primary btn-md bg-gray" href="#" id="">Create New Non It Procurement</a> -->
-            <a class="btn btn-primary btn-md bg-gray" href="/procurement/getNonItProcurementListVIew/" >Refresh</a>
+            <!-- <a class="btn btn-primary btn-md bg-gray" href="/procurement/getNonItProcurementListVIew/" >Refresh</a> -->
         </div>
         <div class="col-md-3">
         <input type="text" class="form-control" placeholder="Search in table..." id="searchField">
@@ -36,6 +37,33 @@
  </div>
 
 </div>
+
+<!-- Vendor Detail Modal  -->
+<div id="vendorDetModal" class="modal fade">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Vendor Detail Detail</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div id="detailLoadingSpinners">
+          <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
+      </div>
+      <table id="vendorDetTable" class="table">
+
+      </table>
+      </div>
+      <div class="modal-footer">
+        <button type="sumbit" class="btn btn-secondary " id="vendDetClose" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!--  DEtail Modal Start   -->
 
 <div id="procurementModal" class="modal fade">
@@ -57,7 +85,7 @@
         </table>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-secondary" id="detailClose" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -83,7 +111,7 @@
                     </div>
                     
                     <div class="col-md-6">
-                    <label for="vendorName">Vendor Name</label>
+                    <label for="vendorName">Impaneled Vendor</label>
                       <input type="text" id="vendorName" disabled class="form-control" value="" name="vendorName" required>
                     </div>
                 </div>
@@ -146,15 +174,19 @@
 
 
     $(document).ready(function(){
+      $('#parentId').hide();
+       
+
+        let parentId=document.getElementById('parentId').innerHTML;
+       // alert('parentId '+parentId);
     
         /**************Table Sortable Start ***********/
     
             let columns ={
                 sequence : 'Sequence',
-                name: 'Procurement IT',
-                item : 'Item',
-                item_category:'Item Category',
-                item_spec: 'Item Specification',
+                name: 'Procurement Non-IT ID',
+                item : 'Items',
+                item_category:'Items Category',
                 quantity: 'Quantity',
                 budget:'Budget',
                 vendor:'Impanel Vendor',
@@ -210,6 +242,7 @@
            $.ajax({
                 url : '/procurement/NonItProcurementList',
                 type:'get',
+                data:{parentId:parentId},
                 dataType: 'json'
            })
            .done((response) => {
@@ -251,29 +284,65 @@
                     let record = response[0];
                               let htmlTable = '';
                               htmlTable += '<tr>';
-                                htmlTable += '<td><strong>Name</strong></td>';
+                                htmlTable += '<td><strong>Procurement_Non-IT ID</strong></td>';
                                 htmlTable += '<td>'+record.procname+'</td>';
-                                htmlTable += '<td><strong>Vendor</strong></td>';
-                                htmlTable += '<td>'+record.vendorname+'</td>';
-                            htmlTable += '</tr>';
+                                htmlTable += '<td><strong>Impaneled Vendor</strong></td>';
+                              //  htmlTable += '<td>'+'<a href="#" class="vendorDetTag" id="'+record.impaneled_vendor__c+'" >'+record.vendorname+'</a>'+'</td>';
+                                htmlTable += '<td>'+'<a href="#" class="vendorDetTag" id="'+record.impaneled_vendor__c+'" >'+record.vendorname+'</a>'+'</td>';
+                         
+                                htmlTable += '</tr>';
                             htmlTable += '<tr>';
-                                htmlTable += '<td><strong>Item</strong></td>';
-                                htmlTable += '<td>'+record.items__c+'</td>';
                                 htmlTable += '<td><strong>Item Category</strong></td>';
                                 htmlTable += '<td>'+record.products_services_name__c+'</td>';
+                                htmlTable += '<td><strong>Item</strong></td>';
+                                htmlTable += '<td>'+record.items__c+'</td>';
                             htmlTable += '</tr>';
                             htmlTable += '<tr>';
-                                htmlTable += '<td><strong>Item Specification</strong></td>';
-                                htmlTable += '<td>'+record.product_service__c+'</td>';
                                 htmlTable += '<td><strong>Quantity</strong></td>';
                                 htmlTable += '<td>'+record.quantity__c+'</td>';
-                            htmlTable += '</tr>'; htmlTable += '<tr>';
                                 htmlTable += '<td><strong>Budget</strong></td>';
                                 htmlTable += '<td>'+record.budget__c+'</td>';
                             htmlTable += '</tr>';
+                             htmlTable += '<tr>';
+                                htmlTable += '<td><strong>Item Specification</strong></td>';
+                                htmlTable += '<td>'+record.product_service__c+'</td>';
+                                htmlTable += '<td><strong>Other Items</strong></td>';
+                                htmlTable += '<td>'+record.others__c+'</td>';
+                            htmlTable += '</tr>';
+                            htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Approver</strong></td>';
+                              htmlTable += '<td>'+record.approvers__c+'</td>';
+                              htmlTable += '<td><strong>State</strong></td>';
+                              htmlTable += '<td>'+record.state__c+'</td>';
+                          htmlTable += '</tr>';
+                          htmlTable += '<tr>';
+                            htmlTable += '<td><strong>Quote1</strong></td>';
+                            htmlTable += '<td>'+record.quote1__c+'</td>';
+                            htmlTable += '<td><strong>District</strong></td>';
+                            htmlTable += '<td>'+record.district__c+'</td>';
+                        htmlTable += '</tr>';
+                        htmlTable += '<tr>';
+                          htmlTable += '<td><strong>Quote2</strong></td>';
+                          htmlTable += '<td>'+record.quote2__c+'</td>';
+                          htmlTable += '<td><strong>quote3</strong></td>';
+                          htmlTable += '<td>'+record.quote3__c+'</td>';
+                      htmlTable += '</tr>';
+                      htmlTable += '<tr>';
+                        htmlTable += '<td><strong>Unit</strong></td>';
+                        htmlTable += '<td>'+record.unit__c+'</td>';
+                        htmlTable += '<td><strong>Per Unit Cost</strong></td>';
+                        htmlTable += '<td>'+record.per_unit_cost__c+'</td>';
+                    htmlTable += '</tr>';
+                    htmlTable += '<tr>';
+                      htmlTable += '<td><strong>Justification</strong></td>';
+                      htmlTable += '<td>'+record.justification__c+'</td>';
+                      htmlTable += '<td><strong>Number Of Quotes</strong></td>';
+                      htmlTable += '<td>'+record.number_of_quotes__c+'</td>';
+                  htmlTable += '</tr>';
                             $('#procTable').empty();
                             $('#procTable').html(htmlTable);
                 }
+                vendorDetailFunction();
 
             })
             .fail((jqXHR, status, error) =>{
@@ -283,6 +352,121 @@
               })
             })    
         }
+        function vendorDetailFunction(){
+          $('a.vendorDetTag').on('click',function(event){
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            let vendorId = this.id;
+            alert('vendor id '+vendorId);
+            location.href = "/procurement/getVondor/"+vendorId;             
+        })
+      }
+
+
+    /* function vendorDetailFunction(){
+          $('a.vendorDetTag').on('click',function(event){
+            event.preventDefault();
+                      event.stopPropagation();
+                      event.stopImmediatePropagation();
+                      let vendorDetId= this.id;
+                      alert('Venndor Button Clicked !'+vendorDetId);
+                      //$('#procurementModal').modal('hide');
+                      $('#vendorDetModal').modal('show');
+                      $('#detailLoadingSpinners').modal('show'); 
+                      $.ajax({
+                          url : '/procurement/getVendorDetail',
+                          type:'get',
+                          data : {
+                            vendorId : vendorDetId
+                          },
+                          dataType: 'json',
+                          beforeSend : function(){
+                            $('#detailLoadingSpinners').show();
+                          }
+                      })
+                      .then((data)=>{
+                        $('#detailLoadingSpinners').hide();
+                        console.log('reponse fro Vendoe DEtail Modal Ajax '+JSON.stringify(data));
+                        if(data.VendorDetail.length>0)
+                       {
+                    console.log('Inside Vendor Details'); 
+                        let vendorDetailRow = '';
+                        data.VendorDetail.forEach((eachRecord) => {
+                            vendorDetailRow += '<tr>';
+                            vendorDetailRow += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Item Metrics</h5></td>';    
+                            vendorDetailRow += '</tr>';
+
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>Impaneled Vendor ID<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.name+'</td>';
+                                    vendorDetailRow += '<td><strong>  State<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.state__c+'</td>';
+                                vendorDetailRow += '</tr>'; 
+
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>District<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.district__c+'</td>';
+                                    vendorDetailRow += '<td><strong> Vendor Name<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.vendor_name__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                    
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>Name of Signing Authority <strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.name_of_signing_authority__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Contact no.<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.contact_no__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+
+                                    vendorDetailRow += '<tr>';
+                                        vendorDetailRow += '<td><strong> Bank Detail <strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.bank_details__c+'</td>';
+                                        vendorDetailRow += '<td><strong> Bank IFSC Code<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.bank_ifsc_code__c+'</td>';
+                                    vendorDetailRow += '</tr>';
+                                    vendorDetailRow += '<tr>';
+
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>PAN<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.pan_no__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Address<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.address__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>  Bank Account No.<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.bank_account_no__c+'</td>';
+                                    vendorDetailRow += '<td><strong> Owner<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.ownerid+'</td>';
+                                vendorDetailRow += '</tr>';
+                                vendorDetailRow += '<tr>';
+                                    vendorDetailRow += '<td><strong>Others/etc<strong></td>';
+                                    vendorDetailRow += '<td>'+eachRecord.others__c+'</td>';
+                                    vendorDetailRow += '<td><strong>Quote Public URL<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.quote_public_url__c+'</td>';
+                                vendorDetailRow += '</tr>'; 
+                                vendorDetailRow += '<tr>';
+                                        vendorDetailRow += '<td><strong>GST No.<strong></td>';
+                                        vendorDetailRow += '<td>'+eachRecord.gst_no__c+'</td>';
+                                vendorDetailRow += '</tr>';
+                                    $('#vendorDetTable').html(vendorDetailRow);
+
+                        })
+                }
+
+                      })
+                      .fail((jqXHR, status, error) =>{
+                        $('#detailLoadingSpinners').show();
+                        console.log('jqXHR  : '+JSON.stringify(jqXHR));
+                        console.log('error  : '+error);
+                      })
+                      
+          })
+        }
+
+*/
+
+
 
         function additionalEditFunctionality(){
             $('.editProcurement').on('click',function(event){
@@ -299,7 +483,7 @@
                     },
                     dataType: 'json',
                     beforeSend : function(){
-                      $('#detailLoadingSpinner').show();
+                    $('#detailLoadingSpinner').show();
                     }
                 })
                 .then((response)=>{

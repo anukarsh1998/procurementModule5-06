@@ -142,7 +142,7 @@
             })
             .done((assetDetails) =>{
                     console.log('assetDetails   : '+JSON.stringify(assetDetails));
-
+                    $('#procuremnetItTable').empty();$('#procuremnetNonItTable').empty();
                     if(assetDetails.assetFormDetails.length > 0)
                     {
                         console.log('Inside Asset Details'); 
@@ -206,6 +206,15 @@
                                             assetDetailsTableRows += '<td>'+assetDetailsRecord.	procurement_head_approval__c+'</td>';
                                             assetDetailsTableRows += '</tr>';
                                             assetDetailsTableRows += '<tr>';
+
+                                                assetDetailsTableRows += '<tr>';
+                                                    assetDetailsTableRows += '<td><strong>Procurement Comt. Approval for fortnight<strong></td>';
+                                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_comt_approval_for_fortnight__c+'</td>';
+                                                    assetDetailsTableRows += '<td><strong>Management Approval(GST+fortnight)<strong></td>';
+                                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_for_fortnight_limit__c+'</td>';
+                                                    assetDetailsTableRows += '</tr>';
+                                                    assetDetailsTableRows += '<tr>';
+
                                                 assetDetailsTableRows += '<td><strong>Procurement Committee Approval<strong></td>';
                                                 assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_committee_approval__c+'</td>';
                                                 assetDetailsTableRows += '<td><strong>Accounts Approval<strong></td>';
@@ -217,6 +226,13 @@
                                                     assetDetailsTableRows += '<td><strong>Chairperson Approval<strong></td>';
                                                     assetDetailsTableRows += '<td>'+assetDetailsRecord.chairperson_approval__c+'</td>';
                                                     assetDetailsTableRows += '</tr>';
+                                                    
+                                                    assetDetailsTableRows += '<tr>';
+                                                        assetDetailsTableRows += '<td><strong> Management Approval(less than 3 quotes)<strong></td>';
+                                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_less_than_3_quotes__c+'</td>';
+                                                        assetDetailsTableRows += '<td><strong>Management Approval (Activity Code)<strong></td>';
+                                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_activity_code__c+'</td>';
+                                                        assetDetailsTableRows += '</tr>';
                                                     assetDetailsTableRows += '<tr>';
                                                         assetDetailsTableRows += '<td><strong> Committee Approved Counts<strong></td>';
                                                         assetDetailsTableRows += '<td>'+assetDetailsRecord.committee_approved_counts__c+'</td>';
@@ -260,7 +276,7 @@
                             nonItProductTable += '<td>'+eachNonIt.budget__c +'</td></tr>';  
 
                         })
-                        nonItProductTable+=  '<td colspan="6"><center><a target="_blank" href="/procurement/getNonItProcurementListVIew">ViewlAll</a></centre></td>';
+                        nonItProductTable+=  '<td colspan="6"><center><a target="_blank" href="/procurement/getNonItProcurementListVIew/'+assetId+'">ViewlAll</a></centre></td>';
                             $('#procuremnetNonItTable').empty();
                             $('#procuremnetNonItTable').append(nonItProductTable);
                     }
@@ -277,7 +293,7 @@
                             itProductTable += '<td>'+eachIt.quantity__c +'</td>';
                             itProductTable += '<td>'+eachIt.budget__c +'</td></tr>';      
                         })
-                        itProductTable+=  '<td colspan="6"><center><a target="_blank" href="/procurement/getProcurementItListView">ViewlAll</a></centre></td>';
+                        itProductTable+=  '<td colspan="6"><center><a target="_blank" href="/procurement/getProcurementItListView/'+assetId+'">ViewlAll</a></centre></td>';
                             $('#procuremnetItTable').empty();
                         $('#procuremnetItTable').append(itProductTable);   
                     }
@@ -407,12 +423,12 @@
             <div class="row">
               <div class="col-md-6">
                     <label for="actualDate">Requested Closure Actual Date</label>
-                    <input type="date" class="form-control" id="actualDate"  name="actualDate" >
+                    <input type="date" class="form-control" id="actualDate" value=""  name="actualDate" >
               </div>
 
               <div class="col-md-6">
                     <label for="planDate">Requested Closure Plan Date</label>
-                    <input type="date" class="form-control" id="planDate"  name="planDate" >
+                    <input type="date" class="form-control" id="planDate" value="" name="planDate" >
                 </div>
           </div>
         </div> 
