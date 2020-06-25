@@ -126,10 +126,10 @@
         html += '<td>'+cnt+'</td>';
 
         html += '<td><select id="state'+cnt+'" name="state" class="form-control item_unit"><option value="">Select</option></select></td>';
-        html += '<td><select id="district'+cnt+'" name="district" class="form-control item_unit" ><option value="">Select</option></select></td>';
+        html += '<td><select id="district'+cnt+'" name="district" class="form-control item_unit" ><option value="">Select District</option></select></td>';
         html += '<td><select name="itemsCategory" id="cat'+cnt+'" class="form-control item_unit itemsCategory"><option value="">Select</option></select></td>';
         html += '<td><select name="items" id="'+cnt+'" class="form-control item_unit items"><option value="">Select</option></select></td>';
-        html += '<td><input type="text" name="otherItems" disabled="true" class="form-control" /></td>';
+        html += '<td><input type="text" name="otherItems" id="other'+cnt+'" readonly="true" class="form-control" /></td>';
         html += '<td><select id="vendor'+cnt+'" name="vendor" class="form-control item_unit"><option value="">Select</option></select></td>';    
         html +='<td><input id="unitCost'+cnt+'" type="text" name="unitCost" class="form-control" readonly="true"  /></td>';
         html +='<td><input id="unit'+cnt+'" type="text" name="unit" class="form-control" readonly="true"  /></td>';  
@@ -175,10 +175,6 @@
            {
             $('#district'+cnt).attr("disabled",false);
             alert('You Choose=> '+state);
-            $('#district'+cnt)
-              .append($("<option></option>")
-              .attr("value","")
-              .text("select District"))
              for(let i=0; i <dstrUP.length; i++)
              {
               $('#district'+cnt)
@@ -283,9 +279,10 @@
               }
 
               $('#'+cnt).on('change', function() {
-                
                   itVal=this.value;
-
+                  if(itVal=='Other Items'){
+                    $('#other'+cnt).attr("readonly",false);
+                  }
                    itemValue = this.value;
                   // alert('your Choose'+itemValue);
                       console.log('District  : '+dstr+' state  : '+sts+' item : '+itemValue);

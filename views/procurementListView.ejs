@@ -51,9 +51,11 @@
           <div id="detailLoadingSpinner">
             <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
         </div>
+        <div class="table-responsive">
         <table id="procItTable" class="table">
 
         </table>
+      </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -146,11 +148,11 @@
 
         let columns ={
             sequence : 'Sequence',
-            name: 'Procurement IT',
-            item : 'Item',
-            item_spec: 'Item Specification',
+            name: 'Procurement-IT ID',
+            item : 'Items',
             quantity: 'Quantity',
             budget:'Budget',
+            no:'Number of quotes',
             vendor:'Impanel Vendor',
             editAction:'Action',
         }
@@ -245,25 +247,63 @@
                               let record = response[0];
                               let htmlTable = '';
                               htmlTable += '<tr>';
-                                htmlTable += '<td><strong>Name</strong></td>';
+                                htmlTable += '<td><strong>Procurement- IT ID</strong></td>';
                                 htmlTable += '<td>'+record.procitname+'</td>';
                                 htmlTable += '<td><strong>ImpaneledVendor Name</strong></td>';
                                 htmlTable += '<td>'+'<a href="#" class="vendorDetTag" id="'+record.impaneled_vendor__c+'" >'+record.vendername+'</a>'+'</td>';
                          
                             htmlTable += '</tr>';
                             htmlTable += '<tr>';
-                                htmlTable += '<td><strong>Item</strong></td>';
+                                htmlTable += '<td><strong>Items</strong></td>';
                                 htmlTable += '<td>'+record.items__c+'</td>';
-                                htmlTable += '<td><strong>Item Specification</strong></td>';
+                                htmlTable += '<td><strong>Items Specification</strong></td>';
                                 htmlTable += '<td>'+record.product_service_specification__c+'</td>';
                             htmlTable += '</tr>';
                             htmlTable += '<tr>';
-                                htmlTable += '<td><strong>Quantity</strong></td>';
-                                htmlTable += '<td>'+record.quantity__c+'</td>';
-                                htmlTable += '<td><strong>Budget</strong></td>';
-                                htmlTable += '<td>'+record.budget__c+'</td>';
-                            htmlTable += '</tr>';
-                            $('#procItTable').empty();
+                              htmlTable += '<td><strong>Quantity</strong></td>';
+                              htmlTable += '<td>'+record.quantity__c+'</td>';
+                              htmlTable += '<td><strong>Budget</strong></td>';
+                              htmlTable += '<td>'+record.budget__c+'</td>';
+                          htmlTable += '</tr>';
+                            htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Others</strong></td>';
+                              htmlTable += '<td>'+record.others__c+'</td>';
+                              htmlTable += '<td><strong>Approvers</strong></td>';
+                              htmlTable += '<td>'+record.approvers__c+'</td>';
+                          htmlTable += '</tr>';
+                          htmlTable += '<tr>';
+                            htmlTable += '<td><strong>Quote1</strong></td>';
+                            htmlTable += '<td>'+record.quote1__c+'</td>';
+                            htmlTable += '<td><strong>Quote2</strong></td>';
+                            htmlTable += '<td>'+record.quote2__c+'</td>';
+                           htmlTable += '</tr>';
+                           htmlTable += '<tr>';
+                              htmlTable += '<td><strong>Quote3</strong></td>';
+                              htmlTable += '<td>'+record.quote3__c+'</td>';
+                              htmlTable += '<td><strong>Is released from stock</strong></td>';
+                              htmlTable += '<td>'+record.is_released_from_stock__c+'</td>';
+                             
+                           htmlTable += '</tr>';
+                           htmlTable += '<tr>';
+                            htmlTable += '<td><strong>State</strong></td>';
+                            htmlTable += '<td>'+record.state__c+'</td>';
+                            htmlTable += '<td><strong>District</strong></td>';
+                            htmlTable += '<td>'+record.district__c+'</td>';
+                            
+                         htmlTable += '</tr>';
+                         htmlTable += '<tr>';
+                          htmlTable += '<td><strong>Per Unit Cost</strong></td>';
+                          htmlTable += '<td>'+record.per_unit_cost__c+'</td>';
+                          htmlTable += '<td><strong>Unit</strong></td>';
+                            htmlTable += '<td>'+record.unit__c+'</td>';
+                       htmlTable += '</tr>';
+                       htmlTable += '<tr>';
+                        htmlTable += '<td><strong>Justification</strong></td>';
+                        htmlTable += '<td>'+record.justification__c+'</td>';
+                        htmlTable += '<td><strong>Number Of Quotes</strong></td>';
+                        htmlTable += '<td>'+record.number_of_quotes__c+'</td>';
+                     htmlTable += '</tr>';
+                          $('#procItTable').empty();
                             $('#procItTable').html(htmlTable);
                             }
                             vendorDetailFunction();

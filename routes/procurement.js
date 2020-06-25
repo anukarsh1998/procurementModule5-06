@@ -171,7 +171,7 @@ router.post('/nonItProducts', (request,response) => {
    let justify=request.body.justification;
    console.log('justified'+justify); */
 
-   const{state,district,itemsCategory,items,itemSpecification,quantity,budget}=request.body;
+   const{state,district,unit,unitCost,itemsCategory,items,itemSpecification,quantity,budget}=request.body;
    let numberOfRows,lstNonItProcurement = [];
    if(typeof(nonItFormResult.quantity) != 'object')
    {
@@ -198,6 +198,10 @@ router.post('/nonItProducts', (request,response) => {
             let singleRecordValues = [];
             singleRecordValues.push(nonItFormResult.itemsCategory);
             singleRecordValues.push(nonItFormResult.items);
+            singleRecordValues.push(nonItFormResult.state);
+            singleRecordValues.push(nonItFormResult.district);
+            singleRecordValues.push(nonItFormResult.unitCost);
+            singleRecordValues.push(nonItFormResult.unit);
           //  singleRecordValues.push(nonItFormResult.otherItems);
             singleRecordValues.push(nonItFormResult.itemSpecification);
             singleRecordValues.push(nonItFormResult.quantity);
@@ -246,6 +250,10 @@ router.post('/nonItProducts', (request,response) => {
                     let singleRecordValues = [];
                     singleRecordValues.push(nonItFormResult.itemsCategory[i]);
                     singleRecordValues.push(nonItFormResult.items[i]);
+                    singleRecordValues.push(nonItFormResult.state[i]);
+                    singleRecordValues.push(nonItFormResult.district[i]);
+                    singleRecordValues.push(nonItFormResult.unitCost[i]);
+                    singleRecordValues.push(nonItFormResult.unit[i]);
                    // singleRecordValues.push(nonItFormResult.otherItems[i]);       
                     singleRecordValues.push(nonItFormResult.itemSpecification[i]);
                     singleRecordValues.push(nonItFormResult.quantity[i]);
@@ -266,7 +274,7 @@ router.post('/nonItProducts', (request,response) => {
    }
    if(typeof(nonItFormResult.quantity) != 'object')
    {
-    let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,Number_of_quotes__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
+    let nonItProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item__c (Products_Services_Name__c, Items__c,State__c,District__c,Per_Unit_Cost__c,unit__c, Product_Service__c, Quantity__c, Budget__c, Quote1__c,Quote2__c	,Quote3__c,Number_of_quotes__c,justification__c,Impaneled_Vendor__c, Asset_Requisition_Form__c ) VALUES %L returning id',lstNonItProcurement);
     console.log('nonItProductsInsertQuery '+nonItProductsInsertQuery);
     pool.query(nonItProductsInsertQuery)
     .then((nonItProductsInsertQueryResult) => {
@@ -321,7 +329,7 @@ router.post('/itProducts', (request,response) => {
 
     console.log('Inside ItProducts Post Method');
     let itFormResult = request.body;
-    const{state,items,itemSpecification,quantity,budget}=request.body;
+    const{state,items,district,unitCost,unit,itemSpecification,quantity,budget}=request.body;
     
     console.log('itFormResult  '+JSON.stringify(itFormResult));
 
@@ -351,6 +359,10 @@ router.post('/itProducts', (request,response) => {
                 singleItProductRecordValue.push(itFormResult.items);
                 singleItProductRecordValue.push(itFormResult.vendor);
                 singleItProductRecordValue.push(itFormResult.itemSpecification);
+                singleItProductRecordValue.push(itFormResult.state);
+                singleItProductRecordValue.push(itFormResult.district );
+                singleItProductRecordValue.push(itFormResult.unitCost);
+                singleItProductRecordValue.push(itFormResult.unit);
                 singleItProductRecordValue.push(itFormResult.quantity);
                 singleItProductRecordValue.push(itFormResult.budget);
                 singleItProductRecordValue.push(itFormResult.imgpath1);
@@ -394,6 +406,10 @@ router.post('/itProducts', (request,response) => {
                 singleItProductRecordValue.push(itFormResult.items[i]);
                 singleItProductRecordValue.push(itFormResult.vendor[i]);
                 singleItProductRecordValue.push(itFormResult.itemSpecification[i]);
+                singleItProductRecordValue.push(itFormResult.state[i]);
+                singleItProductRecordValue.push(itFormResult.district[i]);
+                singleItProductRecordValue.push(itFormResult.unitCost[i]);
+                singleItProductRecordValue.push(itFormResult.unit[i]);
                 singleItProductRecordValue.push(itFormResult.quantity[i]);
                 singleItProductRecordValue.push(itFormResult.budget[i]);
                 singleItProductRecordValue.push(itFormResult.imgpath1[i]);
@@ -412,7 +428,7 @@ router.post('/itProducts', (request,response) => {
     console.log('lstItProducts  '+JSON.stringify(lstItProducts));
     if(typeof(itFormResult.quantity)!='object'){
         console.log('single row');
-        const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c,Number_of_quotes__c,justification__c ,Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
+        const itProductsInsertQuery = format('INSERT INTO salesforce.Product_Line_Item_IT__c (Items__c,Impaneled_Vendor__c,Product_Service_specification__c,State__c,District__c,Per_Unit_Cost__c,Unit__c, Quantity__c, Budget__c,Quote1__c,Quote2__c,Quote3__c,Number_of_quotes__c,justification__c ,Asset_Requisition_Form__c ) values %L returning id',lstItProducts);
         console.log(itProductsInsertQuery);
         pool.query(itProductsInsertQuery)
         .then((itProductsInsertQueryResult) => {
@@ -578,7 +594,7 @@ router.get('/itProcurementList',(request,response)=>{
     let parentAssetId=request.query.parentId;
     console.log('parentAssetId '+parentAssetId);
     console.log('Your are inside the IT PRCUREMENT List Router method');
-    let qry='SELECT procIT.sfid,procIT.Name as procItName ,procIT.Items__c ,procIT.Product_Service_specification__c,vend.name as venderName,procIT.Quantity__c, procIT.Budget__c,procIT.Impaneled_Vendor__c '+
+    let qry='SELECT procIT.sfid,procIT.Name as procItName ,procIT.Items__c,procIT.Number_of_quotes__c ,procIT.Product_Service_specification__c,vend.name as venderName,procIT.Quantity__c, procIT.Budget__c,procIT.Impaneled_Vendor__c '+
             'FROM salesforce.Product_Line_Item_IT__c procIT '+
             'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
             'ON procIT.Impaneled_Vendor__c =  vend.sfid '+
@@ -599,6 +615,7 @@ router.get('/itProcurementList',(request,response)=>{
               obj.item_spec = eachRecord.product_service_specification__c;
               obj.quantity = eachRecord.quantity__c;
               obj.budget = eachRecord.budget__c;
+              obj.no = eachRecord.number_of_quotes__c;
               obj.vendor=eachRecord.vendername;
               obj.editAction = '<button href="#" class="btn btn-primary editProcIt" id="'+eachRecord.sfid+'" >Edit</button>'
               i= i+1;
@@ -620,7 +637,7 @@ router.get('/itProcurementList',(request,response)=>{
 router.get('/getProcurementITDetail',(request,response)=>{
       let procurementId=request.query.procurementId;
         console.log('getProcurementITDetail Id='+procurementId);
-        let qry='SELECT procIT.sfid,procIT.Name as procItName ,procIT.Items__c ,procIT.Product_Service_specification__c,vend.name as venderName,procIT.Quantity__c, procIT.Budget__c,procIT.Impaneled_Vendor__c '+
+        let qry='SELECT procIT.sfid,procIT.Name as procItName,procIT.Is_released_from_stock__c,procIT.Others__c,procIT.state__c,procIT.district__c,procIT.Justification__c,procIT.Number_of_quotes__c,procIT.Per_Unit_Cost__c,procIT.Unit__c,procIT.Quote1__c,procIT.Quote2__c,procIT.Quote3__c,procIT.Approvers__c ,procIT.Items__c ,procIT.Product_Service_specification__c,vend.name as venderName,procIT.Quantity__c, procIT.Budget__c,procIT.Impaneled_Vendor__c '+
         'FROM salesforce.Product_Line_Item_IT__c procIT '+
         'INNER JOIN salesforce.Impaneled_Vendor__c vend '+
         'ON procIT.Impaneled_Vendor__c =  vend.sfid '+        
