@@ -1,3 +1,4 @@
+<% include ./partials/messages %>
 <% include ./partials/navbar %>
 
   <style>
@@ -355,10 +356,18 @@
                   dataType : 'json'
               })
               .done((response) => {
-                    console.log('resonse   :'+response);
+                    console.log('resonse   :'+JSON.stringify(response));
+                   
               })
               .fail((jqXHR, status, error) => {
                     console.log('jqXHR  '+JSON.stringify(jqXHR));
+                    let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'+ jqXHR.responseText+
+                        '<button type="button" class="close" data-dismiss="alert-success" aria-label="Close">'+
+                          '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                      '</div>';
+                      $('#errorMessages').empty();
+                      $('#errorMessages').append(errorHtml); 
               })        
 
             })
@@ -390,7 +399,7 @@
             </div>
     </div>
    </form>
-
+   
    <div id="createAssetRequisitionForm" class="modal fade bs-example-modal-lg" tabindex ="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -401,6 +410,8 @@
           </button>
         </div>
         <div class="modal-body">
+            <div class="">
+                <div id="errorMessages"></div>
           <form  id="assetRequisitionForm" class="needs-validation" novalidate >
 
           <div class="form-group">  
@@ -486,9 +497,11 @@
 
           </form>
         </div>
+        </div>
       </div>
     </div>
   </div>
+
 
 
   <!-- Table Containing rows -->

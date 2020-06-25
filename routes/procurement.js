@@ -134,18 +134,29 @@ router.post('/insertAsssetForm',(request,response)=>{
     actualDate=null;      
 }
 console.log(planDate+'  +'+actualDate);
+const schema=joi.object({
+    assetRequisitionName:joi.string().required().label('Please Fill Asset Requition Name'),
+    projectName:joi.string().required().label('Please choose Project/Department'),
+})
+let result=schema.validate({assetRequisitionName,projectName});
+if(result.error){
+    console.log('fd'+result.error);
+    response.send(result.error.details[0].context.label);    
+}
+else{
    let query ='INSERT INTO salesforce.Asset_Requisition_Form__c (name,Project_Department__c,Requested_Closure_Actual_Date__c,Requested_Closure_Plan_Date__c,GST__c,Submitted_By_Heroku_User__c,Is_SPOC_Approved__c,Available_In_Stock__c) values ($1,$2,$3,$4,$5,$6,$7,$8)';
    console.log('asset Insert Query= '+query);
    pool
    .query(query,[assetRequisitionName,projectName,actualDate,planDate,gst,submittedBy,spocApproval,availableInStock])
    .then((assetQueryResult) => {     
             console.log('assetQueryResult.rows '+JSON.stringify(assetQueryResult));
-            response.send('Success');
+            response.send('Successfully Inserted');
    })
    .catch((assetInserError) => {
         console.log('assetInserError   '+assetInserError.stack);
         response.send('Error');
    })
+}
 })
 
 router.get('/nonItProducts/:parentAssetId',verify, (request,response) => {

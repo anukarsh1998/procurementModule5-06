@@ -273,13 +273,28 @@
                           htmlTable += '</tr>';
                           htmlTable += '<tr>';
                             htmlTable += '<td><strong>Quote1</strong></td>';
-                            htmlTable += '<td>'+record.quote1__c+'</td>';
+                            if(record.quote1__c!="demo1"){
+                            htmlTable += '<td>'+'<a href="'+record.quote1__c+'" target="_blank">Click to View Quote1</a></td>';
+                            }
+                            else{
+                              htmlTable += '<td></td>';
+                            }
                             htmlTable += '<td><strong>Quote2</strong></td>';
-                            htmlTable += '<td>'+record.quote2__c+'</td>';
+                            if(record.quote2__c!="demo2"){
+                            htmlTable += '<td>'+'<a href="'+record.quote2__c+'" target="_blank">Click to View Quote2</a></td>';
+                            }
+                            else{
+                              htmlTable+= '<td></td>';
+                            }
                            htmlTable += '</tr>';
                            htmlTable += '<tr>';
                               htmlTable += '<td><strong>Quote3</strong></td>';
-                              htmlTable += '<td>'+record.quote3__c+'</td>';
+                              if(record.quote3__c!="demo3"){
+                              htmlTable += '<td>'+'<a href="'+record.quote3__c+'" target="_blank">Click to View Quote3</a></td>';
+                              }
+                              else{
+                                htmlTable +='<td></td>';
+                              }
                               htmlTable += '<td><strong>Is released from stock</strong></td>';
                               htmlTable += '<td>'+record.is_released_from_stock__c+'</td>';
                              
