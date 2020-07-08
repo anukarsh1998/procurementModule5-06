@@ -1,13 +1,33 @@
 
-
-   
-    
     <% include ../partials/navbar %> 
    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css" type="text/css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.2/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
-
+    <div class="form-group">
+         <div class="row">
+               <div class="col-md-6">
+                  <label for="validationTooltip02">Select Project</label>
+                     <select class="custom-select custom-select-sm form-control" id="selproject" name="Selectproject">
+                       <option selected value="allproject">All Project</option>
+                       <% if(projectList.length != 0) { %>
+                        <% projectList.forEach((eachProject) => { %>
+                        <option value="<%= eachProject.sfid %>" ><%= eachProject.name %></option>
+                        <% }) %>
+                       <% } %>
+                     </select>
+               </div>
+      <div class="col-md-6">
+        <label for="validationTooltip02">Select View</label>
+        <select class="custom-select custom-select-sm form-control" readonly="true" id="Selectview" name="Selectview">
+            <option selected>None</option>
+            <option value="currentuser">current User View</option>
+            <% if(objUser.isManager) { %>
+            <option value="teamview">Team View</option>
+            <% } %>
+        </select>
+    </div>
+    </div>
 <body>
     <div class="container">
         <div class="row">
@@ -53,7 +73,43 @@
         $(document).ready(function() {
 
             var today = new Date();
-            var eventsData ;  
+            var eventsData ; 
+            /*  initial data Load     */
+            $.ajax({ 
+              type: 'GET',
+              url: '/users/getevents',
+              data : {
+                  'date': today
+              },
+              dataType: 'json'
+          })
+          .done(function( data ) {
+              console.log( "Initial data load Sample of data:", data );
+              eventsData = data;
+              console.log('JSON.Stringied Data of events : '+JSON.stringify(eventsData));
+              $('#bootstrapModalFullCalendar').fullCalendar( 'removeEvents');
+              $('#bootstrapModalFullCalendar').fullCalendar( 'addEventSource', eventsData);         
+              $('#bootstrapModalFullCalendar').fullCalendar( 'rerenderEvents' );
+          })
+          .fail(function(jqXHR, textStatus, err){
+              console.log('AJAX error response :',textStatus);
+          }) 
+            /*  initial data Load END   */
+
+            var selectProj; 
+            $('#selproject').on('change',function(){
+               selectProj = this.value;
+               console.log('selectProj '+selectProj);
+               if(selectProj!='None')
+               {
+                $('#Selectview').attr("readonly",false);
+               }
+            });
+             $('#Selectview').on('change',function(){
+                   let selectedView=this.value;
+              console.log('selected' +selectedView);
+              if(selectProj=='allproject' && selectedView=='currentuser')
+              {
             $.ajax({ 
                 type: 'GET',
                 url: '/users/getevents',
@@ -73,8 +129,33 @@
             .fail(function(jqXHR, textStatus, err){
                 console.log('AJAX error response :',textStatus);
             }) 
+          }
+          if(selectProj=='allproject' && selectedView=='teamview')
+              {
+                alert("team view");
+                $.ajax({ 
+                  type: 'GET',
+                  url: '/users/geteventsTeam',
+                  data : {
+                      'date': today
+                  },
+                  dataType: 'json'
+              })
+              .done(function( data ) {
+                  console.log( "Team view Sample of data:", data );
+                  eventsData = data;
+                  console.log('JSON.Stringied Data of events Team View : '+JSON.stringify(eventsData));
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'removeEvents');
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'addEventSource', eventsData);         
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'rerenderEvents' );
+              })
+              .fail(function(jqXHR, textStatus, err){
+                  console.log('AJAX error response :',textStatus);
+              }) 
 
-
+              }
+              
+          });
 
             /*updating values on next click */
             $('body').on('click', 'button.fc-next-button', function() {
@@ -142,6 +223,7 @@
                         data: values ,
                         success: function (res) {
                                 alert('Task Saved Successfully');
+                                document.getElementById("taskForm").reset();
                                 $("#createTaskModal").modal("hide");
                                 console.log(res)
                         },
@@ -210,11 +292,28 @@
                         {
                             $('#plannedstarttimeTask').prop("disabled",true);
                             $('#plannedendtimeTask').prop("disabled",true);
+                            $('#deadline').prop("disabled",true);
                         }
                         else
                         {
-                            $('#plannedstarttimeTask').prop("disabled",false);
-                            $('#plannedendtimeTask').prop("disabled",false);
+
+                            $('#deadline').prop("disabled",false);
+                            $('#deadline').on('change',function(){
+                              let deadValue=this.value;
+                              console.log('deadValue' +deadValue);
+                              if(deadValue=='Deadlines')
+                              {
+                              $('#plannedstarttimeTask').prop("disabled",true);
+                              $('#plannedendtimeTask').prop("disabled",false);
+                            }
+                              else
+                              {
+                                $('#plannedstarttimeTask').prop("disabled",false);
+                                $('#plannedendtimeTask').prop("disabled",false);
+
+                              }
+                            });
+                
                         }
 
                         $("#createTaskModal").modal("show");
@@ -240,7 +339,7 @@
                                 {
                                     $.ajax({ 
                                     type: 'GET',
-                                    url: '/calendar/getrelatedtasks',
+                                    url: '/timesheets/getrelatedtasks',
                                     data : {
                                             'projectId' : selectedProject,
                                             'selectedDate' : selectedDate
@@ -295,7 +394,7 @@
                             tasktableData  += '<th>Actual Hours</th>';
                             tasktableData  += '<th>Date</th>';
                             tasktableData  += ' <th>Project Name</th>';
-                            tasktableData  += ' <th>Assigned To</th>';
+                            tasktableData  += ' <th>Assigned Resource</th>';
                             tasktableData  += '</tr>';
                             tasktableData  += '</thead>';    
                                                            
@@ -354,7 +453,7 @@
               <div class="row">
                 <div class="col-md-6">
                   <label for="validationTooltip01">Task Description</label>
-                  <input type="text" class="form-control" id="validationTooltip01" placeholder="Task Name"  name="taskname" required>
+                  <input type="text" class="form-control" id="validationTooltip01" placeholder=""  name="taskname" required>
                 </div>
                
                 <div class="col-md-6">
@@ -374,6 +473,7 @@
               <div class="col-md-6">
                 <label for="validationTooltip03">Project</label>
                 <select class="custom-select custom-select-sm form-control" name="projectname">
+                  <option value="" >None</option>
                   <% if(projectList.length != 0) { %>
                    <% projectList.forEach((eachProject) => { %>
                    <option value="<%= eachProject.sfid %>" ><%= eachProject.name %></option>
@@ -394,6 +494,7 @@
                 <div class="col-md-6">
                   <label for="validationTooltip02">Assigned Resource</label>
                   <select class="custom-select custom-select-sm form-control" name="assignedresource">
+                    <option value="" >None</option>
                       <% if(contactList.length != 0) { %>
                        <% contactList.forEach((eachContact) => { %>
                        <option value="<%= eachContact.sfid %>" ><%= eachContact.name %></option>
@@ -425,6 +526,20 @@
                   <label for="validationTooltip02">Planned End Time</label>
                   <input type="time" class="form-control" id="plannedendtimeTask" name="plannedendtime"  required>
                 </div>
+              </div>  
+            </div>
+
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="validationTooltipUsername">Deadline Type</label>
+                  <select class="custom-select custom-select-sm form-control" id="deadline" name="Deadline" >
+                    <option value="">Select</option>
+                    <option value="Deadlines">Deadlines</option>
+                    <option value="blocktime">Block Time</option>
+               </select>
+                </div>
+                
               </div>  
             </div>
 
@@ -523,11 +638,12 @@
                 <div class="col-md-6">
                     <label >Representative</label>
                     <select class="custom-select custom-select-sm form-control" name="representative">
-                        <% if(contactList.length != 0) { %>
+                      <option value="<%= objUser.sfid %>" ><%= objUser.name %></option>
+                      <!--   <% if(contactList.length != 0) { %>
                          <% contactList.forEach((eachContact) => { %>
                          <option value="<%= eachContact.sfid %>" ><%= eachContact.name %></option>
                          <% }) %>
-                        <% } %>
+                        <% } %> -->
                      </select>
                 </div>
 

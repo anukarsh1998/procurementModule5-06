@@ -181,12 +181,13 @@ router.get('/timesheet',verify,function(request,response){
 
    var projectName ='';
     pool
-    .query('SELECT sfid, Name FROM salesforce.Contact  WHERE sfid = $1;',[userId])
+    //.query('SELECT sfid, Name FROM salesforce.Contact  WHERE sfid = $1;',[userId])
+   .query('SELECT sfid, Name FROM salesforce.Contact')
     .then(contactResult => {
       console.log('Name of Contact  ::     '+contactResult.rows[0].name+' sfid'+contactResult.rows[0].sfid);
       var contactId = contactResult.rows[0].sfid;
         pool
-        .query('SELECT sfid, Name, Team__c FROM salesforce.Team_Member__c WHERE Representative__c = $1 ;',[contactId])
+        .query('SELECT sfid, Name, Team__c FROM salesforce.Team_Member__c WHERE Representative__c = $1 ;',[userId])
         .then(teamMemberResult => {
           console.log('Name of TeamMemberId  : '+teamMemberResult.rows[0].name+'   sfid :'+teamMemberResult.rows[0].sfid);
           console.log('Team Id  : '+teamMemberResult.rows[0].team__c);
@@ -212,10 +213,10 @@ router.get('/timesheet',verify,function(request,response){
                   lstProjectId.push(projectTeamResult.rows[i-1].project__c);
                 } 
                 console.log('lstProjectId  : '+lstProjectId);
-                var projetQueryText = 'SELECT sfid, Name FROM salesforce.Milestone1_Project__c WHERE sfid IN ('+ projectParams.join(',')+ ')';
-  
+               // var projetQueryText = 'SELECT sfid, Name FROM salesforce.Milestone1_Project__c WHERE sfid IN ('+ projectParams.join(',')+ ')';
+               var projetQueryText='SELECT sfid, Name FROM salesforce.Milestone1_Project__c';
                 pool.
-                query(projetQueryText, lstProjectId)
+                query(projetQueryText)
                 .then((projectQueryResult) => { 
                       console.log('Number of Projects '+projectQueryResult.rows.length);
                       console.log('Project sfid '+projectQueryResult.rows[0].sfid+ 'Project Name '+projectQueryResult.rows[0].name);
@@ -283,6 +284,244 @@ router.get('/timesheet',verify,function(request,response){
         });
  
 });
+
+router.get('/geteventsTeam',verify,async function(req,res,next){
+  console.log('request.user '+JSON.stringify(req.user));
+  var userId = req.user.sfid;
+  console.log('userId : '+userId+' ObjUser :'+JSON.stringify(req.user));
+
+  var lstTeams=[];
+  var teamParam = [];
+  let teamMember=[];
+  let teamMemberParam=[];
+
+  console.log('req.query :'+req.query.date);
+  var strdate = req.query.date;
+  console.log('typeof date '+typeof(strdate));
+  var selectedDate = new Date(strdate);
+  console.log('selectedDate   : '+selectedDate);
+  console.log('typeof(selectedDate)   : '+typeof(selectedDate));
+  var year = selectedDate.getFullYear();
+  var month = selectedDate.getMonth();
+  console.log('Month '+selectedDate.getMonth());
+  console.log('Year : '+selectedDate.getFullYear());
+  var numberOfDays = new Date(year, month+1, 0).getDate();
+  console.log('numberOfDays : '+numberOfDays);
+  let plannedHoursMap = new Map();
+  let actualHoursMap = new Map();
+
+  function convert(str) {
+    var date = new Date(str),
+      mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+      day = ("0" + date.getDate()).slice(-2);
+    return [date.getFullYear(), mnth, day].join("-");
+  }  
+  await pool.query('SELECT Id, sfid , Manager__c, name FROM salesforce.Team__c WHERE Manager__c = $1',[userId])
+    .then((teamQueryResult) => {
+      if(teamQueryResult.rowCount>0)
+      {
+      console.log('teamQueryResult team '+JSON.stringify(teamQueryResult.rows));
+     
+        for(var i = 1; i <= teamQueryResult.rows.length; i++) {
+          teamParam.push('$' + i);
+          lstTeams.push(teamQueryResult.rows[i-1].sfid);
+        } 
+
+      console.log(' lstTeams '+lstTeams+' teamParam '+teamParam);
+      let teamUserQuery='SELECT Id, sfid,Representative__c , team__c FROM salesforce.Team_Member__c WHERE team__c IN ('+ teamParam.join(',')+ ')';
+      console.log('teamUserQuery '+teamUserQuery);
+      pool.query(teamUserQuery,lstTeams)
+      .then((userTeamQueryResult)=>{
+        console.log('userTeamQueryResult '+JSON.stringify(userTeamQueryResult.rows));
+        for(var i = 1; i <= userTeamQueryResult.rows.length; i++) {
+          teamMemberParam.push('$' + i);
+          teamMember.push(userTeamQueryResult.rows[i-1].representative__c);
+        } 
+        console.log('Team Member involne in Team '+teamMember +'dollers '+teamMemberParam);
+        let qry ='SELECT Id, sfid , Planned_Hours__c, Start_Date__c FROM salesforce.Milestone1_Task__c WHERE Assigned_Manager__c IN ('+ teamMemberParam.join(',')+ ')';
+         console.log('qry xxxxxxxxxxx' +qry);
+         pool.query(qry,teamMember)
+         .then((taskQueryResult) => {
+               if(taskQueryResult.rowCount > 0)
+               {
+                     taskQueryResult.rows.forEach((eachTask) =>{
+                         var date = convert(eachTask.start_date__c);
+                         console.log('date xxx  '+date+'  eachTask.planned_hours__c  xxxxx : '+eachTask.planned_hours__c);
+                        
+                         console.log('plannedHoursMap.has(date)  xxx'+plannedHoursMap.has(date));
+                         console.log('Opposite plannedHoursMap.has(date)  xxx'+(!plannedHoursMap.has(date)));
+                         if( !plannedHoursMap.has(date))
+                         {
+                           plannedHoursMap.set(date, eachTask.planned_hours__c);
+                           console.log('if Block '+eachTask.planned_hours__c);
+                           if(eachTask.planned_hours__c != null)
+                             plannedHoursMap.set(date, eachTask.planned_hours__c);
+                           else
+                             plannedHoursMap.set(date, 0);
+                         }
+                         else
+                         {
+                             
+                             let previousHours = plannedHoursMap.get(date);
+                             console.log('date   '+date +'  else Block Previous Hours : '+previousHours);
+                             let currentHours = eachTask.planned_hours__c;
+                             console.log('date   '+date +'  else Block Current Hours : '+currentHours);
+                             if(currentHours != null)
+                             {
+                               console.log('date  xx'+date +'previousHours + currentHours  '+(previousHours + currentHours));
+                               plannedHoursMap.set(date, previousHours + currentHours );
+                             }
+                         }
+                     })
+       
+                     let mapIter = plannedHoursMap.entries();
+                     console.log('plannedHoursMap    size '+plannedHoursMap.size);
+                     
+                     console.log(mapIter.next().value);
+                     console.log(mapIter.next().value);
+                     console.log(mapIter.next().value);
+                     console.log(mapIter.next().value);
+                     console.log(mapIter.next().value);
+       
+                     for (let key of plannedHoursMap.keys()) {
+                      console.log('key :'+key)
+                     }
+       
+                     for(let value of plannedHoursMap.values()){
+                       console.log('values : '+value);
+                     }
+               }
+         })
+
+
+         .catch((taskQueryError) => {
+               console.log('taskQueryError  xxxx :  '+taskQueryError.stack);
+         })
+
+
+      })
+      .catch((error)=>{
+        console.log('eroor in Team USer ID '+error.stack);
+      })
+    }
+    })
+    .catch((teamQueryError)=>{
+      console.log('teamQueryResult '+teamQueryError.stack);
+    })
+
+    await
+    pool.query('SELECT sfid, date__c, calculated_hours__c FROM salesforce.Milestone1_Time__c WHERE sfid != \''+''+'\'')
+  .then((timesheetQueryResult) => {
+      console.log('timesheetQueryResult  '+JSON.stringify(timesheetQueryResult.rows));
+      console.log('timesheetQueryResult.rowCount '+timesheetQueryResult.rowCount);
+      if(timesheetQueryResult.rowCount > 0)
+      {
+        timesheetQueryResult.rows.forEach((eachTimesheet) => {
+          
+            let fillingDate = convert(eachTimesheet.date__c);
+            console.log('fillingDate TeamView '+fillingDate);
+
+            if( ! actualHoursMap.has(fillingDate))
+            {
+                if(eachTimesheet.calculated_hours__c != null)
+                  actualHoursMap.set(fillingDate, eachTimesheet.calculated_hours__c);
+                else
+                  actualHoursMap.set(fillingDate, 0);
+            }
+            else
+            {
+               let previousFilledHours =  actualHoursMap.get(fillingDate);
+               let currentFilledHours = eachTimesheet.calculated_hours__c;
+               if(currentFilledHours != null)
+               {
+                  actualHoursMap.set(fillingDate, (previousFilledHours + currentFilledHours));
+               }
+               else
+                  actualHoursMap.set(fillingDate, (previousFilledHours + 0));
+            }
+
+            for(let time of actualHoursMap)
+            {
+              console.log('time  : '+time);
+            }
+          
+        })
+      }
+      
+
+  })
+  .catch((timesheetQueryError) => {
+    console.log('timesheetQueryError  '+timesheetQueryError.stack);
+  })
+  console.log('Just above Team View')
+  var lstEvents = [];
+  for(let i = 1;i <= numberOfDays ; i++)
+  {
+      let day = i , twoDigitMonth = month+1;
+      if(day >= 1 && day <= 9)
+      {
+          day = '0'+i;
+      }
+      if(twoDigitMonth >= 1 && twoDigitMonth <= 9)
+      {
+        twoDigitMonth = '0'+twoDigitMonth;
+      }
+
+      var date = year+'-'+twoDigitMonth+'-'+day;
+     // console.log('date inside events '+date);
+    //  console.log('plannedHoursMap.has(date)  '+plannedHoursMap.has(date))
+      if(plannedHoursMap.has(date))
+      {
+          console.log('plannedHoursMap.get(date)  : '+plannedHoursMap.get(date));
+          lstEvents.push({
+            title : 'Planned Hours : '+plannedHoursMap.get(date),
+            start : year+'-'+twoDigitMonth+'-'+day,   
+          });
+         
+      }
+      else
+      {
+          lstEvents.push({
+            title : 'Planned Hours : '+'0',
+            start : year+'-'+twoDigitMonth+'-'+day,   
+          });
+      }
+
+
+      if(actualHoursMap.has(date))
+      {
+          lstEvents.push({
+            title : 'Actual Hours : '+actualHoursMap.get(date),
+            start : year+'-'+twoDigitMonth+'-'+day,   
+          });
+      }
+      else
+      {
+          lstEvents.push({
+            title : 'Actual Hours : '+'0',
+            start : year+'-'+twoDigitMonth+'-'+day,   
+          });
+      }
+
+      lstEvents.push({
+        title : 'Create Task',
+        start : year+'-'+twoDigitMonth+'-'+day,   
+      });
+      lstEvents.push({
+        title : 'Details',
+        start : year+'-'+twoDigitMonth+'-'+day,   
+      });
+      
+      lstEvents.push({
+        title : 'Fill Actuals',
+        start : year+'-'+twoDigitMonth+'-'+day,   
+      });
+   
+  } 
+    console.log('JSON.strigify teamView'+JSON.stringify(lstEvents));
+    res.send(lstEvents);
+ });
+
 
 
 router.get('/getevents',verify, async function(req, res, next) {

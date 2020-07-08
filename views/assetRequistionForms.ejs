@@ -218,11 +218,12 @@
 
                                                 assetDetailsTableRows += '<td><strong>Procurement Committee Approval<strong></td>';
                                                 assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_committee_approval__c+'</td>';
-                                                assetDetailsTableRows += '<td><strong>Accounts Approval<strong></td>';
-                                                assetDetailsTableRows += '<td>'+assetDetailsRecord.accounts_approval__c+'</td>';
+                                                assetDetailsTableRows += '<td><strong>Management Approval (Activity Code)<strong></td>';
+                                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_activity_code__c+'</td>';
+                                               
                                                 assetDetailsTableRows += '</tr>';
-                                                assetDetailsTableRows += '<tr>';
-                                                    assetDetailsTableRows += '<td><strong>Management Approval<strong></td>';
+                                                assetDetailsTableRows += '<tr>'; 
+                                                    assetDetailsTableRows += '<td><strong>Management Approval(Amount)<strong></td>';
                                                     assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval__c+'</td>';
                                                     assetDetailsTableRows += '<td><strong>Chairperson Approval<strong></td>';
                                                     assetDetailsTableRows += '<td>'+assetDetailsRecord.chairperson_approval__c+'</td>';
@@ -231,15 +232,25 @@
                                                     assetDetailsTableRows += '<tr>';
                                                         assetDetailsTableRows += '<td><strong> Management Approval(less than 3 quotes)<strong></td>';
                                                         assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_less_than_3_quotes__c+'</td>';
-                                                        assetDetailsTableRows += '<td><strong>Management Approval (Activity Code)<strong></td>';
-                                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_activity_code__c+'</td>';
+                                                        
                                                         assetDetailsTableRows += '</tr>';
-                                                    assetDetailsTableRows += '<tr>';
+                                                 /*   assetDetailsTableRows += '<tr>';
                                                         assetDetailsTableRows += '<td><strong> Committee Approved Counts<strong></td>';
                                                         assetDetailsTableRows += '<td>'+assetDetailsRecord.committee_approved_counts__c+'</td>';
                                                         assetDetailsTableRows += '<td><strong>Comittee Rejected Count<strong></td>';
                                                         assetDetailsTableRows += '<td>'+assetDetailsRecord.comittee_rejected_count__c+'</td>';
                                                         assetDetailsTableRows += '</tr>';
+                                                 */
+
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Account Status</h5></td>';    
+                                    assetDetailsTableRows += '</tr>';  
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td><strong>Accounts Approval<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.accounts_approval__c+'</td>';
+                                    assetDetailsTableRows += '<td><strong>Payment Status<strong></td>';
+                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.payment_status__c+'</td>';
+                                    assetDetailsTableRows += '</tr>';
 
 
 
@@ -256,11 +267,31 @@
                                     assetDetailsTableRows += '</tr>';   
                     
                                     assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td><strong>P.O attachments<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.p_o_attachment__c+'</td>';            
                                     assetDetailsTableRows += '<td><strong>Total Amount<strong></td>';
                                     assetDetailsTableRows += '<td>'+assetDetailsRecord.total_amount__c+'</td>';
-                                    assetDetailsTableRows += '<td><strong><strong></td>';
-                                    assetDetailsTableRows += '<td></td>';
                                     assetDetailsTableRows += '</tr>';   
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Received Stage(to be filled by Raiser)</h5></td>';    
+                                    assetDetailsTableRows += '</tr>';
+                                    assetDetailsTableRows += '<tr>';
+                                    assetDetailsTableRows += '<td><strong>Status attachments<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.status__c+'</td>';            
+                                    assetDetailsTableRows += '<td><strong>Payment Received Acknowledgement<strong></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.payment_received_acknowledgement__c+'</td>';
+                                    assetDetailsTableRows += '</tr>';
+                                    assetDetailsTableRows += '<tr>';
+                                        assetDetailsTableRows += '<td><strong>Receiver Name<strong></td>';
+                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.receiver_name__c+'</td>';            
+                                        assetDetailsTableRows += '<td><strong>Received Quantity (Goods)<strong></td>';
+                                        assetDetailsTableRows += '<td>'+assetDetailsRecord.received_quantity_goods__c+'</td>';
+                                        assetDetailsTableRows += '</tr>';
+                                        assetDetailsTableRows += '<tr>';
+                                            assetDetailsTableRows += '<td><strong>Date of Receiving (Goods)<strong></td>';
+                                            assetDetailsTableRows += '<td>'+assetDetailsRecord.date_of_receiving_goods__c+'</td>';            
+                                            
+                                            assetDetailsTableRows += '</tr>';  
                         })
                         $('#assetDetails').html(assetDetailsTableRows);
                     }

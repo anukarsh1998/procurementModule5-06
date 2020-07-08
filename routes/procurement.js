@@ -42,7 +42,8 @@ router.get('/details',verify, async(request, response) => {
  'asset.Comittee_Rejected_Count__c,asset.Procurement_Committee_Status__c,asset.Accounts_Approval__c,asset.Procurement_Head_Approval__c,asset.Approval_Status__c,'+
  'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid, '+
  'asset.Management_Approval_Activity_Code__c,asset.Management_Approval_for_fortnight_limit__c, '+
- 'asset.Management_Approval_less_than_3_quotes__c,asset.Procurement_Comt_Approval_for_fortnight__c '+
+ 'asset.Management_Approval_less_than_3_quotes__c,asset.Procurement_Comt_Approval_for_fortnight__c, '+
+  'asset.P_O_attachment__c,payment_status__c,asset.status__c,asset.payment_received_acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c '+
  'FROM  salesforce.Asset_Requisition_Form__c asset '+
   'INNER JOIN salesforce.Milestone1_Project__c proj '+
   'ON asset.Project_Department__c =  proj.sfid '+
