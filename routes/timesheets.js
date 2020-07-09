@@ -378,23 +378,30 @@ router.post('/fillactuals',(request, response) => {
   var selectedDate = request.query.date;
   console.log('date  '+selectedDate);
 
-  var lstTasksToShow = [];
+  var lstTasksToShow = [],contname=[];
   var projectParams = [], projectIDs = [];
   var timesheetParams = [], taskIDs = [];
   var projectMap = new Map();
   var timesheetMap = new Map();
   var lstTaskOfRelatedDate ;
-
-
+  
+let tskqry='SELECT tsk.Id,tsk.sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.name as contname '+
+'FROM salesforce.Milestone1_Task__c tsk '+
+'INNER JOIN salesforce.Contact cont '+
+'ON tsk.assigned_manager__c = cont.sfid '+
+'WHERE Start_Date__c = $1 AND tsk.sfid != \''+''+'\'';
+console.log('tskqry '+tskqry);
   await
-  pool.query('SELECT Id,sfid, Name, Project_Name__c, Start_Date__c,assigned_manager__c, Planned_Hours__c FROM salesforce.Milestone1_Task__c WHERE Start_Date__c = $1 AND sfid != \''+''+'\'',[selectedDate])
+  pool.query(tskqry,[selectedDate])
   .then((taskQueryResult) => {
-      console.log('Query Result '+JSON.stringify(taskQueryResult));  
+      console.log('Query Result '+JSON.stringify(taskQueryResult.rows));  
       lstTaskOfRelatedDate = taskQueryResult.rows;
       for(let i=0; i< taskQueryResult.rowCount ; i++)
       {
+
           projectIDs.push(taskQueryResult.rows[i].project_name__c);
           taskIDs.push(taskQueryResult.rows[i].sfid)
+          contname.push(taskQueryResult.rows[i].contname)
           projectParams.push('$'+(i+1));
           timesheetParams.push('$'+(i+1));
       }  
@@ -403,6 +410,7 @@ router.post('/fillactuals',(request, response) => {
       console.log('taskIDs  : '+taskIDs);
       console.log('projectParams    : '+ projectParams);
       console.log('timesheetParams  : '+timesheetParams);
+      console.log('contname    : '+ contname);
       
   })
   .catch((taskQueryError) => {
@@ -448,7 +456,7 @@ router.post('/fillactuals',(request, response) => {
   {
       lstTaskOfRelatedDate.forEach((eachTask) => {
             let taskDetail = {};
-            taskDetail.name = eachTask.name;
+            taskDetail.name = eachTask.tskname;
             taskDetail.plannedHours = eachTask.planned_hours__c;
 
             if(timesheetMap.has(eachTask.sfid))
@@ -456,8 +464,11 @@ router.post('/fillactuals',(request, response) => {
             else
               taskDetail.actualHours = '';
             console.log('Inside Last Loop timesheetMap.get(eachTask.sfid)    '+timesheetMap.get(eachTask.sfid));
-
-            taskDetail.date = eachTask.start_date__c;
+            console.log('start_date__c '+eachTask.start_date__c);
+            let dt =eachTask.start_date__c.getTime()+19800000;
+            let start_date__c=new Date(dt);
+            console.log('start_date__c new '+start_date__c);
+            taskDetail.date = start_date__c ;
 
             if(projectMap.has(eachTask.project_name__c))
               taskDetail.projectName = projectMap.get(eachTask.project_name__c);
@@ -466,7 +477,7 @@ router.post('/fillactuals',(request, response) => {
 
             console.log('Inside Last Loop  projectMap.get(eachTask.project_Name__c)    '+projectMap.get(eachTask.project_name__c));
           
-            taskDetail.userName = userName;
+            taskDetail.userName =eachTask.contname;
             console.log('task detail '+JSON.stringify(taskDetail));
 
             lstTasksToShow.push(taskDetail);
@@ -480,7 +491,7 @@ router.post('/fillactuals',(request, response) => {
 
 
 
- router.get('/getrelatedtasks',(request, response) => {
+ router.get('/getrelatedtasks',verify,(request, response) => {
 
    var projectId =  request.query.projectId;
    var selectedDate = request.query.selectedDate;
@@ -492,7 +503,7 @@ router.post('/fillactuals',(request, response) => {
        console.log('projectMilestoneQueryResult  : '+JSON.stringify(projectMilestoneQueryResult.rows));
          
         pool
-       .query('SELECT id, sfid, Name FROM salesforce.Milestone1_Task__c WHERE Project_Milestone__c = $1 AND Start_Date__c = $2 And sfid != \''+''+'\'',[projectMilestoneQueryResult.rows[0].sfid, selectedDate])
+       .query('SELECT id, sfid, Name FROM salesforce.Milestone1_Task__c WHERE Project_Milestone__c = $1 AND Start_Date__c = $2 AND Assigned_Manager__c=$3 And sfid != \''+''+'\'',[projectMilestoneQueryResult.rows[0].sfid, selectedDate,request.user.sfid])
        .then((taskQueryResult) => { 
             console.log('taskQueryResult  : '+JSON.stringify(taskQueryResult.rows));
             response.send(taskQueryResult.rows);

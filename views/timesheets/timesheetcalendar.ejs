@@ -20,8 +20,8 @@
       <div class="col-md-6">
         <label for="validationTooltip02">Select View</label>
         <select class="custom-select custom-select-sm form-control" readonly="true" id="Selectview" name="Selectview">
-            <option selected>None</option>
-            <option value="currentuser">current User View</option>
+            <option value''>None</option>
+            <option selected value="currentuser">current User View</option>
             <% if(objUser.isManager) { %>
             <option value="teamview">Team View</option>
             <% } %>
@@ -130,9 +130,9 @@
                 console.log('AJAX error response :',textStatus);
             }) 
           }
-          if(selectProj=='allproject' && selectedView=='teamview')
+          else if(selectProj=='allproject' && selectedView=='teamview')
               {
-                alert("team view");
+                alert("team view & all project");
                 $.ajax({ 
                   type: 'GET',
                   url: '/users/geteventsTeam',
@@ -152,6 +152,54 @@
               .fail(function(jqXHR, textStatus, err){
                   console.log('AJAX error response :',textStatus);
               }) 
+
+              }
+              else if(selectProj!='allproject' && selectedView=='currentuser'){
+                console.log('selected project for current User '+selectProj);
+                $.ajax({ 
+                  type: 'GET',
+                  url: '/users/geteventsProj',
+                  data : {
+                      'projectid': selectProj,
+                      'date': today
+                  },
+                  dataType: 'json'
+              })
+              .done(function( data ) {
+                  console.log( "current view on particuar project Sample of data:", data );
+                  eventsData = data;
+                  console.log('JSON.Stringied Data of events Team View : '+JSON.stringify(eventsData));
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'removeEvents');
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'addEventSource', eventsData);         
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'rerenderEvents' );
+              })
+              .fail(function(jqXHR, textStatus, err){
+                  console.log('AJAX error response :',textStatus);
+              })
+
+              }
+              else if(selectProj!='allproject' && selectedView=='teamview'){
+                console.log('Team View & particula project'+selectProj);
+                $.ajax({ 
+                  type: 'GET',
+                  url: '/users/geteventsProjteam',
+                  data : {
+                      'projectid': selectProj,
+                      'date': today
+                  },
+                  dataType: 'json'
+              })
+              .done(function( data ) {
+                  console.log( "Team view on particuar project Sample of data:", data );
+                  eventsData = data;
+                  console.log('JSON.Stringied Data of events Team View : '+JSON.stringify(eventsData));
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'removeEvents');
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'addEventSource', eventsData);         
+                  $('#bootstrapModalFullCalendar').fullCalendar( 'rerenderEvents' );
+              })
+              .fail(function(jqXHR, textStatus, err){
+                  console.log('AJAX error response :',textStatus);
+              })
 
               }
               
@@ -223,7 +271,7 @@
                         data: values ,
                         success: function (res) {
                                 alert('Task Saved Successfully');
-                                document.getElementById("taskForm").reset();
+                                //document.getElementById("taskForm").reset();
                                 $("#createTaskModal").modal("hide");
                                 console.log(res)
                         },
@@ -245,6 +293,7 @@
                     data: values ,
                     success: function (res) {
                             alert('Timesheet saved successfully !');
+                            document.getElementById("fillActualsForm").reset();
                             $("#fillActualsModal").modal("hide");
                             console.log(res)
                     },
@@ -281,7 +330,15 @@
                     let seletedDate = new Date(selectedDate);
                     console.log('seletedDate   '+seletedDate);
                     let currentDate = new Date();
-                    console.log('currentDate  :  '+currentDate);
+                    console.log('currentDate  :  '+currentDate );
+                    let todaydate = new Date().getTime() +1296000000;
+                    let tomoorow=new Date(todaydate);
+                    console.log('today plus 15 day= '+tomoorow);
+                    let before=new Date().getTime()-1296000000;
+
+
+                    let beforedate=new Date(before);
+                    console.log('15 day before today '+ beforedate);
                 
                     if(calEvent.title == 'Create Task')
                     {
@@ -298,6 +355,8 @@
                         {
 
                             $('#deadline').prop("disabled",false);
+                            $('#plannedstarttimeTask').prop("disabled",true);
+                            $('#plannedendtimeTask').prop("disabled",true);
                             $('#deadline').on('change',function(){
                               let deadValue=this.value;
                               console.log('deadValue' +deadValue);
@@ -315,8 +374,16 @@
                             });
                 
                         }
+                        if(seletedDate.getTime()<todaydate && seletedDate.getTime()>before)
+                        {
+                         // document.getElementById("taskForm").reset();
+                          $("#createTaskModal").modal("show");
+                        }
+                        else{
+                          alert('Date should be 15 daye before or after today ');
+                        }
 
-                        $("#createTaskModal").modal("show");
+                        
                     }
                     else if(calEvent.title == 'Fill Actuals')
                     {
@@ -329,12 +396,19 @@
                         }
                         else
                         {
+                                document.getElementById("fillActualsForm").reset();
                                 $('#dateIncurred').val(selectedDate);
+                                
                                 $("#fillActualsModal").modal("show");
 
                                 $('#projectName').change(() => {            
                                 var selectedProject = $("#projectName option:selected").val();
                                 alert("You have selected the project : " + selectedProject );
+                                let select = document.getElementById("selectedTask");
+                                 let length = select.options.length;
+                                  for (i = length-1; i > 0; i--) {
+                                          select.options[i] = null;
+                                          } 
                                 if(selectedProject != 'None')
                                 {
                                     $.ajax({ 
@@ -399,6 +473,8 @@
                             tasktableData  += '</thead>';    
                                                            
                             taskData.forEach((eachTaskCol) => {
+                              // var dt=eachTaskCol.date.getTime()+86400000;
+                               console.log('dt '+eachTaskCol.date);
                                 console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
                                 var strDate = eachTaskCol.date.toString().split('T')[0];
                                 tasktableData += '<tr>';
@@ -534,7 +610,7 @@
                 <div class="col-md-6">
                   <label for="validationTooltipUsername">Deadline Type</label>
                   <select class="custom-select custom-select-sm form-control" id="deadline" name="Deadline" >
-                    <option value="">Select</option>
+                    <option selected>Select</option>
                     <option value="Deadlines">Deadlines</option>
                     <option value="blocktime">Block Time</option>
                </select>
@@ -562,7 +638,7 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="fillActualsModal">Fill Actuals</h5>
+          <h5 class="modal-title" id="fillActualsModals">Fill Actuals</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
