@@ -96,17 +96,19 @@
           }) 
             /*  initial data Load END   */
 
-            var selectProj; 
+            var selectProj;
+            var selectedView; 
             $('#selproject').on('change',function(){
                selectProj = this.value;
                console.log('selectProj '+selectProj);
+               $('#Selectview').val('None');
                if(selectProj!='None')
                {
                 $('#Selectview').attr("readonly",false);
                }
             });
              $('#Selectview').on('change',function(){
-                   let selectedView=this.value;
+              selectedView=this.value;
               console.log('selected' +selectedView);
               if(selectProj=='allproject' && selectedView=='currentuser')
               {
@@ -453,13 +455,20 @@
                             type: 'GET',
                             url: '/timesheets/getdetails',
                             data : {
-                                'date': selectedDate
+                                'date': selectedDate,
+                                'selproject':$('#selproject').val()
                             },
                             dataType: 'json'
                         })
                         .done(function( taskData ) {
                             console.log( "Sample of data:", JSON.stringify(taskData));
+                           // var taskData=taskData1.lstTasksToShow;
+                           // console.log('hsadbja '+taskData);
                             
+                             var selecPro= $('#selproject').val();
+                             var selecView= $('#Selectview').val();
+                            console.log('sleePROJ :'+selecPro +'& selected view ='+selecView);
+
                             var tasktableData = '';
                             tasktableData  += '<thead>';
                             tasktableData  += '<tr>';
@@ -471,20 +480,44 @@
                             tasktableData  += ' <th>Assigned Resource</th>';
                             tasktableData  += '</tr>';
                             tasktableData  += '</thead>';    
-                                                           
+                                    
                             taskData.forEach((eachTaskCol) => {
                               // var dt=eachTaskCol.date.getTime()+86400000;
-                               console.log('dt '+eachTaskCol.date);
-                                console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
-                                var strDate = eachTaskCol.date.toString().split('T')[0];
-                                tasktableData += '<tr>';
-                                tasktableData  += '<td>'+eachTaskCol.name+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
-                                tasktableData  += '<td>'+strDate+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
-                                tasktableData += '</tr>';
+                              if(selecPro=='allproject' && selecView =='currentuser')
+                                 {
+                                   if(eachTaskCol.userName==eachTaskCol.currentuser){
+                                    console.log('dt '+eachTaskCol.date);
+                                    console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
+                                    var strDate = eachTaskCol.date.toString().split('T')[0];
+                                    tasktableData += '<tr>';
+                                    tasktableData  += '<td>'+eachTaskCol.name+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
+                                    tasktableData  += '<td>'+strDate+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
+                                    tasktableData += '</tr>';
+                                   }
+                                 }
+                                 if(selecPro!='allproject' && selecView =='currentuser')
+                                  {
+                                    console.log('inside particular project current user');
+                                    if((eachTaskCol.userName==eachTaskCol.currentuser)&&(selecPro==eachTaskCol.projectid))
+                                    {                                     
+                                      console.log('dt '+eachTaskCol.date);
+                                       console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
+                                    var strDate = eachTaskCol.date.toString().split('T')[0];
+                                    tasktableData += '<tr>';
+                                    tasktableData  += '<td>'+eachTaskCol.name+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
+                                    tasktableData  += '<td>'+strDate+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
+                                    tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
+                                    tasktableData += '</tr>';
+                                      }
+                                    }
+                                
                             });
                            
                            // $('#taskDetails').append(tasktableData);

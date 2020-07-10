@@ -3,6 +3,7 @@ var router = express.Router();
 const pool = require('../db/dbConfig');
 const verify = require('../config/verifyToken');
 const jwt = require('jsonwebtoken');
+const { json } = require('express');
 
 
 router.get('/timesheet',verify,(request, response) => {
@@ -369,23 +370,27 @@ router.post('/fillactuals',(request, response) => {
 
 
  router.get('/getdetails',verify, async(request, response) => {
-        
+  
   console.log('request.user '+JSON.stringify(request.user));
   var userId = request.user.sfid;
   var userName = request.user.name;
+  
   console.log('userId : '+userId+'  userName  : '+userName);
-
+  var selproject=request.query.selproject;
   var selectedDate = request.query.date;
   console.log('date  '+selectedDate);
+  console.log('selected project '+selproject);
 
+  var lstTeams=[], teamParam = [];
   var lstTasksToShow = [],contname=[];
   var projectParams = [], projectIDs = [];
   var timesheetParams = [], taskIDs = [];
   var projectMap = new Map();
   var timesheetMap = new Map();
   var lstTaskOfRelatedDate ;
+  var lstmember =[];
   
-let tskqry='SELECT tsk.Id,tsk.sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.name as contname '+
+let tskqry='SELECT tsk.Id,tsk.sfid as sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.sfid as contid ,cont.name as contname '+
 'FROM salesforce.Milestone1_Task__c tsk '+
 'INNER JOIN salesforce.Contact cont '+
 'ON tsk.assigned_manager__c = cont.sfid '+
@@ -451,6 +456,44 @@ console.log('tskqry '+tskqry);
         console.log('timesheetQueryError   :  '+timesheetQueryError.stack);
   })
 
+  await
+  pool.query('SELECT Id, sfid , Manager__c, name FROM salesforce.Team__c WHERE Manager__c = $1',[userId])
+  .then((teamQueryResult)=>{
+    console.log('team querry reasult '+JSON.stringify(teamQueryResult.rows));
+    if(teamQueryResult.rowCount>0)
+      {
+      console.log('teamQueryResult team '+JSON.stringify(teamQueryResult.rows));
+      console.log('team size '+teamQueryResult.rowCount);
+        for(var i = 1; i <= teamQueryResult.rows.length; i++) {
+          teamParam.push('$' + i);
+          lstTeams.push(teamQueryResult.rows[i-1].sfid);
+        } 
+   
+
+      console.log(' lstTeams Details'+lstTeams+' teamParam '+teamParam);
+      let teamUserQuery='SELECT Id, sfid,Representative__c , team__c FROM salesforce.Team_Member__c WHERE team__c IN ('+ teamParam.join(',')+ ')';
+      console.log('teamUserQuery '+teamUserQuery);
+      pool
+      .query(teamUserQuery,lstTeams)
+      .then((memberQueryresult)=>{
+        console.log('memberQueryresult '+JSON.stringify(memberQueryresult.rows));
+        if(memberQueryresult.rowCount>0)
+        {
+          memberQueryresult.rows.forEach((eachmember)=>{
+          lstmember.push(eachmember);
+          })
+          console.log('lstmember  '+JSON.stringify(lstmember));
+        }
+      })
+      .catch((errorTeamMemer)=>{
+        console.log('erro '+errorTeamMemer.stack);
+      })
+      }
+  })
+  .catch((queryErrrpr)=>{
+    console.log('team query error '+JSON,stringify(queryErrrpr.stack));
+  })
+
 
   if(lstTaskOfRelatedDate != null)
   {
@@ -478,12 +521,15 @@ console.log('tskqry '+tskqry);
             console.log('Inside Last Loop  projectMap.get(eachTask.project_Name__c)    '+projectMap.get(eachTask.project_name__c));
           
             taskDetail.userName =eachTask.contname;
+            taskDetail.assigned =eachTask.contid;
+            taskDetail.currentuser=userName;
+            taskDetail.projectid=eachTask.project_name__c;
             console.log('task detail '+JSON.stringify(taskDetail));
 
             lstTasksToShow.push(taskDetail);
       })
   }
-
+ // lstTasksToShow.push(lstmember);
   console.log('  lstTasksToShow  : '+JSON.stringify(lstTasksToShow));
   response.send(lstTasksToShow);
 
