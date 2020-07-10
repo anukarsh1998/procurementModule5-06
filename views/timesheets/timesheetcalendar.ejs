@@ -451,6 +451,9 @@
                     }
                     else if(calEvent.title == 'Details')
                     {
+
+                       if($('#Selectview').val() !='teamview' ){
+                       //  alert('select view is : '+$('#Selectview').val());
                         $.ajax({ 
                             type: 'GET',
                             url: '/timesheets/getdetails',
@@ -516,10 +519,8 @@
                                     tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
                                     tasktableData += '</tr>';
                                       }
-                                    }
-                                
+                                    } 
                             });
-                           
                            // $('#taskDetails').append(tasktableData);
                             $('#taskDetails').html(tasktableData);
                             $("#detailsModal").modal("show");
@@ -528,7 +529,54 @@
                             console.log('AJAX error response :',textStatus);
                             $("#detailsModal").modal("show");
                         })     
-                       
+                      }
+                      else {
+                        alert('team view selected '+$('#Selectview').val());
+                        $.ajax({ 
+                          type: 'GET',
+                          url: '/timesheets/getTeamdetails',
+                          data : {
+                              'date': selectedDate,
+                              'selproject':$('#selproject').val()
+                          },
+                          dataType: 'json'
+                      })
+                      .done(function(tskdata){
+                        console.log('sample task team view data :'+JSON.stringify(tskdata));
+                        var tasktableData = '';
+                            tasktableData  += '<thead>';
+                            tasktableData  += '<tr>';
+                            tasktableData  += ' <th>Task Name</th>';
+                            tasktableData  += '<th>Planned Hours</th>';
+                            tasktableData  += '<th>Actual Hours</th>';
+                            tasktableData  += '<th>Date</th>';
+                            tasktableData  += ' <th>Project Name</th>';
+                            tasktableData  += ' <th>Assigned Resource</th>';
+                            tasktableData  += '</tr>';
+                            tasktableData  += '</thead>'; 
+                            tskdata.forEach((eachTaskCol) => {
+                            console.log('dt '+eachTaskCol.start_date__c);
+                            console.log('date str '+eachTaskCol.start_date__c.toString().split('T')[0]);
+                             var strDate = eachTaskCol.start_date__c.toString().split('T')[0];
+                         tasktableData += '<tr>';
+                         tasktableData  += '<td>'+eachTaskCol.tskname+'</td>';
+                         tasktableData  += '<td>'+eachTaskCol.planned_hours__c+'</td>';
+                         tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
+                         tasktableData  += '<td>'+strDate+'</td>';
+                         tasktableData  += '<td>'+eachTaskCol.project_name__c+'</td>';
+                         tasktableData  += '<td>'+eachTaskCol.contname+'</td>';
+                         tasktableData += '</tr>';
+                        })
+                        $('#taskDetails').html(tasktableData);
+                            $("#detailsModal").modal("show");
+
+                      })
+                      .fail(function(jqXHR, textStatus, err){
+                        console.log('AJAX error response :',textStatus);
+                        $("#detailsModal").modal("show");
+                    }) 
+
+                      }
                     }
                 } 
             });
