@@ -555,16 +555,16 @@
                             tasktableData  += '</tr>';
                             tasktableData  += '</thead>'; 
                             tskdata.forEach((eachTaskCol) => {
-                            console.log('dt '+eachTaskCol.start_date__c);
-                            console.log('date str '+eachTaskCol.start_date__c.toString().split('T')[0]);
-                             var strDate = eachTaskCol.start_date__c.toString().split('T')[0];
+                            console.log('dt '+eachTaskCol.date);
+                            console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
+                             var strDate = eachTaskCol.date.toString().split('T')[0];
                          tasktableData += '<tr>';
                          tasktableData  += '<td>'+eachTaskCol.tskname+'</td>';
-                         tasktableData  += '<td>'+eachTaskCol.planned_hours__c+'</td>';
+                         tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
                          tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
                          tasktableData  += '<td>'+strDate+'</td>';
-                         tasktableData  += '<td>'+eachTaskCol.project_name__c+'</td>';
-                         tasktableData  += '<td>'+eachTaskCol.contname+'</td>';
+                         tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
+                         tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
                          tasktableData += '</tr>';
                         })
                         $('#taskDetails').html(tasktableData);
